@@ -50,7 +50,7 @@
     transition: max-height 0.3s ease-out, padding 0.3s ease-out;
 }
 .faq-item.active .faq-answer {
-    max-height: 500px;
+    max-height: 5000px;
     padding-top: 1rem;
     padding-bottom: 1rem;
 }

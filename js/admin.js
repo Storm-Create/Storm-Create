@@ -520,7 +520,7 @@ async function loadAdminFaq() {
                         <span class="text-gray-400 font-mono text-xs">#${item.order}</span>
                         ${item.question}
                     </h4>
-                    <p class="text-sm text-gray-500 line-clamp-1">${item.answer}</p>
+                    <p class="text-sm text-gray-500 line-clamp-3 mt-1">${item.answer}</p>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="window.editFaq('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
@@ -624,6 +624,7 @@ async function loadAdminRoadmap() {
                         <h4 class="font-bold">${item.title}</h4>
                     </div>
                     <p class="text-sm text-gray-500">${item.date}</p>
+                    ${item.description ? `<p class="text-sm text-gray-400 line-clamp-3 mt-2">${item.description}</p>` : ''}
                 </div>
                 <div class="flex gap-2">
                     <button onclick="window.editRoadmap('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
