@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,17 +23,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 transition-colors duration-300 font-sans">
-    
+
     <!-- Navbar -->
-    <nav class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <nav
+        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="index.html" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</a>
+                <a href="index.html"
+                    class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</a>
                 <div class="hidden md:flex space-x-8 items-center">
                     <a href="index.html" class="text-primary font-medium transition">Главная</a>
                     <a href="blog.html" class="hover:text-primary transition">Блог</a>
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                         <i class="fas fa-moon dark:hidden"></i>
                         <i class="fas fa-sun hidden dark:block"></i>
                     </button>
@@ -48,7 +53,8 @@
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
+        <div id="mobile-menu"
+            class="hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 text-primary font-medium">Главная</a>
                 <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
@@ -65,16 +71,20 @@
     <!-- Hero Section -->
     <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center fade-in">
         <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-            Создавай бурю продаж с <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
+            <span id="hero-title-text">Создавай бурю продаж с</span> <span
+                class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
         </h1>
-        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto">
-            Мощный конструктор магазинов в Telegram. Создайте свой полноценный интернет-магазин с корзиной, онлайн-оплатой и цифровыми товарами за пару минут.
+        <p id="hero-subtitle-text" class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto">
+            Мощный конструктор магазинов в Telegram. Создайте свой полноценный интернет-магазин с корзиной,
+            онлайн-оплатой и цифровыми товарами за пару минут.
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="https://t.me/StormCreateBot" target="_blank" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-lg transition shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+            <a id="hero-bot-link" href="https://t.me/StormCreateBot" target="_blank"
+                class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-lg transition shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
                 <i class="fas fa-robot"></i> Создать магазин
             </a>
-            <a href="https://t.me/StormCreation" target="_blank" class="px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-semibold text-lg transition flex items-center justify-center gap-2">
+            <a id="hero-channel-link" href="https://t.me/StormCreation" target="_blank"
+                class="px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-semibold text-lg transition flex items-center justify-center gap-2">
                 <i class="fab fa-telegram-plane text-blue-500"></i> Наш Telegram канал
             </a>
         </div>
@@ -86,52 +96,70 @@
             <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 fade-in">Возможности магазина</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in">
-                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div
+                    class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in">
+                    <div
+                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-shopping-cart"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Каталог и корзина</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Удобная навигация по категориям, поиск, сортировка товаров, добавление в корзину и список избранного.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Удобная навигация по категориям, поиск, сортировка
+                        товаров, добавление в корзину и список избранного.</p>
                 </div>
                 <!-- Feature 2 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in" style="transition-delay: 100ms;">
-                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in"
+                    style="transition-delay: 100ms;">
+                    <div
+                        class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-credit-card"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Множество способов оплаты</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Принимайте платежи через ЮMoney, CryptoBot, Telegram Stars, по реквизитам или с внутреннего баланса.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Принимайте платежи через ЮMoney, CryptoBot, Telegram
+                        Stars, по реквизитам или с внутреннего баланса.</p>
                 </div>
                 <!-- Feature 3 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in" style="transition-delay: 200ms;">
-                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in"
+                    style="transition-delay: 200ms;">
+                    <div
+                        class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-box-open"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Физические и цифровые товары</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Автоматическая выдача цифровых ключей и файлов, строгий учет остатков для физических товаров.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Автоматическая выдача цифровых ключей и файлов, строгий
+                        учет остатков для физических товаров.</p>
                 </div>
                 <!-- Feature 4 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in">
-                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div
+                    class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in">
+                    <div
+                        class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-receipt"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Оформление и чеки</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Многошаговый чекаут с выбором доставки, автоматическая генерация PDF-чеков и уведомления администраторам.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Многошаговый чекаут с выбором доставки, автоматическая
+                        генерация PDF-чеков и уведомления администраторам.</p>
                 </div>
                 <!-- Feature 5 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in" style="transition-delay: 100ms;">
-                    <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in"
+                    style="transition-delay: 100ms;">
+                    <div
+                        class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-star"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Отзывы и промокоды</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Система честных отзывов после покупки, гибкие промокоды на скидку и подробная история заказов.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Система честных отзывов после покупки, гибкие промокоды
+                        на скидку и подробная история заказов.</p>
                 </div>
                 <!-- Feature 6 -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in" style="transition-delay: 200ms;">
-                    <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+                <div class="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl transition fade-in"
+                    style="transition-delay: 200ms;">
+                    <div
+                        class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-xl flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-cogs"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-2">Удобное управление</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Управляйте товарами, заказами и настройками прямо через встроенную админ-панель в Telegram.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Управляйте товарами, заказами и настройками прямо через
+                        встроенную админ-панель в Telegram.</p>
                 </div>
             </div>
         </div>
@@ -142,11 +170,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Тарифы и Подписки</h2>
-                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Выберите подходящий план для вашего бизнеса. Экономьте до 20% при оплате за год.</p>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Выберите подходящий план для вашего
+                    бизнеса. Экономьте до 20% при оплате за год.</p>
 
                 <div class="mt-8 flex justify-center items-center space-x-4">
                     <span class="text-sm font-medium">Период:</span>
-                    <select id="billing-period" class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary" onchange="window.updatePricing()">
+                    <select id="billing-period"
+                        class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                        onchange="window.updatePricing()">
                         <option value="1">1 месяц</option>
                         <option value="3">3 месяца (скидка 5%)</option>
                         <option value="6">6 месяцев (скидка 10%)</option>
@@ -157,7 +188,8 @@
 
             <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto fade-in" style="transition-delay: 100ms;">
                 <!-- Basic -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition">
+                <div
+                    class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition">
                     <h3 class="text-xl font-bold mb-2">Базовый</h3>
                     <p class="text-gray-500 text-sm mb-6">Идеально для старта</p>
                     <div class="mb-6">
@@ -169,12 +201,16 @@
                         <li class="flex items-center text-gray-400"><i class="fas fa-times mr-3"></i> Кнопки</li>
                         <li class="flex items-center text-gray-400"><i class="fas fa-times mr-3"></i> Чеки</li>
                     </ul>
-                    <a href="https://t.me/stormcreatebot?start=plan_basic" target="_blank" class="block w-full py-3 rounded-lg font-medium border-2 border-primary text-primary hover:bg-primary hover:text-white transition text-center">Выбрать</a>
+                    <a href="https://t.me/stormcreatebot?start=plan_basic" target="_blank"
+                        class="block w-full py-3 rounded-lg font-medium border-2 border-primary text-primary hover:bg-primary hover:text-white transition text-center">Выбрать</a>
                 </div>
 
                 <!-- Pro -->
-                <div class="bg-primary rounded-2xl shadow-xl p-8 text-white relative flex flex-col transform md:-translate-y-4">
-                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">Популярный</div>
+                <div
+                    class="bg-primary rounded-2xl shadow-xl p-8 text-white relative flex flex-col transform md:-translate-y-4">
+                    <div
+                        class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
+                        Популярный</div>
                     <h3 class="text-xl font-bold mb-2">Pro</h3>
                     <p class="text-blue-100 text-sm mb-6">Для растущих продаж</p>
                     <div class="mb-6">
@@ -186,11 +222,13 @@
                         <li class="flex items-center"><i class="fas fa-check text-blue-200 mr-3"></i> Кнопки</li>
                         <li class="flex items-center text-blue-300/50"><i class="fas fa-times mr-3"></i> Чеки</li>
                     </ul>
-                    <a href="https://t.me/stormcreatebot?start=plan_pro" target="_blank" class="block w-full py-3 rounded-lg font-medium bg-white text-primary hover:bg-gray-50 transition shadow-lg text-center">Выбрать</a>
+                    <a href="https://t.me/stormcreatebot?start=plan_pro" target="_blank"
+                        class="block w-full py-3 rounded-lg font-medium bg-white text-primary hover:bg-gray-50 transition shadow-lg text-center">Выбрать</a>
                 </div>
 
                 <!-- Ultra -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition">
+                <div
+                    class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition">
                     <h3 class="text-xl font-bold mb-2">Ultra</h3>
                     <p class="text-gray-500 text-sm mb-6">Максимум возможностей</p>
                     <div class="mb-6">
@@ -202,7 +240,8 @@
                         <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i> Кнопки</li>
                         <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i> Чеки</li>
                     </ul>
-                    <a href="https://t.me/stormcreatebot?start=plan_ultra" target="_blank" class="block w-full py-3 rounded-lg font-medium border-2 border-primary text-primary hover:bg-primary hover:text-white transition text-center">Выбрать</a>
+                    <a href="https://t.me/stormcreatebot?start=plan_ultra" target="_blank"
+                        class="block w-full py-3 rounded-lg font-medium border-2 border-primary text-primary hover:bg-primary hover:text-white transition text-center">Выбрать</a>
                 </div>
             </div>
         </div>
@@ -212,9 +251,10 @@
     <section id="reviews" class="py-20 bg-gray-50 dark:bg-darker">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 fade-in">Отзывы о проекте</h2>
-            
+
             <!-- Add Review Form (Hidden by default) -->
-            <div id="review-form-container" class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-12 hidden fade-in">
+            <div id="review-form-container"
+                class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-12 hidden fade-in">
                 <h3 class="text-xl font-bold mb-4">Оставить отзыв</h3>
                 <form id="review-form" class="space-y-4">
                     <div>
@@ -230,16 +270,22 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Ваш отзыв</label>
-                        <textarea id="review-text" required rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none transition"></textarea>
+                        <textarea id="review-text" required rows="3"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none transition"></textarea>
                     </div>
-                    <button type="submit" class="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition">Отправить отзыв</button>
+                    <button type="submit"
+                        class="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition">Отправить
+                        отзыв</button>
                 </form>
             </div>
 
             <!-- Auth Prompt (Shown if not logged in) -->
             <div id="review-auth-prompt" class="max-w-2xl mx-auto text-center mb-12 fade-in">
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Чтобы оставить отзыв, пожалуйста, войдите или зарегистрируйтесь.</p>
-                <button onclick="window.openAuthModal('login')" class="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition">Войти / Регистрация</button>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Чтобы оставить отзыв, пожалуйста, войдите или
+                    зарегистрируйтесь.</p>
+                <button onclick="window.openAuthModal('login')"
+                    class="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition">Войти
+                    / Регистрация</button>
             </div>
 
             <!-- Reviews List -->
@@ -257,16 +303,17 @@
                     <h2 class="text-3xl md:text-4xl font-bold mb-4">Последние новости</h2>
                     <p class="text-gray-600 dark:text-gray-400">Обновления, гайды и полезные статьи.</p>
                 </div>
-                <a href="blog.html" class="hidden md:inline-flex items-center text-primary hover:text-blue-700 font-medium">
+                <a href="blog.html"
+                    class="hidden md:inline-flex items-center text-primary hover:text-blue-700 font-medium">
                     Все статьи <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
-            
+
             <div id="latest-posts" class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Posts will be injected here -->
                 <div class="col-span-3 text-center py-10 text-gray-500">Загрузка постов...</div>
             </div>
-            
+
             <div class="mt-8 text-center md:hidden">
                 <a href="blog.html" class="inline-flex items-center text-primary font-medium">
                     Все статьи <i class="fas fa-arrow-right ml-2"></i>
@@ -276,29 +323,41 @@
     </section>
 
     <!-- Auth Modal -->
-    <div id="auth-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-300" id="auth-modal-content">
-            <button onclick="window.closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fas fa-times text-xl"></i></button>
-            
+    <div id="auth-modal"
+        class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-300"
+            id="auth-modal-content">
+            <button onclick="window.closeAuthModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i
+                    class="fas fa-times text-xl"></i></button>
+
             <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
-                <button id="tab-login" class="flex-1 py-3 text-center font-medium text-primary border-b-2 border-primary" onclick="window.switchAuthTab('login')">Вход</button>
-                <button id="tab-register" class="flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300" onclick="window.switchAuthTab('register')">Регистрация</button>
+                <button id="tab-login"
+                    class="flex-1 py-3 text-center font-medium text-primary border-b-2 border-primary"
+                    onclick="window.switchAuthTab('login')">Вход</button>
+                <button id="tab-register"
+                    class="flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300"
+                    onclick="window.switchAuthTab('register')">Регистрация</button>
             </div>
 
             <form id="auth-form" class="space-y-4">
                 <div id="name-field" class="hidden">
                     <label class="block text-sm font-medium mb-1">Имя</label>
-                    <input type="text" id="auth-name" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                    <input type="text" id="auth-name"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="auth-email" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                    <input type="email" id="auth-email" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Пароль</label>
-                    <input type="password" id="auth-password" required minlength="6" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                    <input type="password" id="auth-password" required minlength="6"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                 </div>
-                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition mt-4">Войти</button>
+                <button type="submit" id="auth-submit-btn"
+                    class="w-full py-3 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition mt-4">Войти</button>
             </form>
 
             <div class="mt-6">
@@ -318,25 +377,33 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profile-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-300" id="profile-modal-content">
-            <button onclick="window.closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fas fa-times text-xl"></i></button>
-            
+    <div id="profile-modal"
+        class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-300"
+            id="profile-modal-content">
+            <button onclick="window.closeProfileModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i
+                    class="fas fa-times text-xl"></i></button>
+
             <h3 class="text-xl font-bold mb-6">Настройки профиля</h3>
 
             <form id="profile-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Никнейм</label>
-                    <input type="text" id="profile-name" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                    <input type="text" id="profile-name" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Аватарка (необязательно)</label>
                     <div class="flex items-center space-x-4">
-                        <img id="profile-avatar-preview" src="" alt="Preview" class="w-12 h-12 rounded-full border border-gray-300 object-cover hidden">
-                        <input type="file" id="profile-avatar" accept="image/*" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                        <img id="profile-avatar-preview" src="" alt="Preview"
+                            class="w-12 h-12 rounded-full border border-gray-300 object-cover hidden">
+                        <input type="file" id="profile-avatar" accept="image/*"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                     </div>
                 </div>
-                <button type="submit" id="profile-submit-btn" class="w-full py-3 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition mt-4">Сохранить</button>
+                <button type="submit" id="profile-submit-btn"
+                    class="w-full py-3 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition mt-4">Сохранить</button>
             </form>
         </div>
     </div>
@@ -345,11 +412,13 @@
     <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
             <div class="mb-4 md:mb-0">
-                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
-                <p class="text-gray-500 text-sm mt-2">© 2026 Все права защищены.</p>
+                <span
+                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
+                <p id="footer-copyright" class="text-gray-500 text-sm mt-2">© 2026 Все права защищены.</p>
             </div>
             <div class="flex space-x-6">
-                <a href="#" class="text-gray-400 hover:text-primary text-xl transition"><i class="fab fa-telegram"></i></a>
+                <a id="footer-tg-link" href="#" class="text-gray-400 hover:text-primary text-xl transition"><i
+                        class="fab fa-telegram"></i></a>
             </div>
         </div>
     </footer>
@@ -357,5 +426,5 @@
     <script type="module" src="js/ui.js"></script>
     <script type="module" src="js/index.js"></script>
 </body>
-</html>
 
+</html>

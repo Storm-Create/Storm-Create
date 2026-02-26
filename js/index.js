@@ -2,8 +2,9 @@ import { getPosts } from './posts.js';
 import { formatDate, showToast } from './ui.js';
 import { checkAuth, login, register, logout, updateUserProfile, loginWithTelegram } from './auth.js';
 import { getReviews, addReview } from './reviews.js';
-import { storage } from './firebase.js';
+import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' or 'register'
@@ -477,4 +478,41 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReviews();
     setupReviewForm();
     setupProfileForm();
+    loadSiteSettings();
 });
+
+async function loadSiteSettings() {
+    if (!db) return;
+    try {
+        const snap = await getDoc(doc(db, 'settings', 'site'));
+        if (!snap.exists()) return;
+        const s = snap.data();
+
+        if (s.heroTitle) {
+            const el = document.getElementById('hero-title-text');
+            if (el) el.textContent = s.heroTitle;
+        }
+        if (s.heroSubtitle) {
+            const el = document.getElementById('hero-subtitle-text');
+            if (el) el.textContent = s.heroSubtitle;
+        }
+        if (s.botLink) {
+            const el = document.getElementById('hero-bot-link');
+            if (el) el.href = s.botLink;
+        }
+        if (s.channelLink) {
+            const el = document.getElementById('hero-channel-link');
+            if (el) el.href = s.channelLink;
+        }
+        if (s.footerCopy) {
+            const el = document.getElementById('footer-copyright');
+            if (el) el.textContent = s.footerCopy;
+        }
+        if (s.footerTg) {
+            const el = document.getElementById('footer-tg-link');
+            if (el) el.href = s.footerTg;
+        }
+    } catch (e) {
+        console.warn('Could not load site settings:', e);
+    }
+}

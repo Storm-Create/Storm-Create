@@ -3,8 +3,9 @@ import { getPosts, createPost, updatePost, deletePost } from './posts.js';
 import { getAllComments, deleteComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
 import { showToast, formatDate, initTheme } from './ui.js';
-import { storage } from './firebase.js';
+import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let simplemde;
 let postsData = [];
@@ -13,18 +14,18 @@ let reviewsData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
-    
+
     checkAuth((user) => {
         const adminEmails = ['counterflug@stormcreate.com', 'andrewsker@stormcreate.com'];
         if (user && adminEmails.includes(user.email)) {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
             document.getElementById('admin-email').innerText = user.email;
-            
+
             // Set Gravatar
             const hash = md5(user.email.trim().toLowerCase());
             document.getElementById('admin-avatar').src = `https://www.gravatar.com/avatar/${hash}?d=mp&f=y`;
-            
+
             initDashboard();
         } else {
             if (user) {
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupLogout();
     setupEditor();
+    setupSettings();
 });
 
 function setupLogin() {
@@ -50,10 +52,10 @@ function setupLogin() {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
         const btn = form.querySelector('button');
-        
+
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
-        
+
         try {
             await login(email, password);
             showToast('Успешный вход', 'success');
@@ -101,6 +103,7 @@ function setupNavigation() {
             if (targetId === 'posts-view') loadAdminPosts();
             if (targetId === 'comments-view') loadAdminComments();
             if (targetId === 'reviews-view') loadAdminReviews();
+            if (targetId === 'settings-view') loadSettings();
         });
     });
 }
@@ -193,17 +196,17 @@ async function loadAdminReviews() {
 function renderAdminReviews() {
     const tbody = document.getElementById('admin-reviews-list');
     if (!tbody) return;
-    
+
     if (reviewsData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Нет отзывов</td></tr>`;
         return;
     }
 
     tbody.innerHTML = reviewsData.map(review => {
-        const stars = Array(5).fill(0).map((_, i) => 
+        const stars = Array(5).fill(0).map((_, i) =>
             `<i class="fas fa-star ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}"></i>`
         ).join('');
-        
+
         return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
             <td class="p-4 font-medium">${review.userName}</td>
@@ -235,7 +238,7 @@ window.deleteReviewHandler = async (id) => {
 function initChart() {
     const ctx = document.getElementById('viewsChart');
     if (!ctx) return;
-    
+
     // Mock data for chart based on posts
     const labels = postsData.slice(0, 5).map(p => p.title.substring(0, 10) + '...');
     const data = postsData.slice(0, 5).map(p => p.views || 0);
@@ -278,7 +281,7 @@ function setupEditor() {
         document.getElementById('post-image-file').value = '';
         document.getElementById('post-tags').value = '';
         simplemde.value(localStorage.getItem('post_draft') || '');
-        
+
         document.getElementById('editor-title').innerText = 'Создание поста';
         showView('editor-view');
     });
@@ -309,12 +312,12 @@ function setupEditor() {
         try {
             if (imageFile && storage) {
                 const storageRef = ref(storage, `posts/${Date.now()}_${imageFile.name}`);
-                
+
                 const uploadPromise = uploadBytes(storageRef, imageFile);
-                const timeoutPromise = new Promise((_, reject) => 
+                const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
                 );
-                
+
                 const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
@@ -358,7 +361,7 @@ window.editPost = (id) => {
     document.getElementById('post-image-file').value = '';
     document.getElementById('post-tags').value = (post.tags || []).join(', ');
     simplemde.value(post.content);
-    
+
     document.getElementById('editor-title').innerText = 'Редактирование поста';
     showView('editor-view');
 };
@@ -394,4 +397,59 @@ function md5(string) {
     // This is a placeholder. In a real app, include a proper MD5 library via CDN.
     // For simplicity, we just return a dummy hash if no library is present.
     return '00000000000000000000000000000000';
+}
+
+// --- Settings Management ---
+
+async function loadSettings() {
+    if (!db) return;
+    try {
+        const snap = await getDoc(doc(db, 'settings', 'site'));
+        if (snap.exists()) {
+            const data = snap.data();
+            document.getElementById('setting-hero-title').value = data.heroTitle || '';
+            document.getElementById('setting-hero-subtitle').value = data.heroSubtitle || '';
+            document.getElementById('setting-bot-link').value = data.botLink || '';
+            document.getElementById('setting-channel-link').value = data.channelLink || '';
+            document.getElementById('setting-footer-copy').value = data.footerCopy || '';
+            document.getElementById('setting-footer-tg').value = data.footerTg || '';
+        }
+    } catch (e) {
+        console.error('Error loading settings:', e);
+        showToast('Ошибка загрузки настроек', 'error');
+    }
+}
+
+function setupSettings() {
+    const form = document.getElementById('settings-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('settings-save-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+
+        const data = {
+            heroTitle: document.getElementById('setting-hero-title').value.trim(),
+            heroSubtitle: document.getElementById('setting-hero-subtitle').value.trim(),
+            botLink: document.getElementById('setting-bot-link').value.trim(),
+            channelLink: document.getElementById('setting-channel-link').value.trim(),
+            footerCopy: document.getElementById('setting-footer-copy').value.trim(),
+            footerTg: document.getElementById('setting-footer-tg').value.trim(),
+            updatedAt: new Date().toISOString()
+        };
+
+        try {
+            if (!db) throw new Error('Firebase не настроен');
+            await setDoc(doc(db, 'settings', 'site'), data, { merge: true });
+            showToast('Настройки сохранены!', 'success');
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            showToast(error.message || 'Ошибка сохранения настроек', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Сохранить настройки';
+        }
+    });
 }
