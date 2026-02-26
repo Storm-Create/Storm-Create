@@ -303,6 +303,11 @@ function setupEditor() {
     });
 
     document.getElementById('save-post-btn').addEventListener('click', async () => {
+        if (!document.getElementById('post-form').checkValidity()) {
+            document.getElementById('post-form').reportValidity();
+            return;
+        }
+
         const id = document.getElementById('post-id').value;
         const title = document.getElementById('post-title').value.trim();
         const description = document.getElementById('post-description').value.trim();
@@ -310,6 +315,11 @@ function setupEditor() {
         const imageFile = document.getElementById('post-image-file').files[0];
         const tagsStr = document.getElementById('post-tags').value.trim();
         const content = simplemde.value().trim();
+
+        if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+            imageUrl = 'https://' + imageUrl;
+            document.getElementById('post-image').value = imageUrl;
+        }
 
         if (!title || !content) {
             showToast('Заголовок и содержание обязательны', 'error');
