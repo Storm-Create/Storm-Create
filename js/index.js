@@ -12,7 +12,7 @@ async function loadLatestPosts() {
     const container = document.getElementById('latest-posts');
     try {
         const posts = await getPosts(3);
-        
+
         if (posts.length === 0) {
             container.innerHTML = `<div class="col-span-3 text-center py-10 text-gray-500">Пока нет опубликованных постов.</div>`;
             return;
@@ -35,7 +35,7 @@ async function loadLatestPosts() {
                 </div>
             </a>
         `).join('');
-        
+
         // Trigger animations for new elements
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -53,7 +53,20 @@ async function loadLatestPosts() {
 // --- Auth Logic ---
 
 function setupAuth() {
-    checkAuth((user) => {
+    checkAuth(async (user) => {
+        if (user) {
+            // Ensure profile data is fully loaded (fixes mobile email login)
+            if (!user.displayName) {
+                try {
+                    await user.reload();
+                    // Re-read from auth after reload
+                    const { auth } = await import('./firebase.js');
+                    user = auth.currentUser || user;
+                } catch (e) {
+                    console.warn('Could not reload user profile:', e);
+                }
+            }
+        }
         currentUser = user;
         updateNavAuth();
         updateReviewSection();
@@ -67,10 +80,10 @@ function setupAuth() {
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
             const btn = document.getElementById('auth-submit-btn');
-            
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
-            
+
             try {
                 if (currentAuthMode === 'login') {
                     await login(email, password);
@@ -94,7 +107,7 @@ function setupAuth() {
 function updateNavAuth() {
     const navSection = document.getElementById('nav-auth-section');
     const mobileSection = document.getElementById('mobile-auth-section');
-    
+
     if (!navSection || !mobileSection) return;
 
     if (currentUser) {
@@ -195,10 +208,10 @@ window.openProfileModal = () => {
     if (!currentUser) return;
     const modal = document.getElementById('profile-modal');
     document.getElementById('profile-name').value = currentUser.displayName || '';
-    
+
     const avatarInput = document.getElementById('profile-avatar');
     if (avatarInput) avatarInput.value = ''; // clear file input
-    
+
     const preview = document.getElementById('profile-avatar-preview');
     if (preview) {
         if (currentUser.photoURL) {
@@ -209,7 +222,7 @@ window.openProfileModal = () => {
             preview.classList.add('hidden');
         }
     }
-    
+
     modal.classList.remove('hidden');
     void modal.offsetWidth; // trigger reflow
     modal.classList.remove('opacity-0');
@@ -247,31 +260,46 @@ function setupProfileForm() {
             e.preventDefault();
             const name = document.getElementById('profile-name').value.trim();
             const btn = document.getElementById('profile-submit-btn');
-            
+
             if (!name) return;
-            
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
-            
+
             try {
                 let avatarUrl = currentUser.photoURL;
                 const file = avatarInput && avatarInput.files.length > 0 ? avatarInput.files[0] : null;
 
-                if (file && storage) {
+                if (file) {
+                    // Проверка размера файла (макс. 5 МБ)
+                    if (file.size > 5 * 1024 * 1024) {
+                        throw new Error('Файл слишком большой. Максимальный размер — 5 МБ.');
+                    }
+
+                    if (!storage) {
+                        throw new Error('Хранилище не настроено. Невозможно загрузить аватар.');
+                    }
+
                     const storageRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}_${file.name}`);
-                    
-                    // Добавляем таймаут 15 секунд, чтобы избежать бесконечной загрузки
+
+                    // Таймаут 15 секунд
                     const uploadPromise = uploadBytes(storageRef, file);
-                    const timeoutPromise = new Promise((_, reject) => 
+                    const timeoutPromise = new Promise((_, reject) =>
                         setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
                     );
-                    
-                    const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+
+                    let snapshot;
+                    try {
+                        snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+                    } catch (uploadError) {
+                        console.error('Upload error:', uploadError);
+                        throw new Error(uploadError.message || 'Ошибка загрузки аватара. Попробуйте позже.');
+                    }
                     avatarUrl = await getDownloadURL(snapshot.ref);
                 }
 
                 await updateUserProfile(name, avatarUrl);
-                
+
                 // Force update currentUser locally
                 if (currentUser) {
                     currentUser.displayName = name;
@@ -298,7 +326,7 @@ window.switchAuthTab = (mode) => {
     const tabRegister = document.getElementById('tab-register');
     const nameField = document.getElementById('name-field');
     const submitBtn = document.getElementById('auth-submit-btn');
-    
+
     if (mode === 'login') {
         tabLogin.className = "flex-1 py-3 text-center font-medium text-primary border-b-2 border-primary";
         tabRegister.className = "flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300";
@@ -319,7 +347,7 @@ window.switchAuthTab = (mode) => {
 async function loadReviews() {
     const container = document.getElementById('reviews-list');
     if (!container) return;
-    
+
     try {
         const reviews = await getReviews();
         if (reviews.length === 0) {
@@ -328,7 +356,7 @@ async function loadReviews() {
         }
 
         container.innerHTML = reviews.map(review => {
-            const stars = Array(5).fill(0).map((_, i) => 
+            const stars = Array(5).fill(0).map((_, i) =>
                 `<i class="fas fa-star ${i < review.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}"></i>`
             ).join('');
 
@@ -359,7 +387,7 @@ async function loadReviews() {
 function updateReviewSection() {
     const formContainer = document.getElementById('review-form-container');
     const authPrompt = document.getElementById('review-auth-prompt');
-    
+
     if (!formContainer || !authPrompt) return;
 
     if (currentUser) {
@@ -374,12 +402,12 @@ function updateReviewSection() {
 function setupReviewForm() {
     const stars = document.querySelectorAll('#star-rating i');
     const ratingInput = document.getElementById('review-rating');
-    
+
     stars.forEach(star => {
         star.addEventListener('click', (e) => {
             const rating = parseInt(e.target.getAttribute('data-rating'));
             ratingInput.value = rating;
-            
+
             stars.forEach((s, index) => {
                 if (index < rating) {
                     s.classList.remove('text-gray-300');
@@ -397,16 +425,16 @@ function setupReviewForm() {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
-            
+
             const text = document.getElementById('review-text').value.trim();
             const rating = document.getElementById('review-rating').value;
             const btn = form.querySelector('button[type="submit"]');
-            
+
             if (!text) return;
-            
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-            
+
             try {
                 await addReview(currentUser.uid, currentUser.displayName || currentUser.email.split('@')[0], text, rating);
                 showToast('Отзыв успешно добавлен!', 'success');
@@ -432,9 +460,15 @@ window.updatePricing = () => {
 
     const basePrices = { basic: 1500, pro: 2300, ultra: 3000 };
 
-    document.getElementById('price-basic').innerText = Math.round(basePrices.basic * (1 - discount));
-    document.getElementById('price-pro').innerText = Math.round(basePrices.pro * (1 - discount));
-    document.getElementById('price-ultra').innerText = Math.round(basePrices.ultra * (1 - discount));
+    const label = period === 1 ? 'руб/мес' : `руб за ${period} мес`;
+
+    document.getElementById('price-basic').innerText = Math.round(basePrices.basic * (1 - discount) * period);
+    document.getElementById('price-pro').innerText = Math.round(basePrices.pro * (1 - discount) * period);
+    document.getElementById('price-ultra').innerText = Math.round(basePrices.ultra * (1 - discount) * period);
+
+    document.getElementById('price-label-basic').innerText = label;
+    document.getElementById('price-label-pro').innerText = label;
+    document.getElementById('price-label-ultra').innerText = label;
 };
 
 document.addEventListener('DOMContentLoaded', () => {

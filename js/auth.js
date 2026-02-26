@@ -6,11 +6,12 @@ export function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
 }
 
-export function register(email, password, displayName) {
+export async function register(email, password, displayName) {
     if (!auth) throw new Error("Firebase not configured");
-    return createUserWithEmailAndPassword(auth, email, password).then(userCredential => {
-        return updateProfile(userCredential.user, { displayName }).then(() => userCredential.user);
-    });
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCredential.user, { displayName });
+    await userCredential.user.reload();
+    return auth.currentUser;
 }
 
 export function logout() {
@@ -29,7 +30,7 @@ export function updateUserProfile(displayName, photoURL) {
 
 export async function loginWithTelegram(tgUser) {
     if (!auth) throw new Error("Firebase not configured");
-    
+
     // Create a mock email and secure password based on Telegram ID
     // Note: In a real production app, this should be handled by a secure backend
     // using Firebase Custom Tokens. This is a client-side workaround for static hosting.
