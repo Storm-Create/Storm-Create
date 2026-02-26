@@ -4,7 +4,7 @@ import { checkAuth, login, register, logout, updateUserProfile, loginWithTelegra
 import { getReviews, addReview } from './reviews.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' or 'register'
@@ -448,13 +448,79 @@ function setupReviewForm() {
                 loadReviews();
             } catch (error) {
                 console.error(error);
-                showToast('Ошибка при добавлении отзыва', 'error');
+                // Display specific anti-cheat error or generic error
+                showToast(error.message || 'Ошибка при добавлении отзыва', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Отправить отзыв';
             }
         });
     }
+}
+
+// --- Support Logic ---
+
+window.openSupportModal = () => {
+    if (!currentUser) {
+        showToast('Пожалуйста, войдите в аккаунт, чтобы связаться с поддержкой', 'info');
+        window.openAuthModal('login');
+        return;
+    }
+    const modal = document.getElementById('support-modal');
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.remove('opacity-0');
+};
+
+window.closeSupportModal = () => {
+    const modal = document.getElementById('support-modal');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+};
+
+function setupSupportForm() {
+    const form = document.getElementById('support-form');
+    if (!form) return;
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+
+        const btn = document.getElementById('support-submit-btn');
+        const data = {
+            userId: currentUser.uid,
+            userName: currentUser.displayName || 'Без имени',
+            userEmail: currentUser.email,
+            category: document.getElementById('support-category').value,
+            subject: document.getElementById('support-subject').value.trim(),
+            message: document.getElementById('support-message').value.trim(),
+            status: 'open',
+            createdAt: new Date().toISOString()
+        };
+
+        if (data.message.length < 10) {
+            showToast('Сообщение слишком короткое', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+        try {
+            await addDoc(collection(db, 'tickets'), data);
+            showToast('Тикет успешно отправлен! Мы свяжемся с вами.', 'success');
+            form.reset();
+            window.closeSupportModal();
+        } catch (error) {
+            console.error(error);
+            showToast('Ошибка при отправке тикета', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Отправить тикет';
+        }
+    };
 }
 
 window.updatePricing = () => {
@@ -483,6 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReviews();
     setupReviewForm();
     setupProfileForm();
+    setupSupportForm();
     loadSiteSettings();
     loadFaq();
     loadRoadmap();

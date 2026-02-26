@@ -496,11 +496,58 @@
                 <p id="footer-copyright" class="text-gray-500 text-sm mt-2">© 2026 Все права защищены.</p>
             </div>
             <div class="flex space-x-6">
+                <button onclick="window.openSupportModal()"
+                    class="text-gray-400 hover:text-primary text-sm font-medium transition">Поддержка</button>
                 <a id="footer-tg-link" href="#" class="text-gray-400 hover:text-primary text-xl transition"><i
                         class="fab fa-telegram"></i></a>
             </div>
         </div>
     </footer>
+
+    <!-- Support Modal -->
+    <div id="support-modal"
+        class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative transform scale-95 transition-transform duration-300"
+            id="support-modal-content">
+            <button onclick="window.closeSupportModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i
+                    class="fas fa-times text-xl"></i></button>
+
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold mb-2">Техподдержка</h3>
+                <p class="text-gray-500 dark:text-gray-400">Опишите вашу проблему, и наши специалисты помогут вам в
+                    ближайшее время.</p>
+            </div>
+
+            <form id="support-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Категория</label>
+                    <select id="support-category" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                        <option value="billing">Вопросы оплаты</option>
+                        <option value="technical">Технические проблемы</option>
+                        <option value="partnership">Партнерство</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Тема</label>
+                    <input type="text" id="support-subject" required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                        placeholder="Краткое описание">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Сообщение</label>
+                    <textarea id="support-message" required rows="4"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                        placeholder="Опишите ситуацию подробно..."></textarea>
+                </div>
+                <button type="submit" id="support-submit-btn"
+                    class="w-full py-3 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition mt-4">Отправить
+                    тикет</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Floating Telegram Button -->
     <a href="https://t.me/StormCreation" target="_blank"

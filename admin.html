@@ -94,6 +94,11 @@
                 </button>
                 <button
                     class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    data-target="tickets-view">
+                    <i class="fas fa-headset w-5"></i> Поддержка
+                </button>
+                <button
+                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
                     data-target="settings-view">
                     <i class="fas fa-cog w-5"></i> Настройки
                 </button>
@@ -582,6 +587,43 @@
                                 class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Сохранить</button>
                         </div>
                     </form>
+                </div>
+            </div>
+            <!-- Tickets View -->
+            <div id="tickets-view" class="view-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Запросы в техподдержку</h2>
+                    <div class="flex gap-2">
+                        <button onclick="window.loadAdminTickets()"
+                            class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"><i
+                                class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+                <div id="tickets-list" class="space-y-4">
+                    <!-- Ticket items -->
+                </div>
+            </div>
+
+            <!-- Ticket Modal -->
+            <div id="ticket-modal"
+                class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full scale-animation overflow-y-auto max-h-[90vh]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Детали тикета</h3>
+                        <button onclick="document.getElementById('ticket-modal').classList.add('hidden')"
+                            class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="ticket-details" class="space-y-6">
+                        <!-- Content -->
+                    </div>
+                    <div class="flex gap-3 justify-end mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+                        <button onclick="document.getElementById('ticket-modal').classList.add('hidden')"
+                            class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Закрыть</button>
+                        <button id="close-ticket-btn"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Закрыть
+                            тикет</button>
+                    </div>
                 </div>
             </div>
         </main>

@@ -115,6 +115,7 @@ function setupNavigation() {
             if (targetId === 'faq-view') loadAdminFaq();
             if (targetId === 'roadmap-view') loadAdminRoadmap();
             if (targetId === 'docs-view') loadAdminDocs();
+            if (targetId === 'tickets-view') loadAdminTickets();
         });
     });
 }
@@ -800,3 +801,97 @@ function setupDocsHandlers() {
         }
     };
 }
+// --- Support Management ---
+
+let ticketsData = [];
+
+async function loadAdminTickets() {
+    if (!db) return;
+    const list = document.getElementById('tickets-list');
+    list.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка тикетов...</div>';
+
+    try {
+        const q = query(collection(db, 'tickets'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        ticketsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (ticketsData.length === 0) {
+            list.innerHTML = '<div class="text-center py-10 text-gray-500">Запросов пока нет.</div>';
+            return;
+        }
+
+        list.innerHTML = ticketsData.map(ticket => `
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 group hover:shadow-md transition-all">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${ticket.status === 'open' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}">
+                                ${ticket.status === 'open' ? 'Открыт' : 'Закрыт'}
+                            </span>
+                            <span class="text-xs text-gray-400">${formatDate(ticket.createdAt)}</span>
+                        </div>
+                        <h4 class="font-bold text-lg">${ticket.subject}</h4>
+                        <p class="text-sm text-gray-500">${ticket.userName} (${ticket.userEmail})</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="window.viewTicket('${ticket.id}')" class="px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition text-sm font-medium">Смотреть</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error(e);
+        showToast('Ошибка загрузки тикетов', 'error');
+    }
+}
+
+window.viewTicket = (id) => {
+    const ticket = ticketsData.find(t => t.id === id);
+    if (!ticket) return;
+
+    const modal = document.getElementById('ticket-modal');
+    const details = document.getElementById('ticket-details');
+    const closeBtn = document.getElementById('close-ticket-btn');
+
+    details.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+            <div>
+                <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Пользователь</label>
+                <div class="font-medium">${ticket.userName}</div>
+                <div class="text-sm text-gray-500">${ticket.userEmail}</div>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Категория</label>
+                <div class="font-medium capitalize">${ticket.category}</div>
+                <div class="text-xs text-gray-400">${id}</div>
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Тема</label>
+            <div class="text-xl font-bold">${ticket.subject}</div>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Сообщение</label>
+            <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-700 whitespace-pre-line leading-relaxed">
+                ${ticket.message}
+            </div>
+        </div>
+        <div class="text-xs text-gray-400">
+            Создан: ${formatDate(ticket.createdAt)}
+        </div>
+    `;
+
+    closeBtn.onclick = async () => {
+        if (!confirm('Вы уверены, что хотите закрыть этот тикет?')) return;
+        try {
+            await setDoc(doc(db, 'tickets', id), { status: 'closed' }, { merge: true });
+            showToast('Тикет закрыт', 'success');
+            modal.classList.add('hidden');
+            loadAdminTickets();
+        } catch (e) {
+            showToast('Ошибка при закрытии тикета', 'error');
+        }
+    };
+
+    modal.classList.remove('hidden');
+};
