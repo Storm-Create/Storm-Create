@@ -7,7 +7,7 @@
     <title>Админ-панель - StormCreate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#3b82f6', dark: '#0f172a', darker: '#020617' } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: 'var(--primary-color, #3b82f6)', dark: '#0f172a', darker: '#020617' } } } }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
@@ -101,6 +101,21 @@
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">
                     <i class="fas fa-external-link-alt w-5"></i> На сайт
                 </a>
+                <button
+                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    data-target="faq-view">
+                    <i class="fas fa-question-circle w-5"></i> FAQ
+                </button>
+                <button
+                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    data-target="roadmap-view">
+                    <i class="fas fa-map-signs w-5"></i> Roadmap
+                </button>
+                <button
+                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    data-target="docs-view">
+                    <i class="fas fa-book w-5"></i> База знаний
+                </button>
             </nav>
 
             <div class="p-4 border-t border-gray-200 dark:border-gray-800">
@@ -127,7 +142,8 @@
                             </div>
                             <div
                                 class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl">
-                                <i class="fas fa-file-alt"></i></div>
+                                <i class="fas fa-file-alt"></i>
+                            </div>
                         </div>
                     </div>
                     <div
@@ -139,7 +155,8 @@
                             </div>
                             <div
                                 class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl">
-                                <i class="fas fa-eye"></i></div>
+                                <i class="fas fa-eye"></i>
+                            </div>
                         </div>
                     </div>
                     <div
@@ -151,7 +168,8 @@
                             </div>
                             <div
                                 class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
-                                <i class="fas fa-comments"></i></div>
+                                <i class="fas fa-comments"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,16 +364,59 @@
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
                                 class="fas fa-copyright text-green-500"></i> Подвал (Footer)</h3>
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Текст копирайта</label>
-                                <input type="text" id="setting-footer-copy" placeholder="© 2026 Все права защищены."
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                                <label class="block text-sm font-medium mb-1">Текст копирайта (Footer)</label>
+                                <input type="text" id="setting-footer-copy" placeholder="© 2026 StormCreate"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Ссылка Telegram в футере</label>
-                                <input type="url" id="setting-footer-tg" placeholder="https://t.me/StormCreation"
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                                <label class="block text-sm font-medium mb-1">Ссылка на TG (Footer)</label>
+                                <input type="text" id="setting-footer-tg" placeholder="https://t.me/..."
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Management -->
+                    <div
+                        class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
+                                class="fas fa-chart-line text-green-500"></i> Статистика (Social Proof)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Создано ботов</label>
+                                <input type="number" id="setting-stat-bots" value="0"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Пользователей</label>
+                                <input type="number" id="setting-stat-users" value="0"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Заказов</label>
+                                <input type="number" id="setting-stat-orders" value="0"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme Settings -->
+                    <div
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
+                                class="fas fa-palette text-blue-500"></i> Тема и Оформление</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="flex-grow">
+                                    <label class="block text-sm font-medium mb-1">Основной цвет сайта (Accent
+                                        Color)</label>
+                                    <p class="text-xs text-gray-400 mb-2">Этот цвет будет использоваться для кнопок,
+                                        ссылок и акцентных элементов по всему сайту.</p>
+                                </div>
+                                <input type="color" id="setting-primary-color" value="#3b82f6"
+                                    class="w-16 h-16 rounded-xl cursor-pointer border-0 p-1 bg-gray-100 dark:bg-gray-700">
                             </div>
                         </div>
                     </div>
@@ -366,7 +427,163 @@
                     </button>
                 </form>
             </div>
+            <!-- FAQ View -->
+            <div id="faq-view" class="view-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Управление FAQ</h2>
+                    <button id="add-faq-btn" class="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Добавить вопрос
+                    </button>
+                </div>
+                <div id="faq-admin-list" class="space-y-4">
+                    <!-- FAQ items for admin -->
+                </div>
+            </div>
 
+            <!-- Roadmap View -->
+            <div id="roadmap-view" class="view-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Управление Roadmap</h2>
+                    <button id="add-roadmap-btn"
+                        class="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Добавить этап
+                    </button>
+                </div>
+                <div id="roadmap-admin-list" class="space-y-4">
+                    <!-- Roadmap items for admin -->
+                </div>
+            </div>
+
+            <!-- FAQ Modal -->
+            <div id="faq-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full scale-animation">
+                    <h3 id="faq-modal-title" class="text-xl font-bold mb-4">Добавить вопрос</h3>
+                    <form id="faq-form" class="space-y-4">
+                        <input type="hidden" id="faq-id">
+                        <div>
+                            <label
+                                class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Вопрос</label>
+                            <input type="text" id="faq-question" required
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Ответ</label>
+                            <textarea id="faq-answer" required rows="4"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Порядок (чем
+                                меньше, тем выше)</label>
+                            <input type="number" id="faq-order" value="0"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div class="flex gap-3 justify-end mt-6">
+                            <button type="button" onclick="document.getElementById('faq-modal').classList.add('hidden')"
+                                class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Отмена</button>
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Roadmap Modal -->
+            <div id="roadmap-modal"
+                class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full scale-animation">
+                    <h3 id="roadmap-modal-title" class="text-xl font-bold mb-4">Добавить этап Roadmap</h3>
+                    <form id="roadmap-form" class="space-y-4">
+                        <input type="hidden" id="roadmap-id">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Заголовок
+                                этапа</label>
+                            <input type="text" id="roadmap-title" required
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Дата/Период
+                                (напр. Q2 2026)</label>
+                            <input type="text" id="roadmap-date" required
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Статус</label>
+                            <select id="roadmap-status"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary">
+                                <option value="todo">В планах</option>
+                                <option value="doing">В процессе</option>
+                                <option value="done">Завершено</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Описание
+                                (необязательно)</label>
+                            <textarea id="roadmap-desc" rows="2"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        <div class="flex gap-3 justify-end mt-6">
+                            <button type="button"
+                                onclick="document.getElementById('roadmap-modal').classList.add('hidden')"
+                                class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Отмена</button>
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Docs View -->
+            <div id="docs-view" class="view-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Управление документацией</h2>
+                    <button id="add-doc-btn" class="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Создать статью
+                    </button>
+                </div>
+                <div id="docs-admin-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Doc list items -->
+                </div>
+            </div>
+
+            <!-- Doc Modal -->
+            <div id="doc-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-full h-[90vh] flex flex-col scale-animation">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="doc-modal-title" class="text-xl font-bold">Создать статью</h3>
+                        <button onclick="document.getElementById('doc-modal').classList.add('hidden')"
+                            class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form id="doc-form" class="flex-grow flex flex-col space-y-4 overflow-hidden">
+                        <input type="hidden" id="doc-id">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Заголовок</label>
+                                <input type="text" id="doc-title" required
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Категория</label>
+                                <input type="text" id="doc-category" placeholder="Общее, Гайды, FAQ..."
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Порядок (index)</label>
+                            <input type="number" id="doc-order" value="0"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 outline-none">
+                        </div>
+                        <div class="flex-grow flex flex-col min-h-0">
+                            <label class="block text-sm font-medium mb-1">Содержимое (Markdown)</label>
+                            <textarea id="doc-content-editor" class="flex-grow"></textarea>
+                        </div>
+                        <div class="flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <button type="button" onclick="document.getElementById('doc-modal').classList.add('hidden')"
+                                class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Отмена</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
 

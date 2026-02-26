@@ -5,7 +5,7 @@ import { getReviews, deleteReview } from './reviews.js';
 import { showToast, formatDate, initTheme } from './ui.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, getDocs, deleteDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let simplemde;
 let postsData = [];
@@ -16,7 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
 
     checkAuth((user) => {
-        const adminEmails = ['counterflug@stormcreate.com', 'andrewsker@stormcreate.com'];
+        const adminEmails = [
+            'counterflug@stormcreate.com',
+            'andrewsker@stormcreate.com',
+            '852861796@telegram.stormcreate.com',
+            '7456647404@telegram.stormcreate.com'
+        ];
         if (user && adminEmails.includes(user.email)) {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
@@ -43,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
     setupEditor();
     setupSettings();
+    setupFaqHandlers();
+    setupRoadmapHandlers();
+    setupDocsHandlers();
 });
 
 function setupLogin() {
@@ -104,6 +112,9 @@ function setupNavigation() {
             if (targetId === 'comments-view') loadAdminComments();
             if (targetId === 'reviews-view') loadAdminReviews();
             if (targetId === 'settings-view') loadSettings();
+            if (targetId === 'faq-view') loadAdminFaq();
+            if (targetId === 'roadmap-view') loadAdminRoadmap();
+            if (targetId === 'docs-view') loadAdminDocs();
         });
     });
 }
@@ -413,6 +424,12 @@ async function loadSettings() {
             document.getElementById('setting-channel-link').value = data.channelLink || '';
             document.getElementById('setting-footer-copy').value = data.footerCopy || '';
             document.getElementById('setting-footer-tg').value = data.footerTg || '';
+            document.getElementById('setting-primary-color').value = data.primaryColor || '#3b82f6';
+
+            // Stats
+            document.getElementById('setting-stat-bots').value = data.statsBots || 0;
+            document.getElementById('setting-stat-users').value = data.statsUsers || 0;
+            document.getElementById('setting-stat-orders').value = data.statsOrders || 0;
         }
     } catch (e) {
         console.error('Error loading settings:', e);
@@ -437,6 +454,13 @@ function setupSettings() {
             channelLink: document.getElementById('setting-channel-link').value.trim(),
             footerCopy: document.getElementById('setting-footer-copy').value.trim(),
             footerTg: document.getElementById('setting-footer-tg').value.trim(),
+            primaryColor: document.getElementById('setting-primary-color').value,
+
+            // Stats
+            statsBots: parseInt(document.getElementById('setting-stat-bots').value) || 0,
+            statsUsers: parseInt(document.getElementById('setting-stat-users').value) || 0,
+            statsOrders: parseInt(document.getElementById('setting-stat-orders').value) || 0,
+
             updatedAt: new Date().toISOString()
         };
 
@@ -444,6 +468,8 @@ function setupSettings() {
             if (!db) throw new Error('Firebase не настроен');
             await setDoc(doc(db, 'settings', 'site'), data, { merge: true });
             showToast('Настройки сохранены!', 'success');
+            // Apply primary color to admin panel too for consistency
+            document.documentElement.style.setProperty('--primary-color', data.primaryColor);
         } catch (error) {
             console.error('Error saving settings:', error);
             showToast(error.message || 'Ошибка сохранения настроек', 'error');
@@ -452,4 +478,325 @@ function setupSettings() {
             btn.innerHTML = '<i class="fas fa-save"></i> Сохранить настройки';
         }
     });
+}
+
+// --- FAQ Management ---
+
+let faqData = [];
+
+async function loadAdminFaq() {
+    if (!db) return;
+    const list = document.getElementById('faq-admin-list');
+    list.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка...</div>';
+
+    try {
+        const q = query(collection(db, 'faq'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
+        faqData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (faqData.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-500">Вопросов-ответов пока нет. Начните с первого!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = faqData.map(item => `
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex justify-between items-center group">
+                <div>
+                    <h4 class="font-bold flex items-center gap-2">
+                        <span class="text-gray-400 font-mono text-xs">#${item.order}</span>
+                        ${item.question}
+                    </h4>
+                    <p class="text-sm text-gray-500 line-clamp-1">${item.answer}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.editFaq('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                    <button onclick="window.deleteFaq('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error(e);
+        showToast('Ошибка загрузки FAQ', 'error');
+    }
+}
+
+function setupFaqHandlers() {
+    const btn = document.getElementById('add-faq-btn');
+    const form = document.getElementById('faq-form');
+    const modal = document.getElementById('faq-modal');
+
+    if (btn) btn.onclick = () => {
+        document.getElementById('faq-modal-title').innerText = 'Добавить вопрос';
+        document.getElementById('faq-id').value = '';
+        form.reset();
+        modal.classList.remove('hidden');
+    };
+
+    window.editFaq = (id) => {
+        const item = faqData.find(f => f.id === id);
+        if (!item) return;
+        document.getElementById('faq-modal-title').innerText = 'Редактировать вопрос';
+        document.getElementById('faq-id').value = item.id;
+        document.getElementById('faq-question').value = item.question;
+        document.getElementById('faq-answer').value = item.answer;
+        document.getElementById('faq-order').value = item.order || 0;
+        modal.classList.remove('hidden');
+    };
+
+    window.deleteFaq = async (id) => {
+        if (!confirm('Вы уверены, что хотите удалить этот вопрос?')) return;
+        try {
+            await deleteDoc(doc(db, 'faq', id));
+            showToast('Вопрос удален', 'success');
+            loadAdminFaq();
+        } catch (e) {
+            showToast('Ошибка при удалении', 'error');
+        }
+    };
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('faq-id').value;
+        const data = {
+            question: document.getElementById('faq-question').value.trim(),
+            answer: document.getElementById('faq-answer').value.trim(),
+            order: parseInt(document.getElementById('faq-order').value) || 0
+        };
+
+        try {
+            if (id) {
+                await setDoc(doc(db, 'faq', id), data);
+            } else {
+                await addDoc(collection(db, 'faq'), data);
+            }
+            modal.classList.add('hidden');
+            showToast('FAQ сохранено успешно!', 'success');
+            loadAdminFaq();
+        } catch (e) {
+            showToast('Ошибка при сохранении', 'error');
+        }
+    };
+}
+
+// --- Roadmap Management ---
+
+let roadmapData = [];
+
+async function loadAdminRoadmap() {
+    if (!db) return;
+    const list = document.getElementById('roadmap-admin-list');
+    list.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка...</div>';
+
+    try {
+        const snap = await getDocs(collection(db, 'roadmap'));
+        roadmapData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (roadmapData.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-500">План развития пуст. Время строить будущее!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = roadmapData.map(item => `
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex justify-between items-center group">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${item.status === 'done' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                item.status === 'doing' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+            }">${item.status === 'done' ? 'Готово' : item.status === 'doing' ? 'В работе' : 'План'}</span>
+                        <h4 class="font-bold">${item.title}</h4>
+                    </div>
+                    <p class="text-sm text-gray-500">${item.date}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.editRoadmap('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                    <button onclick="window.deleteRoadmap('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error(e);
+        showToast('Ошибка загрузки Roadmap', 'error');
+    }
+}
+
+function setupRoadmapHandlers() {
+    const btn = document.getElementById('add-roadmap-btn');
+    const form = document.getElementById('roadmap-form');
+    const modal = document.getElementById('roadmap-modal');
+
+    if (btn) btn.onclick = () => {
+        document.getElementById('roadmap-modal-title').innerText = 'Добавить этап Roadmap';
+        document.getElementById('roadmap-id').value = '';
+        form.reset();
+        modal.classList.remove('hidden');
+    };
+
+    window.editRoadmap = (id) => {
+        const item = roadmapData.find(r => r.id === id);
+        if (!item) return;
+        document.getElementById('roadmap-modal-title').innerText = 'Редактировать этап';
+        document.getElementById('roadmap-id').value = item.id;
+        document.getElementById('roadmap-title').value = item.title;
+        document.getElementById('roadmap-date').value = item.date;
+        document.getElementById('roadmap-status').value = item.status;
+        document.getElementById('roadmap-desc').value = item.description || '';
+        modal.classList.remove('hidden');
+    };
+
+    window.deleteRoadmap = async (id) => {
+        if (!confirm('Вы уверены, что хотите удалить этот этап?')) return;
+        try {
+            await deleteDoc(doc(db, 'roadmap', id));
+            showToast('Этап удален', 'success');
+            loadAdminRoadmap();
+        } catch (e) {
+            showToast('Ошибка при удалении', 'error');
+        }
+    };
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('roadmap-id').value;
+        const data = {
+            title: document.getElementById('roadmap-title').value.trim(),
+            date: document.getElementById('roadmap-date').value.trim(),
+            status: document.getElementById('roadmap-status').value,
+            description: document.getElementById('roadmap-desc').value.trim(),
+            updatedAt: new Date().toISOString()
+        };
+
+        try {
+            if (id) {
+                await setDoc(doc(db, 'roadmap', id), data);
+            } else {
+                await addDoc(collection(db, 'roadmap'), data);
+            }
+            modal.classList.add('hidden');
+            showToast('Roadmap успешно обновлен!', 'success');
+            loadAdminRoadmap();
+        } catch (e) {
+            showToast('Ошибка при сохранении', 'error');
+        }
+    };
+}
+// --- Documentation Management ---
+
+let docsData = [];
+let docsEditor;
+
+async function loadAdminDocs() {
+    if (!db) return;
+    const list = document.getElementById('docs-admin-list');
+    list.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка...</div>';
+
+    try {
+        const q = query(collection(db, 'docs'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
+        docsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (docsData.length === 0) {
+            list.innerHTML = `
+                <div class="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-500">Документация пуста. Создайте свой первый гайд!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = docsData.map(item => `
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 group hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">${item.category || 'Общее'}</span>
+                    <div class="flex gap-2">
+                        <button onclick="window.editDoc('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                        <button onclick="window.deleteDoc('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <h4 class="font-bold text-lg mb-1">${item.title}</h4>
+                <p class="text-sm text-gray-500 line-clamp-2">${(item.content || '').substring(0, 100)}...</p>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error(e);
+        showToast('Ошибка загрузки документации', 'error');
+    }
+}
+
+function setupDocsHandlers() {
+    const btn = document.getElementById('add-doc-btn');
+    const form = document.getElementById('doc-form');
+    const modal = document.getElementById('doc-modal');
+
+    // Initialize Markdown editor for docs if not exists
+    if (!docsEditor) {
+        docsEditor = new SimpleMDE({
+            element: document.getElementById('doc-content-editor'),
+            spellChecker: false,
+            placeholder: "Начните писать гайд...",
+            status: false,
+            autosave: { enabled: false }
+        });
+    }
+
+    if (btn) btn.onclick = () => {
+        document.getElementById('doc-modal-title').innerText = 'Создать статью';
+        document.getElementById('doc-id').value = '';
+        form.reset();
+        docsEditor.value('');
+        modal.classList.remove('hidden');
+    };
+
+    window.editDoc = (id) => {
+        const item = docsData.find(d => d.id === id);
+        if (!item) return;
+        document.getElementById('doc-modal-title').innerText = 'Редактировать статью';
+        document.getElementById('doc-id').value = item.id;
+        document.getElementById('doc-title').value = item.title;
+        document.getElementById('doc-category').value = item.category || '';
+        document.getElementById('doc-order').value = item.order || 0;
+        docsEditor.value(item.content || '');
+        modal.classList.remove('hidden');
+    };
+
+    window.deleteDoc = async (id) => {
+        if (!confirm('Вы уверены, что хотите удалить эту статью?')) return;
+        try {
+            await deleteDoc(doc(db, 'docs', id));
+            showToast('Статья удалена', 'success');
+            loadAdminDocs();
+        } catch (e) {
+            showToast('Ошибка при удалении', 'error');
+        }
+    };
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('doc-id').value;
+        const data = {
+            title: document.getElementById('doc-title').value.trim(),
+            category: document.getElementById('doc-category').value.trim() || 'Общее',
+            order: parseInt(document.getElementById('doc-order').value) || 0,
+            content: docsEditor.value(),
+            updatedAt: new Date().toISOString()
+        };
+
+        try {
+            if (id) {
+                await setDoc(doc(db, 'docs', id), data);
+            } else {
+                await addDoc(collection(db, 'docs'), data);
+            }
+            modal.classList.add('hidden');
+            showToast('Статья успешно сохранена!', 'success');
+            loadAdminDocs();
+        } catch (e) {
+            showToast('Ошибка при сохранении', 'error');
+        }
+    };
 }

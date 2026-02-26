@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация | Storm Create</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--primary-color, #3b82f6)',
+                        dark: '#0f172a',
+                        darker: '#020617'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-gray-50 dark:bg-darker text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Navigation -->
+    <nav
+        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="index.html" class="flex items-center space-x-2 group">
+                    <span
+                        class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-600 group-hover:to-purple-700 transition-all duration-300">StormCreate</span>
+                    <span
+                        class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Docs</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-500"></i>
+                    </button>
+                    <a href="index.html"
+                        class="text-gray-600 dark:text-gray-400 hover:text-primary transition font-medium">Вернуться на
+                        главную</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-24 pb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar Navigation -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="sticky top-24 space-y-8">
+                        <div>
+                            <div class="relative mb-6">
+                                <i
+                                    class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                <input type="text" id="docs-search" placeholder="Поиск по гайдам..."
+                                    class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 outline-none focus:ring-2 focus:ring-primary transition text-sm">
+                            </div>
+
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Разделы</h3>
+                            <nav id="docs-nav" class="space-y-1">
+                                <!-- Docs categories/items will be injected here -->
+                                <div class="animate-pulse space-y-2">
+                                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-4/5"></div>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-grow">
+                    <div id="docs-content"
+                        class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[600px]">
+                        <div id="doc-placeholder" class="text-center py-20">
+                            <i class="fas fa-book-open text-6xl text-gray-200 dark:text-gray-700 mb-6"></i>
+                            <h2 class="text-2xl font-bold mb-2">Добро пожаловать в базу знаний</h2>
+                            <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">Выберите интересующий вас
+                                раздел в меню слева, чтобы начать изучение документации StormCreate.</p>
+                        </div>
+                        <div id="doc-render" class="markdown-body hidden">
+                            <!-- Selected doc will be rendered here -->
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="js/docs.js"></script>
+</body>
+
+</html>

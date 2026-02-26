@@ -1,4 +1,8 @@
 /* Custom styles and animations */
+:root {
+    --primary-color: #3b82f6;
+}
+
 .fade-in {
     opacity: 0;
     transform: translateY(20px);
@@ -37,14 +41,32 @@
 
 .toast.success { background-color: #10b981; }
 .toast.error { background-color: #ef4444; }
-.toast.info { background-color: #3b82f6; }
+.toast.info { background-color: var(--primary-color); }
+
+/* FAQ Accordion */
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+.faq-item.active .fa-chevron-down {
+    transform: rotate(180deg);
+}
+.fa-chevron-down {
+    transition: transform 0.3s ease;
+}
 
 /* Markdown Styles */
 .markdown-body h1 { font-size: 2.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
 .markdown-body h2 { font-size: 1.875rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 .markdown-body h3 { font-size: 1.5rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
 .markdown-body p { margin-bottom: 1rem; line-height: 1.75; }
-.markdown-body a { color: #3b82f6; text-decoration: underline; }
+.markdown-body a { color: var(--primary-color); text-decoration: underline; }
 .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
 .markdown-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
 .markdown-body blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; color: #6b7280; font-style: italic; }

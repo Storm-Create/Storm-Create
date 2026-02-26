@@ -4,7 +4,7 @@ import { checkAuth, login, register, logout, updateUserProfile, loginWithTelegra
 import { getReviews, addReview } from './reviews.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' or 'register'
@@ -112,8 +112,13 @@ function updateNavAuth() {
     if (!navSection || !mobileSection) return;
 
     if (currentUser) {
-        // Simple check for admin email (you should ideally use Firebase Custom Claims for real security)
-        const adminEmails = ['counterflug@stormcreate.com', 'andrewsker@stormcreate.com'];
+        // Simple check for admin email
+        const adminEmails = [
+            'counterflug@stormcreate.com',
+            'andrewsker@stormcreate.com',
+            '852861796@telegram.stormcreate.com',
+            '7456647404@telegram.stormcreate.com'
+        ];
         const isAdmin = adminEmails.includes(currentUser.email);
         const adminLink = isAdmin ? `<a href="admin.html" class="text-sm font-medium text-primary hover:text-blue-600 mr-4"><i class="fas fa-cog"></i> Админка</a>` : '';
         const mobileAdminLink = isAdmin ? `<a href="admin.html" class="block px-3 py-2 text-primary hover:text-blue-600 font-medium"><i class="fas fa-cog"></i> Админка</a>` : '';
@@ -479,6 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupReviewForm();
     setupProfileForm();
     loadSiteSettings();
+    loadFaq();
+    loadRoadmap();
 });
 
 async function loadSiteSettings() {
@@ -512,7 +519,143 @@ async function loadSiteSettings() {
             const el = document.getElementById('footer-tg-link');
             if (el) el.href = s.footerTg;
         }
+
+        if (s.primaryColor) {
+            applyPrimaryColor(s.primaryColor);
+        }
+
+        // Stats
+        if (s.statsBots) animateCounter('stat-bots-val', s.statsBots);
+        if (s.statsUsers) animateCounter('stat-users-val', s.statsUsers);
+        if (s.statsOrders) animateCounter('stat-orders-val', s.statsOrders);
     } catch (e) {
         console.warn('Could not load site settings:', e);
+    }
+}
+
+function applyPrimaryColor(color) {
+    if (!color) return;
+
+    // Set CSS variable
+    document.documentElement.style.setProperty('--primary-color', color);
+
+    // Update Tailwind-like primary colors for specific elements if needed
+    // But better to use CSS variables for everything.
+    // Let's also update the logo gradient as a nice touch
+    const logos = document.querySelectorAll('.text-transparent.bg-gradient-to-r');
+    logos.forEach(logo => {
+        logo.style.backgroundImage = `linear-gradient(to right, ${color}, #9333ea)`;
+    });
+}
+
+function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    let current = 0;
+    const duration = 2000; // 2 seconds
+    const stepTime = 30;
+    const increment = target / (duration / stepTime);
+
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            el.textContent = target.toLocaleString() + '+';
+            clearInterval(timer);
+        } else {
+            el.textContent = Math.floor(current).toLocaleString() + '+';
+        }
+    }, stepTime);
+}
+
+async function loadFaq() {
+    if (!db) return;
+    const list = document.getElementById('faq-list');
+    if (!list) return;
+
+    try {
+        const q = query(collection(db, 'faq'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
+        const faqItems = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (faqItems.length === 0) {
+            list.innerHTML = '<div class="text-center py-10 text-gray-500">Вопросов пока нет.</div>';
+            return;
+        }
+
+        list.innerHTML = faqItems.map(item => `
+            <div class="faq-item bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300">
+                <button class="w-full px-6 py-5 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition focus:outline-none">
+                    <span class="font-bold text-lg">${item.question}</span>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-6">
+                    <div class="pb-5 text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                        ${item.answer}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Setup accordion click listeners
+        list.querySelectorAll('.faq-item button').forEach(btn => {
+            btn.onclick = () => {
+                const item = btn.parentElement;
+                const isActive = item.classList.contains('active');
+
+                // Close other items
+                list.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+
+                // Toggle current
+                if (!isActive) item.classList.add('active');
+            };
+        });
+    } catch (e) {
+        console.warn('Could not load FAQ:', e);
+    }
+}
+
+async function loadRoadmap() {
+    if (!db) return;
+    const list = document.getElementById('roadmap-list');
+    if (!list) return;
+
+    try {
+        const snap = await getDocs(collection(db, 'roadmap'));
+        let roadmapItems = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Basic sort by date string (ideally add a timestamp or order field)
+        roadmapItems.sort((a, b) => (a.updatedAt || '') > (b.updatedAt || '') ? 1 : -1);
+
+        if (roadmapItems.length === 0) {
+            list.innerHTML = '<div class="text-center py-10 text-gray-500">План развития пуст.</div>';
+            return;
+        }
+
+        list.innerHTML = roadmapItems.map((item, index) => `
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group fade-in">
+                <!-- Dot -->
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-dark bg-gray-200 dark:bg-gray-800 absolute left-1/2 transform -translate-x-1/2 z-10 group-hover:bg-primary transition-colors duration-300">
+                    <i class="fas ${item.status === 'done' ? 'fa-check text-green-500' : item.status === 'doing' ? 'fa-spinner fa-spin text-blue-500' : 'fa-clock text-gray-400'} text-xs"></i>
+                </div>
+                
+                <!-- Content Card -->
+                <div class="w-full md:w-[calc(50%-30px)] bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex flex-col mb-2">
+                        <span class="text-primary font-bold text-sm mb-1">${item.date}</span>
+                        <h3 class="text-xl font-bold">${item.title}</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm whitespace-pre-line">${item.description || ''}</p>
+                    <div class="mt-4 flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${item.status === 'done' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                item.status === 'doing' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+            }">${item.status === 'done' ? 'Завершено' : item.status === 'doing' ? 'В процессе' : 'В планах'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.warn('Could not load roadmap:', e);
     }
 }

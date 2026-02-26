@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3b82f6',
+                        primary: 'var(--primary-color, #3b82f6)',
                         dark: '#0f172a',
                         darker: '#020617'
                     }
@@ -160,6 +160,26 @@
                     <h3 class="text-xl font-bold mb-2">Удобное управление</h3>
                     <p class="text-gray-600 dark:text-gray-400">Управляйте товарами, заказами и настройками прямо через
                         встроенную админ-панель в Telegram.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 bg-blue-600 dark:bg-blue-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-white">
+                <div class="fade-in">
+                    <div id="stat-bots-val" class="text-5xl font-extrabold mb-2">0+</div>
+                    <div class="text-blue-100 uppercase tracking-wider font-semibold">Создано ботов</div>
+                </div>
+                <div class="fade-in">
+                    <div id="stat-users-val" class="text-5xl font-extrabold mb-2">0+</div>
+                    <div class="text-blue-100 uppercase tracking-wider font-semibold">Пользователей бота</div>
+                </div>
+                <div class="fade-in">
+                    <div id="stat-orders-val" class="text-5xl font-extrabold mb-2">0+</div>
+                    <div class="text-blue-100 uppercase tracking-wider font-semibold">Заказов обработано</div>
                 </div>
             </div>
         </div>
@@ -322,6 +342,41 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-gray-50 dark:bg-darker">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Часто задаваемые вопросы</h2>
+                <p class="text-gray-600 dark:text-gray-400">Все, что вы хотели знать о StormCreate.</p>
+            </div>
+
+            <div id="faq-list" class="space-y-4">
+                <!-- FAQ items will be injected here -->
+                <div class="text-center py-10 text-gray-500">Загрузка вопросов...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section id="roadmap" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Roadmap развития</h2>
+                <p class="text-gray-600 dark:text-gray-400">Наши планы и цели на ближайшее будущее.</p>
+            </div>
+
+            <div class="relative">
+                <div
+                    class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-200 dark:bg-gray-800 hidden md:block">
+                </div>
+                <div id="roadmap-list" class="space-y-12 relative">
+                    <!-- Roadmap items will be injected here -->
+                    <div class="text-center py-10 text-gray-500">Загрузка плана развития...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Auth Modal -->
     <div id="auth-modal"
         class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
@@ -408,6 +463,30 @@
         </div>
     </div>
 
+    <!-- Partners Section -->
+    <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in">
+                <h2 class="text-2xl font-bold text-gray-400 uppercase tracking-widest">Нам доверяют</h2>
+            </div>
+            <div
+                class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-apple text-4xl"></i></div>
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-google text-4xl"></i></div>
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-stripe text-4xl"></i></div>
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-paypal text-4xl"></i></div>
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-shopify text-4xl"></i></div>
+                <div class="flex items-center justify-center p-4 transition hover:scale-110"><i
+                        class="fab fa-telegram-plane text-4xl"></i></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
@@ -422,6 +501,16 @@
             </div>
         </div>
     </footer>
+
+    <!-- Floating Telegram Button -->
+    <a href="https://t.me/StormCreation" target="_blank"
+        class="fixed bottom-6 right-6 z-[60] w-14 h-14 bg-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:rotate-12 transition-all duration-300 group">
+        <i class="fab fa-telegram-plane text-2xl"></i>
+        <span
+            class="absolute right-full mr-3 px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+            Написать нам
+        </span>
+    </a>
 
     <script type="module" src="js/ui.js"></script>
     <script type="module" src="js/index.js"></script>
