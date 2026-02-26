@@ -2,6 +2,8 @@ import { getPosts } from './posts.js';
 import { formatDate, showToast } from './ui.js';
 import { checkAuth, login, register, logout, updateUserProfile, loginWithTelegram } from './auth.js';
 import { getReviews, addReview } from './reviews.js';
+import { storage } from './firebase.js';
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' or 'register'
@@ -97,20 +99,27 @@ function updateNavAuth() {
 
     if (currentUser) {
         // Simple check for admin email (you should ideally use Firebase Custom Claims for real security)
-        const adminEmails = ['counerflug@stormcreate.com', 'andrewsker@stormcreate.com'];
+        const adminEmails = ['counterflug@stormcreate.com', 'andrewsker@stormcreate.com'];
         const isAdmin = adminEmails.includes(currentUser.email);
         const adminLink = isAdmin ? `<a href="admin.html" class="text-sm font-medium text-primary hover:text-blue-600 mr-4"><i class="fas fa-cog"></i> Админка</a>` : '';
         const mobileAdminLink = isAdmin ? `<a href="admin.html" class="block px-3 py-2 text-primary hover:text-blue-600 font-medium"><i class="fas fa-cog"></i> Админка</a>` : '';
 
+        const avatarUrl = currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.email)}&background=random`;
+        const avatarImg = `<img src="${avatarUrl}" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-primary object-cover inline-block mr-2">`;
+
         const html = `
             ${adminLink}
-            <button onclick="window.openProfileModal()" class="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary mr-4"><i class="fas fa-user"></i> Профиль</button>
+            <button onclick="window.openProfileModal()" class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary mr-4">
+                ${avatarImg} Профиль
+            </button>
             <span class="text-sm text-gray-600 dark:text-gray-300 mr-2">${currentUser.displayName || currentUser.email}</span>
             <button onclick="window.logoutUser()" class="text-sm text-red-500 hover:text-red-600 font-medium">Выйти</button>
         `;
         const mobileHtml = `
             ${mobileAdminLink}
-            <button onclick="window.openProfileModal()" class="w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-primary font-medium"><i class="fas fa-user"></i> Профиль</button>
+            <button onclick="window.openProfileModal()" class="w-full flex items-center text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-primary font-medium">
+                ${avatarImg} Профиль
+            </button>
             <span class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-300">${currentUser.displayName || currentUser.email}</span>
             <button onclick="window.logoutUser()" class="w-full text-left px-3 py-2 text-red-500 hover:text-red-600 font-medium">Выйти</button>
         `;
@@ -186,6 +195,21 @@ window.openProfileModal = () => {
     if (!currentUser) return;
     const modal = document.getElementById('profile-modal');
     document.getElementById('profile-name').value = currentUser.displayName || '';
+    
+    const avatarInput = document.getElementById('profile-avatar');
+    if (avatarInput) avatarInput.value = ''; // clear file input
+    
+    const preview = document.getElementById('profile-avatar-preview');
+    if (preview) {
+        if (currentUser.photoURL) {
+            preview.src = currentUser.photoURL;
+            preview.classList.remove('hidden');
+        } else {
+            preview.src = '';
+            preview.classList.add('hidden');
+        }
+    }
+    
     modal.classList.remove('hidden');
     void modal.offsetWidth; // trigger reflow
     modal.classList.remove('opacity-0');
@@ -201,6 +225,23 @@ window.closeProfileModal = () => {
 
 function setupProfileForm() {
     const form = document.getElementById('profile-form');
+    const avatarInput = document.getElementById('profile-avatar');
+    const preview = document.getElementById('profile-avatar-preview');
+
+    if (avatarInput && preview) {
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -213,10 +254,21 @@ function setupProfileForm() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
             
             try {
-                await updateUserProfile(name);
-                // Force update currentUser displayName locally
+                let avatarUrl = currentUser.photoURL;
+                const file = avatarInput && avatarInput.files.length > 0 ? avatarInput.files[0] : null;
+
+                if (file && storage) {
+                    const storageRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    avatarUrl = await getDownloadURL(snapshot.ref);
+                }
+
+                await updateUserProfile(name, avatarUrl);
+                
+                // Force update currentUser locally
                 if (currentUser) {
                     currentUser.displayName = name;
+                    currentUser.photoURL = avatarUrl;
                 }
                 updateNavAuth(); // refresh UI
                 updateReviewSection(); // refresh review form if open
@@ -363,6 +415,20 @@ function setupReviewForm() {
         });
     }
 }
+
+window.updatePricing = () => {
+    const period = parseInt(document.getElementById('billing-period').value);
+    let discount = 0;
+    if (period === 3) discount = 0.05;
+    if (period === 6) discount = 0.10;
+    if (period === 12) discount = 0.20;
+
+    const basePrices = { basic: 1500, pro: 2300, ultra: 3000 };
+
+    document.getElementById('price-basic').innerText = Math.round(basePrices.basic * (1 - discount));
+    document.getElementById('price-pro').innerText = Math.round(basePrices.pro * (1 - discount));
+    document.getElementById('price-ultra').innerText = Math.round(basePrices.ultra * (1 - discount));
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     loadLatestPosts();

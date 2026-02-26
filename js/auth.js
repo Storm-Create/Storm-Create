@@ -18,9 +18,13 @@ export function logout() {
     return signOut(auth);
 }
 
-export function updateUserProfile(displayName) {
+export function updateUserProfile(displayName, photoURL) {
     if (!auth || !auth.currentUser) throw new Error("Firebase not configured or user not logged in");
-    return updateProfile(auth.currentUser, { displayName });
+    const updateData = { displayName };
+    if (photoURL !== undefined) {
+        updateData.photoURL = photoURL;
+    }
+    return updateProfile(auth.currentUser, updateData);
 }
 
 export async function loginWithTelegram(tgUser) {
