@@ -6,9 +6,18 @@ const COLLECTION_NAME = 'comments';
 export async function getComments(postId) {
     if (!db) return [];
     try {
-        const q = query(collection(db, COLLECTION_NAME), where('postId', '==', postId), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, COLLECTION_NAME), where('postId', '==', postId));
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sort explicitly in memory to avoid requiring a composite index in Firestore
+        comments.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return dateB - dateA; // Descending
+        });
+
+        return comments;
     } catch (e) {
         console.error("Error getting comments:", e);
         return [];
