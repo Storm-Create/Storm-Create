@@ -288,15 +288,9 @@ function setupProfileForm() {
 
                     const storageRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}_${file.name}`);
 
-                    // Таймаут 15 секунд
-                    const uploadPromise = uploadBytes(storageRef, file);
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
-                    );
-
                     let snapshot;
                     try {
-                        snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+                        snapshot = await uploadBytes(storageRef, file);
                     } catch (uploadError) {
                         console.error('Upload error:', uploadError);
                         throw new Error(uploadError.message || 'Ошибка загрузки аватара. Попробуйте позже.');

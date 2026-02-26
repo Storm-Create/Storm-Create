@@ -325,13 +325,13 @@ function setupEditor() {
             if (imageFile && storage) {
                 const storageRef = ref(storage, `posts/${Date.now()}_${imageFile.name}`);
 
-                const uploadPromise = uploadBytes(storageRef, imageFile);
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
-                );
-
-                const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                try {
+                    const snapshot = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                } catch (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw new Error(uploadError.message || 'Ошибка загрузки изображения. Попробуйте позже.');
+                }
             }
 
             const postData = { title, description, imageUrl, tags, content };
