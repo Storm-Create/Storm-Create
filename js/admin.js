@@ -309,7 +309,13 @@ function setupEditor() {
         try {
             if (imageFile && storage) {
                 const storageRef = ref(storage, `posts/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
+                
+                const uploadPromise = uploadBytes(storageRef, imageFile);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
+                );
+                
+                const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
 
@@ -327,7 +333,7 @@ function setupEditor() {
             showView('posts-view');
         } catch (error) {
             console.error(error);
-            showToast('Ошибка при сохранении', 'error');
+            showToast(error.message || 'Ошибка при сохранении', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save"></i> Сохранить';

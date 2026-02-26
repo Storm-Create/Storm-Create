@@ -259,7 +259,14 @@ function setupProfileForm() {
 
                 if (file && storage) {
                     const storageRef = ref(storage, `avatars/${currentUser.uid}_${Date.now()}_${file.name}`);
-                    const snapshot = await uploadBytes(storageRef, file);
+                    
+                    // Добавляем таймаут 15 секунд, чтобы избежать бесконечной загрузки
+                    const uploadPromise = uploadBytes(storageRef, file);
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error("Превышено время ожидания загрузки. Проверьте VPN или подключение к интернету.")), 15000)
+                    );
+                    
+                    const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
                     avatarUrl = await getDownloadURL(snapshot.ref);
                 }
 
@@ -276,7 +283,7 @@ function setupProfileForm() {
                 window.closeProfileModal();
             } catch (error) {
                 console.error(error);
-                showToast('Ошибка при обновлении профиля', 'error');
+                showToast(error.message || 'Ошибка при обновлении профиля', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Сохранить';
