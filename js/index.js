@@ -716,6 +716,15 @@ async function loadRoadmap() {
                 </div>
             </div>
         `).join('');
+
+        // Trigger animations for new roadmap elements
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        list.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
     } catch (e) {
         console.warn('Could not load roadmap:', e);
     }
