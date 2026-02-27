@@ -1,10 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
-  
+
   // Determine base path based on environment or default to root
   // For GitHub Pages, this should be the repository name (e.g., '/storm-create/')
   // We use process.env.BASE_URL if provided, otherwise '/'
@@ -30,6 +30,7 @@ export default defineConfig(({mode}) => {
           admin: path.resolve(__dirname, 'admin.html'),
           blog: path.resolve(__dirname, 'blog.html'),
           post: path.resolve(__dirname, 'post.html'),
+          tariffs: path.resolve(__dirname, 'tariffs.html'),
         },
       },
     },
