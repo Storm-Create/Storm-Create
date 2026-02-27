@@ -1,6 +1,6 @@
 import { checkAuth, login, logout } from './auth.js';
 import { getPosts, createPost, updatePost, deletePost } from './posts.js';
-import { getAllComments, deleteComment } from './comments.js';
+import { getAllComments, deleteComment, replyToComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
 import { getTariffs, saveTariff, deleteTariff } from './tariffs.js';
 import { showToast, formatDate, initTheme } from './ui.js';
@@ -132,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'delete-comment':
                 window.deleteCommentHandler(id);
                 break;
+            case 'reply-comment':
+                window.replyToComment(id);
+                break;
             case 'delete-review':
                 window.deleteReviewHandler(id);
                 break;
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('admin-avatar').src = `https://www.gravatar.com/avatar/${hash}?d=mp&f=y`;
 
             initDashboard();
+            startNotificationSystem();
         } else {
             if (user) {
                 // Logged in but not admin
@@ -294,7 +298,7 @@ async function loadAdminComments() {
 function renderAdminComments() {
     const tbody = document.getElementById('admin-comments-list');
     if (commentsData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Нет комментариев</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Нет комментариев</td></tr>`;
         return;
     }
 
@@ -303,8 +307,14 @@ function renderAdminComments() {
             <td class="p-4 font-medium" data-label="Автор">${escapeHtml(comment.author)}</td>
             <td class="p-4 text-gray-500 truncate max-w-xs" data-label="Текст">${escapeHtml(comment.text)}</td>
             <td class="p-4 text-gray-500" data-label="Дата">${formatDate(comment.createdAt)}</td>
+            <td class="p-4 text-center" data-label="Ответ">
+                ${comment.reply ?
+            '<span class="text-green-500 text-xs"><i class="fas fa-check"></i> Отвечено</span>' :
+            '<button data-action="reply-comment" data-id="' + escapeHtml(comment.id) + '" class="text-blue-500 hover:text-blue-700" title="Ответить"><i class="fas fa-reply"></i></button>'
+        }
+            </td>
             <td class="p-4 text-right" data-label="Действия">
-                <button data-action="delete-comment" data-id="${escapeHtml(comment.id)}" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                <button data-action="delete-comment" data-id="${escapeHtml(comment.id)}" class="text-red-500 hover:text-red-700 ml-2" title="Удалить"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('');
@@ -688,6 +698,64 @@ window.deleteCommentHandler = async (id) => {
             showToast('Ошибка при удалении', 'error');
         }
     }
+};
+
+window.replyToComment = (id) => {
+    const comment = commentsData.find(c => c.id === id);
+    if (!comment) return;
+
+    // Создаем модальное окно динамически
+    const modalHtml = `
+        <div id="comment-reply-modal" class="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full scale-animation">
+                <h3 class="text-xl font-bold mb-4">Ответить на комментарий</h3>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-4">
+                    <div class="text-sm text-gray-500 mb-1">Комментарий от ${escapeHtml(comment.author)}:</div>
+                    <p class="text-gray-700 dark:text-gray-300">${escapeHtml(comment.text)}</p>
+                </div>
+                <form id="reply-comment-form" class="space-y-4">
+                    <input type="hidden" id="reply-comment-id" value="${escapeHtml(comment.id)}">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ваш ответ</label>
+                        <textarea id="reply-comment-text" required rows="4"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                            placeholder="Напишите ваш ответ..."></textarea>
+                    </div>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" onclick="document.getElementById('comment-reply-modal').remove()"
+                            class="px-4 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Отмена</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600">Отправить ответ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    // Удаляем старое модальное окно, если есть
+    const existingModal = document.getElementById('comment-reply-modal');
+    if (existingModal) existingModal.remove();
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Обработка отправки формы
+    document.getElementById('reply-comment-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const commentId = document.getElementById('reply-comment-id').value;
+        const replyText = document.getElementById('reply-comment-text').value.trim();
+
+        if (!replyText) return;
+
+        try {
+            const adminName = document.getElementById('admin-email')?.textContent || 'Администратор';
+            await replyToComment(commentId, adminName, replyText);
+            showToast('Ответ отправлен!', 'success');
+            document.getElementById('comment-reply-modal').remove();
+            await loadAdminComments();
+        } catch (error) {
+            console.error(error);
+            showToast('Ошибка при отправке ответа', 'error');
+        }
+    });
 };
 
 // Simple MD5 implementation for Gravatar
@@ -1117,8 +1185,8 @@ async function loadAdminTickets() {
                             </span>
                             <span class="text-xs text-gray-400">${formatDate(ticket.createdAt)}</span>
                         </div>
-                        <h4 class="font-bold text-lg">${ticket.subject}</h4>
-                        <p class="text-sm text-gray-500">${ticket.userName} (${ticket.userEmail})</p>
+                        <h4 class="font-bold text-lg">${escapeHtml(ticket.subject)}</h4>
+                        <p class="text-sm text-gray-500">${escapeHtml(ticket.userName)} (${escapeHtml(ticket.userEmail)})</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="window.viewTicket('${ticket.id}')" class="px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition text-sm font-medium">Смотреть</button>
@@ -1140,33 +1208,105 @@ window.viewTicket = (id) => {
     const details = document.getElementById('ticket-details');
     const closeBtn = document.getElementById('close-ticket-btn');
 
+    // Отображение истории ответов
+    const repliesHtml = ticket.replies && ticket.replies.length > 0 ? `
+        <div class="mt-4">
+            <label class="block text-xs text-gray-400 uppercase font-bold mb-2">История ответов</label>
+            <div class="space-y-3">
+                ${ticket.replies.map(reply => `
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-blue-600 dark:text-blue-400">${escapeHtml(reply.author)}</span>
+                            <span class="text-xs text-gray-400">${formatDate(reply.createdAt)}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">${escapeHtml(reply.text)}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
+
     details.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
             <div>
                 <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Пользователь</label>
-                <div class="font-medium">${ticket.userName}</div>
-                <div class="text-sm text-gray-500">${ticket.userEmail}</div>
+                <div class="font-medium">${escapeHtml(ticket.userName)}</div>
+                <div class="text-sm text-gray-500">${escapeHtml(ticket.userEmail)}</div>
             </div>
             <div>
                 <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Категория</label>
-                <div class="font-medium capitalize">${ticket.category}</div>
+                <div class="font-medium capitalize">${escapeHtml(ticket.category)}</div>
                 <div class="text-xs text-gray-400">${id}</div>
             </div>
         </div>
         <div>
             <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Тема</label>
-            <div class="text-xl font-bold">${ticket.subject}</div>
+            <div class="text-xl font-bold">${escapeHtml(ticket.subject)}</div>
         </div>
         <div>
             <label class="block text-xs text-gray-400 uppercase font-bold mb-1">Сообщение</label>
             <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-700 whitespace-pre-line leading-relaxed">
-                ${ticket.message}
+                ${escapeHtml(ticket.message)}
             </div>
         </div>
-        <div class="text-xs text-gray-400">
+        ${repliesHtml}
+        
+        <!-- Форма ответа -->
+        <div class="mt-4">
+            <label class="block text-xs text-gray-400 uppercase font-bold mb-2">Ответить</label>
+            <form id="ticket-reply-form" class="space-y-3">
+                <textarea id="ticket-reply-text" required rows="3"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                    placeholder="Напишите ваш ответ..."></textarea>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                    <i class="fas fa-paper-plane mr-2"></i>Отправить ответ
+                </button>
+            </form>
+        </div>
+        
+        <div class="text-xs text-gray-400 mt-4">
             Создан: ${formatDate(ticket.createdAt)}
         </div>
     `;
+
+    // Обработка отправки формы ответа - удаляем старый обработчик, если есть
+    const replyForm = document.getElementById('ticket-reply-form');
+    const existingHandler = replyForm._submitHandler;
+    if (existingHandler) {
+        replyForm.removeEventListener('submit', existingHandler);
+    }
+
+    const handleReplySubmit = async (e) => {
+        e.preventDefault();
+        const replyText = document.getElementById('ticket-reply-text').value.trim();
+        if (!replyText) return;
+
+        const adminName = document.getElementById('admin-email')?.textContent || 'Администратор';
+        const newReply = {
+            text: replyText,
+            author: adminName,
+            createdAt: new Date()
+        };
+
+        const replies = ticket.replies || [];
+        replies.push(newReply);
+
+        try {
+            await setDoc(doc(db, 'tickets', id), {
+                replies: replies,
+                status: 'pending',
+                updatedAt: new Date()
+            }, { merge: true });
+            showToast('Ответ отправлен!', 'success');
+            window.viewTicket(id); // Перезагрузить тикет
+        } catch (e) {
+            console.error(e);
+            showToast('Ошибка при отправке ответа', 'error');
+        }
+    };
+
+    replyForm._submitHandler = handleReplySubmit;
+    replyForm.addEventListener('submit', handleReplySubmit);
 
     closeBtn.onclick = async () => {
         if (!confirm('Вы уверены, что хотите закрыть этот тикет?')) return;
@@ -1182,3 +1322,96 @@ window.viewTicket = (id) => {
 
     modal.classList.remove('hidden');
 };
+
+// --- Notifications System ---
+let lastTicketCount = 0;
+let lastCommentCount = 0;
+let notificationInterval = null;
+
+// Добавить счетчик уведомлений в sidebar
+function addNotificationBadge() {
+    const ticketsNavBtn = document.querySelector('[data-target="tickets-view"]');
+    const commentsNavBtn = document.querySelector('[data-target="comments-view"]');
+
+    if (ticketsNavBtn && !document.getElementById('tickets-badge')) {
+        const badge = document.createElement('span');
+        badge.id = 'tickets-badge';
+        badge.className = 'ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full hidden';
+        ticketsNavBtn.appendChild(badge);
+    }
+    if (commentsNavBtn && !document.getElementById('comments-badge')) {
+        const badge = document.createElement('span');
+        badge.id = 'comments-badge';
+        badge.className = 'ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full hidden';
+        commentsNavBtn.appendChild(badge);
+    }
+}
+
+// Проверить новые тикеты и комментарии
+async function checkForNotifications() {
+    if (!db) return;
+
+    try {
+        // Проверка тикетов
+        const ticketsQ = query(collection(db, 'tickets'), orderBy('createdAt', 'desc'));
+        const ticketsSnap = await getDocs(ticketsQ);
+        const currentTicketCount = ticketsSnap.size;
+
+        if (lastTicketCount > 0 && currentTicketCount > lastTicketCount) {
+            const newTickets = currentTicketCount - lastTicketCount;
+            showToast(`Новых тикетов: ${newTickets}`, 'info');
+
+            // Обновить badge
+            const badge = document.getElementById('tickets-badge');
+            if (badge) {
+                badge.textContent = newTickets;
+                badge.classList.remove('hidden');
+            }
+        }
+        lastTicketCount = currentTicketCount;
+
+        // Проверка комментариев
+        const commentsQ = query(collection(db, 'comments'), orderBy('createdAt', 'desc'));
+        const commentsSnap = await getDocs(commentsQ);
+        const currentCommentCount = commentsSnap.size;
+
+        if (lastCommentCount > 0 && currentCommentCount > lastCommentCount) {
+            const newComments = currentCommentCount - lastCommentCount;
+            showToast(`Новых комментариев: ${newComments}`, 'info');
+
+            // Обновить badge
+            const badge = document.getElementById('comments-badge');
+            if (badge) {
+                badge.textContent = newComments;
+                badge.classList.remove('hidden');
+            }
+        }
+        lastCommentCount = currentCommentCount;
+
+    } catch (e) {
+        console.error('Error checking notifications:', e);
+    }
+}
+
+// Запустить систему уведомлений
+function startNotificationSystem() {
+    addNotificationBadge();
+
+    // Первоначальная проверка
+    checkForNotifications().then(() => {
+        // Установить интервал проверки (каждые 2 минуты)
+        notificationInterval = setInterval(checkForNotifications, 120000);
+    });
+}
+
+// Остановить систему уведомлений
+function stopNotificationSystem() {
+    if (notificationInterval) {
+        clearInterval(notificationInterval);
+        notificationInterval = null;
+    }
+}
+
+// Экспортировать функции
+window.startNotificationSystem = startNotificationSystem;
+window.stopNotificationSystem = stopNotificationSystem;

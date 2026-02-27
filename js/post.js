@@ -24,7 +24,7 @@ async function initPost() {
         document.title = `${post.title} - StormCreate`;
         renderPost(post);
         incrementViews(currentPostId);
-        
+
         document.getElementById('comments-section').classList.remove('hidden');
         loadComments();
         setupCommentForm();
@@ -40,14 +40,14 @@ async function initPost() {
 
 async function loadRelatedPosts(tags, currentId) {
     if (!tags || tags.length === 0) return;
-    
+
     const list = document.getElementById('related-posts-list');
     const section = document.getElementById('related-posts-section');
-    
+
     try {
         const posts = await getPosts(4, tags[0]);
         const related = posts.filter(p => p.id !== currentId).slice(0, 2);
-        
+
         if (related.length > 0) {
             section.classList.remove('hidden');
             list.innerHTML = related.map(post => `
@@ -68,7 +68,7 @@ async function loadRelatedPosts(tags, currentId) {
 function renderPost(post) {
     const container = document.getElementById('post-content-container');
     const htmlContent = DOMPurify.sanitize(converter.makeHtml(post.content));
-    
+
     // Simple user ID based on localStorage for likes
     let userId = localStorage.getItem('userId');
     if (!userId) {
@@ -122,15 +122,15 @@ function renderPost(post) {
 function setupLikeButton() {
     const likeBtn = document.getElementById('like-btn');
     if (!likeBtn) return;
-    
+
     likeBtn.addEventListener('click', async () => {
         const userId = localStorage.getItem('userId');
         const isLiked = await toggleLike(currentPostId, userId);
-        
+
         const icon = likeBtn.querySelector('i');
         const countSpan = document.getElementById('like-count');
         let count = parseInt(countSpan.innerText);
-        
+
         if (isLiked) {
             likeBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-full transition bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
             icon.className = 'fas fa-heart text-xl';
@@ -151,7 +151,7 @@ async function loadComments() {
             list.innerHTML = `<p class="text-gray-500 text-center py-4">Пока нет комментариев. Будьте первым!</p>`;
             return;
         }
-        
+
         list.innerHTML = comments.map(comment => `
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-4">
@@ -166,6 +166,16 @@ async function loadComments() {
                     </div>
                 </div>
                 <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${DOMPurify.sanitize(comment.text)}</p>
+                ${comment.reply ? `
+                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-user-shield text-primary"></i>
+                            <span class="font-medium text-primary">Ответ администратора</span>
+                            <span class="text-xs text-gray-400">${comment.reply.createdAt ? formatDate(comment.reply.createdAt) : ''}</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">${DOMPurify.sanitize(comment.reply.text)}</p>
+                    </div>
+                ` : ''}
             </div>
         `).join('');
     } catch (e) {
@@ -180,15 +190,15 @@ function setupCommentForm() {
         const nameInput = document.getElementById('comment-name');
         const textInput = document.getElementById('comment-text');
         const submitBtn = form.querySelector('button[type="submit"]');
-        
+
         const name = nameInput.value.trim();
         const text = textInput.value.trim();
-        
+
         if (!name || !text) return;
-        
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-        
+
         try {
             await addComment(currentPostId, name, text);
             showToast('Комментарий добавлен', 'success');
@@ -209,7 +219,7 @@ function setupImageModal() {
     const modal = document.getElementById('image-modal');
     const modalImg = document.getElementById('modal-image');
     const closeBtn = document.getElementById('close-modal');
-    
+
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('post-image') || (e.target.tagName === 'IMG' && e.target.closest('.markdown-body'))) {
             modalImg.src = e.target.src;
@@ -220,7 +230,7 @@ function setupImageModal() {
             document.body.style.overflow = 'hidden';
         }
     });
-    
+
     const closeModal = () => {
         modal.classList.add('opacity-0');
         setTimeout(() => {
@@ -228,7 +238,7 @@ function setupImageModal() {
             document.body.style.overflow = '';
         }, 300);
     };
-    
+
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();

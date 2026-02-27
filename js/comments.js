@@ -1,5 +1,5 @@
 import { db } from './firebase.js';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const COLLECTION_NAME = 'comments';
 
@@ -24,15 +24,30 @@ export async function getComments(postId) {
     }
 }
 
-export async function addComment(postId, author, text) {
+export async function addComment(postId, author, text, replyTo = null) {
     if (!db) throw new Error("Firebase not configured");
     const comment = {
         postId,
         author,
         text,
-        createdAt: new Date()
+        replyTo,
+        createdAt: new Date(),
+        updatedAt: new Date()
     };
     return await addDoc(collection(db, COLLECTION_NAME), comment);
+}
+
+export async function replyToComment(commentId, adminName, replyText) {
+    if (!db) throw new Error("Firebase not configured");
+    const commentRef = doc(db, COLLECTION_NAME, commentId);
+    await updateDoc(commentRef, {
+        reply: {
+            text: replyText,
+            author: adminName,
+            createdAt: new Date()
+        },
+        updatedAt: new Date()
+    });
 }
 
 export async function deleteComment(id) {
