@@ -1,6 +1,6 @@
 import { getTariffs } from './tariffs.js';
 import { formatDate, showToast, initTheme } from './ui.js';
-import { db, currentUser } from './firebase.js';
+import { db } from './firebase.js';
 import { addDoc, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // Escape HTML to prevent XSS
@@ -123,8 +123,8 @@ function setupSupportForm() {
 
         const btn = document.getElementById('support-submit-btn');
         const data = {
-            userName: currentUser?.displayName || currentUser?.email || 'Гость',
-            userEmail: currentUser?.email || 'Не указан',
+            userName: localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'Гость',
+            userEmail: localStorage.getItem('userEmail') || 'Не указан',
             category: document.getElementById('support-category').value,
             subject: document.getElementById('support-subject').value.trim(),
             message: document.getElementById('support-message').value.trim(),
@@ -156,7 +156,7 @@ function setupSupportForm() {
 }
 
 window.openSupportModal = () => {
-    if (!currentUser) {
+    if (!localStorage.getItem('userEmail')) {
         window.openAuthModal?.('login');
         return;
     }
