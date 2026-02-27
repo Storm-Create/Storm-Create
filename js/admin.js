@@ -3,6 +3,7 @@ import { getPosts, createPost, updatePost, deletePost } from './posts.js';
 import { getAllComments, deleteComment, replyToComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
 import { getTariffs, saveTariff, deleteTariff } from './tariffs.js';
+import { getTariffSections, saveTariffSection, deleteTariffSection, addProductToSection, updateProductInSection, deleteProductFromSection, initDefaultSections } from './tariff-sections.js';
 import { showToast, formatDate, initTheme } from './ui.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
@@ -383,147 +384,325 @@ window.deleteReviewHandler = async (id) => {
 
 // --- Tariffs Management ---
 let tariffsData = [];
+let tariffSectionsData = [];
 
 async function loadAdminTariffs() {
     try {
-        tariffsData = await getTariffs();
-        renderTariffs();
+        // Initialize default sections if needed
+        await initDefaultSections();
+
+        // Load new tariff sections
+        tariffSectionsData = await getTariffSections();
+        renderTariffSections();
     } catch (error) {
-        console.error(error);
-        showToast('Ошибка при загрузке тарифов', 'error');
+        console.error('Error loading tariff sections:', error);
+        showToast('Ошибка при загрузке разделов тарифов', 'error');
     }
 }
 
-function renderTariffs() {
-    const container = document.getElementById('tariffs-list');
+function renderTariffSections() {
+    const container = document.getElementById('tariff-sections-container');
     if (!container) return;
 
-    if (tariffsData.length === 0) {
+    if (tariffSectionsData.length === 0) {
         container.innerHTML = `
             <div class="col-span-full text-center py-12 text-gray-500">
                 <i class="fas fa-tags text-4xl mb-4"></i>
-                <p>Нет тарифов. Добавьте первый тариф.</p>
+                <p>Нет разделов. Добавьте первый раздел.</p>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = tariffsData.map(tariff => {
-        const features = tariff.features || [];
-        const featuresHtml = features.length > 0
-            ? `<ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">${features.map(f => `<li><i class="fas fa-check text-green-500 mr-2"></i>${escapeHtml(f)}</li>`).join('')}</ul>`
-            : '';
+    container.innerHTML = tariffSectionsData.map(section => {
+        const products = section.products || [];
+        const iconClass = section.icon || 'fa-tag';
 
         return `
-            <div class="tariff-card bg-white dark:bg-gray-800 rounded-2xl shadow-sm border ${tariff.isPopular ? 'border-primary ring-2 ring-primary/20' : 'border-gray-100 dark:border-gray-700'} p-6 relative overflow-hidden">
-                ${tariff.isPopular ? '<div class="absolute top-0 right-0 bg-primary text-white text-xs px-3 py-1 rounded-bl-lg">Популярный</div>' : ''}
-                ${!tariff.isActive ? '<div class="absolute top-0 right-0 bg-gray-400 text-white text-xs px-3 py-1 rounded-bl-lg">Неактивен</div>' : ''}
-                
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-xl font-bold">${escapeHtml(tariff.name)}</h3>
-                        <p class="text-3xl font-bold text-primary mt-2">${tariff.price || 0} ₽<span class="text-sm font-normal text-gray-500">/мес</span></p>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <!-- Section Header -->
+                <div class="bg-gradient-to-r from-primary/10 to-purple-500/10 p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-2xl">
+                                <i class="fas ${iconClass}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">${escapeHtml(section.name)}</h3>
+                                <p class="text-gray-500 text-sm">${escapeHtml(section.description || 'Нет описания')}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button data-action="edit-section" data-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                                <i class="fas fa-edit mr-1"></i>Изменить
+                            </button>
+                            <button data-action="delete-section" data-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                ${tariff.description ? `<p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${escapeHtml(tariff.description)}</p>` : ''}
-                
-                ${tariff.productsLimit ? `<p class="text-sm text-gray-500 mb-4"><i class="fas fa-box mr-2"></i>До ${tariff.productsLimit} товаров</p>` : '<p class="text-sm text-gray-500 mb-4"><i class="fas fa-infinity mr-2"></i>Безлимит товаров</p>'}
-                
-                ${featuresHtml}
-                
-                <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button data-action="edit-tariff" data-id="${escapeHtml(tariff.id)}" class="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
-                        <i class="fas fa-edit mr-1"></i>Изменить
-                    </button>
-                    <button data-action="delete-tariff" data-id="${escapeHtml(tariff.id)}" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <!-- Section Products -->
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-medium text-gray-700 dark:text-gray-300">Товары и услуги</h4>
+                        <button data-action="add-product" data-section-id="${escapeHtml(section.id)}" class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-sm">
+                            <i class="fas fa-plus mr-1"></i>Добавить товар
+                        </button>
+                    </div>
+                    
+                    ${products.length > 0 ? `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${products.map(product => `
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border ${product.isActive ? 'border-gray-200 dark:border-gray-600' : 'border-red-200 dark:border-red-800'} relative">
+                                    ${!product.isActive ? '<span class="absolute top-2 right-2 text-xs bg-red-500 text-white px-2 py-1 rounded">Неактивен</span>' : ''}
+                                    
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h5 class="font-bold">${escapeHtml(product.name)}</h5>
+                                        <span class="text-lg font-bold text-primary">${product.price} ₽</span>
+                                    </div>
+                                    
+                                    <p class="text-sm text-gray-500 mb-3">${escapeHtml(product.description || '')}</p>
+                                    
+                                    <div class="flex items-center gap-2 mb-3">
+                                        ${product.paymentType === 'subscription' ?
+                `<span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-1 rounded">
+                                                <i class="fas fa-redo mr-1"></i>Подписка ${product.subscriptionPeriod} дн.
+                                            </span>` :
+                `<span class="text-xs bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 px-2 py-1 rounded">
+                                                <i class="fas fa-check mr-1"></i>Разовая покупка
+                                            </span>`
+            }
+                                    </div>
+                                    
+                                    ${product.features && product.features.length > 0 ? `
+                                        <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 mb-3">
+                                            ${product.features.map(f => `<li><i class="fas fa-check text-green-500 mr-1"></i>${escapeHtml(f)}</li>`).join('')}
+                                        </ul>
+                                    ` : ''}
+                                    
+                                    <div class="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                        <button data-action="edit-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(product.id)}" class="flex-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-xs">
+                                            <i class="fas fa-edit mr-1"></i>Изменить
+                                        </button>
+                                        <button data-action="delete-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(product.id)}" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-xs">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-box-open text-3xl mb-2"></i>
+                            <p>Нет товаров в этом разделе</p>
+                        </div>
+                    `}
                 </div>
             </div>
         `;
     }).join('');
 }
 
-// Add tariff event handlers to the main event delegation
+// Toggle subscription period field visibility
+window.toggleSubscriptionPeriod = function () {
+    const paymentType = document.getElementById('product-payment-type').value;
+    const periodContainer = document.getElementById('subscription-period-container');
+    if (paymentType === 'subscription') {
+        periodContainer.classList.remove('hidden');
+    } else {
+        periodContainer.classList.add('hidden');
+    }
+};
+
+// Event handlers for tariff sections
 document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-action="edit-tariff"][data-id], [data-action="delete-tariff"][data-id]');
+    const btn = e.target.closest('[data-action^="edit-section"], [data-action^="delete-section"], [data-action^="add-product"], [data-action^="edit-product"], [data-action^="delete-product"]');
     if (!btn) return;
 
     const action = btn.dataset.action;
-    const id = btn.dataset.id;
+    const sectionId = btn.dataset.sectionId;
+    const productId = btn.dataset.productId;
 
-    if (action === 'edit-tariff') {
-        const tariff = tariffsData.find(t => t.id === id);
-        if (tariff) {
-            document.getElementById('tariff-id').value = tariff.id;
-            document.getElementById('tariff-name').value = tariff.name || '';
-            document.getElementById('tariff-price').value = tariff.price || '';
-            document.getElementById('tariff-description').value = tariff.description || '';
-            document.getElementById('tariff-products-limit').value = tariff.productsLimit || '';
-            document.getElementById('tariff-features').value = (tariff.features || []).join(', ');
-            document.getElementById('tariff-popular').checked = tariff.isPopular || false;
-            document.getElementById('tariff-active').checked = tariff.isActive !== false;
+    switch (action) {
+        case 'edit-section':
+            const section = tariffSectionsData.find(s => s.id === sectionId);
+            if (section) {
+                document.getElementById('section-id').value = section.id;
+                document.getElementById('section-name').value = section.name || '';
+                document.getElementById('section-icon').value = section.icon || 'fa-tag';
+                document.getElementById('section-description').value = section.description || '';
+                document.getElementById('section-sort-order').value = section.sortOrder || 1;
+                document.getElementById('section-active').checked = section.isActive !== false;
+                document.getElementById('section-form-modal').classList.remove('hidden');
+                document.getElementById('section-name').focus();
+            }
+            break;
 
-            document.getElementById('tariff-form-container').classList.remove('hidden');
-            document.getElementById('tariff-name').focus();
-        }
-    } else if (action === 'delete-tariff') {
-        if (confirm('Вы уверены, что хотите удалить этот тариф?')) {
-            deleteTariff(id).then(() => {
-                showToast('Тариф удален', 'success');
-                loadAdminTariffs();
-            }).catch(err => {
-                console.error(err);
-                showToast('Ошибка при удалении', 'error');
-            });
-        }
+        case 'delete-section':
+            if (confirm('Вы уверены, что хотите удалить этот раздел со всеми товарами?')) {
+                deleteTariffSection(sectionId).then(() => {
+                    showToast('Раздел удален', 'success');
+                    loadAdminTariffs();
+                }).catch(err => {
+                    console.error(err);
+                    showToast('Ошибка при удалении', 'error');
+                });
+            }
+            break;
+
+        case 'add-product':
+            document.getElementById('product-section-id').value = sectionId;
+            document.getElementById('product-id').value = '';
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-description').value = '';
+            document.getElementById('product-payment-type').value = 'one-time';
+            document.getElementById('product-subscription-period').value = '30';
+            document.getElementById('product-features').value = '';
+            document.getElementById('product-active').checked = true;
+            document.getElementById('subscription-period-container').classList.add('hidden');
+            document.getElementById('product-form-modal').classList.remove('hidden');
+            document.getElementById('product-name').focus();
+            break;
+
+        case 'edit-product':
+            const sec = tariffSectionsData.find(s => s.id === sectionId);
+            const product = sec?.products?.find(p => p.id === productId);
+            if (product) {
+                document.getElementById('product-section-id').value = sectionId;
+                document.getElementById('product-id').value = product.id;
+                document.getElementById('product-name').value = product.name || '';
+                document.getElementById('product-price').value = product.price || '';
+                document.getElementById('product-description').value = product.description || '';
+                document.getElementById('product-payment-type').value = product.paymentType || 'one-time';
+                document.getElementById('product-subscription-period').value = product.subscriptionPeriod || '30';
+                document.getElementById('product-features').value = (product.features || []).join(', ');
+                document.getElementById('product-active').checked = product.isActive !== false;
+
+                if (product.paymentType === 'subscription') {
+                    document.getElementById('subscription-period-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('subscription-period-container').classList.add('hidden');
+                }
+
+                document.getElementById('product-form-modal').classList.remove('hidden');
+                document.getElementById('product-name').focus();
+            }
+            break;
+
+        case 'delete-product':
+            if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+                deleteProductFromSection(sectionId, productId).then(() => {
+                    showToast('Товар удален', 'success');
+                    loadAdminTariffs();
+                }).catch(err => {
+                    console.error(err);
+                    showToast('Ошибка при удалении', 'error');
+                });
+            }
+            break;
     }
 });
 
-// Tariff form handling
+// Section form handling
 document.addEventListener('DOMContentLoaded', () => {
-    const addTariffBtn = document.getElementById('add-tariff-btn');
-    const cancelTariffBtn = document.getElementById('cancel-tariff-btn');
-    const tariffForm = document.getElementById('tariff-form');
+    const addSectionBtn = document.getElementById('add-section-btn');
+    const cancelSectionBtn = document.getElementById('cancel-section-btn');
+    const sectionForm = document.getElementById('section-form');
 
-    if (addTariffBtn) {
-        addTariffBtn.addEventListener('click', () => {
-            document.getElementById('tariff-form').reset();
-            document.getElementById('tariff-id').value = '';
-            document.getElementById('tariff-active').checked = true;
-            document.getElementById('tariff-form-container').classList.remove('hidden');
-            document.getElementById('tariff-name').focus();
+    if (addSectionBtn) {
+        addSectionBtn.addEventListener('click', () => {
+            document.getElementById('section-form').reset();
+            document.getElementById('section-id').value = '';
+            document.getElementById('section-active').checked = true;
+            document.getElementById('section-sort-order').value = (tariffSectionsData.length + 1);
+            document.getElementById('section-form-modal').classList.remove('hidden');
+            document.getElementById('section-name').focus();
         });
     }
 
-    if (cancelTariffBtn) {
-        cancelTariffBtn.addEventListener('click', () => {
-            document.getElementById('tariff-form-container').classList.add('hidden');
-            document.getElementById('tariff-form').reset();
+    if (cancelSectionBtn) {
+        cancelSectionBtn.addEventListener('click', () => {
+            document.getElementById('section-form-modal').classList.add('hidden');
+            document.getElementById('section-form').reset();
         });
     }
 
-    if (tariffForm) {
-        tariffForm.addEventListener('submit', async (e) => {
+    if (sectionForm) {
+        sectionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const tariff = {
-                id: document.getElementById('tariff-id').value || null,
-                name: document.getElementById('tariff-name').value,
-                price: document.getElementById('tariff-price').value,
-                description: document.getElementById('tariff-description').value,
-                productsLimit: document.getElementById('tariff-products-limit').value,
-                features: document.getElementById('tariff-features').value,
-                isPopular: document.getElementById('tariff-popular').checked,
-                isActive: document.getElementById('tariff-active').checked
+            const section = {
+                id: document.getElementById('section-id').value || null,
+                name: document.getElementById('section-name').value,
+                icon: document.getElementById('section-icon').value,
+                description: document.getElementById('section-description').value,
+                sortOrder: document.getElementById('section-sort-order').value,
+                isActive: document.getElementById('section-active').checked
             };
 
             try {
-                await saveTariff(tariff);
-                showToast(tariff.id ? 'Тариф обновлен' : 'Тариф добавлен', 'success');
-                document.getElementById('tariff-form-container').classList.add('hidden');
-                document.getElementById('tariff-form').reset();
+                await saveTariffSection(section);
+                showToast(section.id ? 'Раздел обновлен' : 'Раздел добавлен', 'success');
+                document.getElementById('section-form-modal').classList.add('hidden');
+                document.getElementById('section-form').reset();
+                await loadAdminTariffs();
+            } catch (error) {
+                console.error(error);
+                showToast('Ошибка при сохранении', 'error');
+            }
+        });
+    }
+
+    // Product form handling
+    const cancelProductBtn = document.getElementById('cancel-product-btn');
+    const productForm = document.getElementById('product-form');
+
+    if (cancelProductBtn) {
+        cancelProductBtn.addEventListener('click', () => {
+            document.getElementById('product-form-modal').classList.add('hidden');
+            document.getElementById('product-form').reset();
+        });
+    }
+
+    if (productForm) {
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const sectionId = document.getElementById('product-section-id').value;
+            const productId = document.getElementById('product-id').value;
+            const features = document.getElementById('product-features').value
+                .split(',')
+                .map(f => f.trim())
+                .filter(f => f);
+
+            const productData = {
+                name: document.getElementById('product-name').value,
+                price: document.getElementById('product-price').value,
+                description: document.getElementById('product-description').value,
+                paymentType: document.getElementById('product-payment-type').value,
+                subscriptionPeriod: document.getElementById('product-subscription-period').value,
+                features: features,
+                isActive: document.getElementById('product-active').checked
+            };
+
+            try {
+                if (productId) {
+                    // Update existing product
+                    await updateProductInSection(sectionId, productId, productData);
+                    showToast('Товар обновлен', 'success');
+                } else {
+                    // Add new product
+                    await addProductToSection(sectionId, {
+                        ...productData,
+                        id: `prod_${Date.now()}`
+                    });
+                    showToast('Товар добавлен', 'success');
+                }
+                document.getElementById('product-form-modal').classList.add('hidden');
+                document.getElementById('product-form').reset();
                 await loadAdminTariffs();
             } catch (error) {
                 console.error(error);

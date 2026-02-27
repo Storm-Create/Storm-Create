@@ -342,70 +342,77 @@
                 </div>
             </div>
 
-            <!-- Tariffs View -->
+            <!-- Tariffs View (New Version with Sections) -->
             <div id="tariffs-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Управление тарифами</h2>
-                    <button id="add-tariff-btn"
+                    <h2 class="text-2xl font-bold">Управление тарифами и услугами</h2>
+                    <button id="add-section-btn"
                         class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition flex items-center gap-2">
-                        <i class="fas fa-plus"></i> Добавить тариф
+                        <i class="fas fa-plus"></i> Добавить раздел
                     </button>
                 </div>
 
-                <div id="tariff-form-container" class="hidden mb-6">
-                    <form id="tariff-form"
+                <!-- Section Form Modal -->
+                <div id="section-form-modal" class="hidden mb-6">
+                    <form id="section-form"
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
-                        <input type="hidden" id="tariff-id">
+                        <input type="hidden" id="section-id">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Название тарифа</label>
-                                <input type="text" id="tariff-name" required
+                                <label class="block text-sm font-medium mb-1">Название раздела</label>
+                                <input type="text" id="section-name" required
                                     class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="например: Базовый">
+                                    placeholder="например: Боты, Каналы, Группы">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Цена (₽/мес)</label>
-                                <input type="number" id="tariff-price" required min="0"
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="например: 999">
+                                <label class="block text-sm font-medium mb-1">Иконка</label>
+                                <select id="section-icon"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                                    <option value="fa-robot">🤖 Бот</option>
+                                    <option value="fa-bullhorn">📢 Канал</option>
+                                    <option value="fa-users">👥 Группа</option>
+                                    <option value="fa-gem">💎 Подписка</option>
+                                    <option value="fa-shopping-cart">🛒 Магазин</option>
+                                    <option value="fa-gamepad">🎮 Игры</option>
+                                    <option value="fa-graduation-cap">🎓 Обучение</option>
+                                    <option value="fa-headset">🎧 Поддержка</option>
+                                    <option value="fa-chart-line">📈 Аналитика</option>
+                                    <option value="fa-crown">👑 Премиум</option>
+                                    <option value="fa-star">⭐ Звезда</option>
+                                    <option value="fa-bolt">⚡ Молния</option>
+                                    <option value="fa-fire">🔥 Огонь</option>
+                                    <option value="fa-rocket">🚀 Ракета</option>
+                                    <option value="fa-shield-alt">🛡️ Защита</option>
+                                    <option value="fa-cog">⚙️ Настройки</option>
+                                </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Описание</label>
-                            <textarea id="tariff-description" rows="3"
+                            <textarea id="section-description" rows="2"
                                 class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
-                                placeholder="Описание возможностей тарифа"></textarea>
+                                placeholder="Краткое описание раздела"></textarea>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Лимит товаров</label>
-                                <input type="number" id="tariff-products-limit" min="0"
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="0 - безлимит">
+                                <label class="block text-sm font-medium mb-1">Порядок сортировки</label>
+                                <input type="number" id="section-sort-order" min="1" value="1"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Особенности</label>
-                                <input type="text" id="tariff-features"
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="через запятую: Email-рассылка, SMS-уведомления...">
+                            <div class="flex items-center pt-6">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="section-active" class="w-4 h-4 text-primary rounded"
+                                        checked>
+                                    <span class="text-sm font-medium">Раздел активен</span>
+                                </label>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="tariff-popular" class="w-4 h-4 text-primary rounded">
-                                <span class="text-sm font-medium">Популярный тариф</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="tariff-active" class="w-4 h-4 text-primary rounded" checked>
-                                <span class="text-sm font-medium">Активен</span>
-                            </label>
                         </div>
                         <div class="flex gap-2">
                             <button type="submit"
                                 class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                                <i class="fas fa-save mr-2"></i>Сохранить
+                                <i class="fas fa-save mr-2"></i>Сохранить раздел
                             </button>
-                            <button type="button" id="cancel-tariff-btn"
+                            <button type="button" id="cancel-section-btn"
                                 class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                                 Отмена
                             </button>
@@ -413,8 +420,83 @@
                     </form>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tariffs-list">
-                    <!-- Tariffs will be injected here -->
+                <!-- Product Form Modal -->
+                <div id="product-form-modal" class="hidden mb-6">
+                    <form id="product-form"
+                        class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                        <input type="hidden" id="product-section-id">
+                        <input type="hidden" id="product-id">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Название товара/услуги</label>
+                                <input type="text" id="product-name" required
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="например: Базовый бот">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Цена (₽)</label>
+                                <input type="number" id="product-price" required min="0"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="например: 500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Описание</label>
+                            <textarea id="product-description" rows="2"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                                placeholder="Описание товара или услуги"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Тип оплаты</label>
+                                <select id="product-payment-type"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                                    onchange="toggleSubscriptionPeriod()">
+                                    <option value="one-time">💰 Разовая покупка</option>
+                                    <option value="subscription">🔄 Подписка</option>
+                                </select>
+                            </div>
+                            <div id="subscription-period-container" class="hidden">
+                                <label class="block text-sm font-medium mb-1">Период подписки</label>
+                                <select id="product-subscription-period"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none">
+                                    <option value="7">7 дней</option>
+                                    <option value="14">14 дней</option>
+                                    <option value="30" selected>30 дней (месяц)</option>
+                                    <option value="90">90 дней (3 месяца)</option>
+                                    <option value="180">180 дней (6 месяцев)</option>
+                                    <option value="365">365 дней (год)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Особенности (через запятую)</label>
+                            <input type="text" id="product-features"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none"
+                                placeholder="например: До 1000 пользователей, Базовая статистика">
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="product-active" class="w-4 h-4 text-primary rounded" checked>
+                                <span class="text-sm font-medium">Товар активен</span>
+                            </label>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                                <i class="fas fa-save mr-2"></i>Сохранить товар
+                            </button>
+                            <button type="button" id="cancel-product-btn"
+                                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tariff Sections Container -->
+                <div id="tariff-sections-container" class="space-y-8">
+                    <!-- Sections will be loaded here -->
                 </div>
             </div>
 

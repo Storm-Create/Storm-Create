@@ -92,9 +92,23 @@
 
     <!-- Pricing Cards -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div class="grid md:grid-cols-3 gap-8" id="tariffs-grid">
-            <!-- Tariffs will be loaded here -->
-            <div class="col-span-full text-center py-10 text-gray-500">Загрузка тарифов...</div>
+        <!-- Period Selector -->
+        <div class="flex justify-center items-center space-x-4 mb-8">
+            <span class="text-sm font-medium">Период:</span>
+            <select id="billing-period"
+                class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                onchange="window.updatePricing()">
+                <option value="1">1 месяц</option>
+                <option value="3">3 месяца (скидка 5%)</option>
+                <option value="6">6 месяцев (скидка 10%)</option>
+                <option value="12">12 месяцев (скидка 20%)</option>
+            </select>
+        </div>
+
+        <!-- New Sections-based Tariffs -->
+        <div id="tariff-sections-public" class="space-y-12">
+            <!-- Sections will be loaded here -->
+            <div class="text-center py-10 text-gray-500">Загрузка тарифов...</div>
         </div>
     </section>
 
