@@ -7,6 +7,105 @@ import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 import { doc, getDoc, setDoc, collection, getDocs, deleteDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// Mobile sidebar functionality
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function initMobileSidebar() {
+    const sidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const sidebar = document.querySelector('#admin-dashboard aside');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+
+    if (!sidebarToggle || !sidebar) return;
+
+    const openSidebar = () => {
+        sidebar.classList.add('mobile-open');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeSidebar = () => {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    sidebarToggle.addEventListener('click', openSidebar);
+
+    if (backdrop) {
+        backdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar when clicking nav buttons on mobile
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        });
+    });
+
+    // Set ARIA attributes for accessibility
+    if (backdrop) {
+        backdrop.setAttribute('role', 'button');
+        backdrop.setAttribute('aria-label', 'Закрыть меню');
+        backdrop.setAttribute('tabindex', '-1');
+    }
+    sidebarToggle.setAttribute('aria-label', 'Открыть меню');
+    sidebarToggle.setAttribute('aria-expanded', 'false');
+
+    // Keyboard accessibility - close on ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+            closeSidebar();
+            sidebarToggle.focus();
+        }
+    });
+
+    // Focus trap inside sidebar when opened
+    const openSidebarWithFocus = () => {
+        openSidebar();
+        const firstFocusable = sidebar.querySelector('a, button');
+        if (firstFocusable) {
+            setTimeout(() => firstFocusable.focus(), 100);
+        }
+        sidebarToggle.setAttribute('aria-expanded', 'true');
+    };
+
+    const closeSidebarWithFocus = () => {
+        closeSidebar();
+        sidebarToggle.focus();
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+    };
+
+    sidebarToggle.removeEventListener('click', openSidebar);
+    sidebarToggle.addEventListener('click', openSidebarWithFocus);
+    if (backdrop) {
+        backdrop.removeEventListener('click', closeSidebar);
+        backdrop.addEventListener('click', closeSidebarWithFocus);
+    }
+
+    // Mobile theme toggle - use existing initTheme from ui.js
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleMobile && themeToggleBtn) {
+        themeToggleMobile.addEventListener('click', () => {
+            themeToggleBtn.click();
+        });
+    }
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            closeSidebar();
+        }
+    });
+}
+
 let simplemde;
 let postsData = [];
 let commentsData = [];
@@ -14,6 +113,7 @@ let reviewsData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initMobileSidebar();
 
     checkAuth((user) => {
         const adminEmails = [
@@ -147,12 +247,12 @@ function renderAdminPosts() {
 
     tbody.innerHTML = postsData.map(post => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-            <td class="p-4 font-medium">${post.title}</td>
-            <td class="p-4 text-gray-500">${formatDate(post.createdAt)}</td>
-            <td class="p-4 text-gray-500">${post.views || 0}</td>
-            <td class="p-4 text-right">
-                <button onclick="window.editPost('${post.id}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
-                <button onclick="window.deletePostHandler('${post.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+            <td class="p-4 font-medium" data-label="Заголовок">${escapeHtml(post.title)}</td>
+            <td class="p-4 text-gray-500" data-label="Дата">${formatDate(post.createdAt)}</td>
+            <td class="p-4 text-gray-500" data-label="Просмотры">${post.views || 0}</td>
+            <td class="p-4 text-right" data-label="Действия">
+                <button onclick="window.editPost('${escapeHtml(post.id)}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                <button onclick="window.deletePostHandler('${escapeHtml(post.id)}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('');
@@ -176,10 +276,10 @@ function renderAdminComments() {
 
     tbody.innerHTML = commentsData.map(comment => `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-            <td class="p-4 font-medium">${comment.author}</td>
-            <td class="p-4 text-gray-500 truncate max-w-xs">${comment.text}</td>
-            <td class="p-4 text-gray-500">${formatDate(comment.createdAt)}</td>
-            <td class="p-4 text-right">
+            <td class="p-4 font-medium" data-label="Автор">${escapeHtml(comment.author)}</td>
+            <td class="p-4 text-gray-500 truncate max-w-xs" data-label="Текст">${escapeHtml(comment.text)}</td>
+            <td class="p-4 text-gray-500" data-label="Дата">${formatDate(comment.createdAt)}</td>
+            <td class="p-4 text-right" data-label="Действия">
                 <button onclick="window.deleteCommentHandler('${comment.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
@@ -221,11 +321,11 @@ function renderAdminReviews() {
 
         return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-            <td class="p-4 font-medium">${review.userName}</td>
-            <td class="p-4"><div class="flex gap-1 text-sm">${stars}</div></td>
-            <td class="p-4 text-gray-600 dark:text-gray-400 truncate max-w-xs">${review.text}</td>
-            <td class="p-4 text-gray-500 text-sm">${formatDate(review.createdAt)}</td>
-            <td class="p-4 text-right">
+            <td class="p-4 font-medium" data-label="Автор">${escapeHtml(review.userName)}</td>
+            <td class="p-4" data-label="Оценка"><div class="flex gap-1 text-sm">${stars}</div></td>
+            <td class="p-4 text-gray-600 dark:text-gray-400 truncate max-w-xs" data-label="Текст">${escapeHtml(review.text)}</td>
+            <td class="p-4 text-gray-500 text-sm" data-label="Дата">${formatDate(review.createdAt)}</td>
+            <td class="p-4 text-right" data-label="Действия">
                 <button onclick="window.deleteReviewHandler('${review.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition" title="Удалить">
                     <i class="fas fa-trash"></i>
                 </button>

@@ -1,9 +1,10 @@
 export function initTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleMobileBtn = document.getElementById('theme-toggle-mobile');
-    
+
+    // Apply saved theme or system preference
     const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    
+
     if (currentTheme === 'dark') {
         document.documentElement.classList.add('dark');
     } else {
@@ -36,9 +37,9 @@ export function showToast(message, type = 'info') {
             <button class="ml-4 focus:outline-none" onclick="this.parentElement.parentElement.remove()"><i class="fas fa-times"></i></button>
         </div>
     `;
-    
+
     container.appendChild(toast);
-    
+
     // Trigger reflow
     void toast.offsetWidth;
     toast.classList.add('show');
@@ -70,7 +71,7 @@ export function formatDate(timestamp) {
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initScrollAnimations();
-    
+
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');

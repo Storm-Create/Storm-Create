@@ -50,6 +50,22 @@
 
     <!-- Admin Dashboard -->
     <div id="admin-dashboard" class="hidden flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
+        <!-- Mobile Header -->
+        <div
+            class="admin-mobile-header fixed top-0 left-0 right-0 h-14 bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800 z-50 px-4 flex items-center justify-between">
+            <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <span
+                class="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormAdmin</span>
+            <button id="theme-toggle-mobile"
+                class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+        </div>
+        <!-- Sidebar backdrop for mobile -->
+        <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
         <!-- Sidebar -->
         <aside
             class="w-full md:w-64 bg-white dark:bg-dark border-r border-gray-200 dark:border-gray-800 flex flex-col h-full">
@@ -132,7 +148,7 @@
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-grow bg-gray-50 dark:bg-darker overflow-y-auto p-4 md:p-8">
+        <main class="flex-grow bg-gray-50 dark:bg-darker overflow-y-auto p-4 md:p-8 mt-14 md:mt-0">
 
             <!-- Dashboard View -->
             <div id="dashboard-view" class="view-section">
