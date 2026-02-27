@@ -401,3 +401,35 @@
     border-radius: 0.5rem;
     cursor: pointer;
 }
+
+/* Tariff Card Styles */
+.tariff-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tariff-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .tariff-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* Admin tariffs grid - single column on mobile */
+#tariffs-list {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    #tariffs-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    #tariffs-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

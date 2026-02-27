@@ -2,6 +2,7 @@ import { checkAuth, login, logout } from './auth.js';
 import { getPosts, createPost, updatePost, deletePost } from './posts.js';
 import { getAllComments, deleteComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
+import { getTariffs, saveTariff, deleteTariff } from './tariffs.js';
 import { showToast, formatDate, initTheme } from './ui.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
@@ -83,10 +84,8 @@ function initMobileSidebar() {
         sidebarToggle.setAttribute('aria-expanded', 'false');
     };
 
-    sidebarToggle.removeEventListener('click', openSidebar);
     sidebarToggle.addEventListener('click', openSidebarWithFocus);
     if (backdrop) {
-        backdrop.removeEventListener('click', closeSidebar);
         backdrop.addEventListener('click', closeSidebarWithFocus);
     }
 
@@ -114,6 +113,30 @@ let reviewsData = [];
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initMobileSidebar();
+
+    // Event delegation for table action buttons (XSS-safe)
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action][data-id]');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+
+        switch (action) {
+            case 'edit':
+                window.editPost(id);
+                break;
+            case 'delete':
+                window.deletePostHandler(id);
+                break;
+            case 'delete-comment':
+                window.deleteCommentHandler(id);
+                break;
+            case 'delete-review':
+                window.deleteReviewHandler(id);
+                break;
+        }
+    });
 
     checkAuth((user) => {
         const adminEmails = [
@@ -211,6 +234,7 @@ function setupNavigation() {
             if (targetId === 'posts-view') loadAdminPosts();
             if (targetId === 'comments-view') loadAdminComments();
             if (targetId === 'reviews-view') loadAdminReviews();
+            if (targetId === 'tariffs-view') loadAdminTariffs();
             if (targetId === 'settings-view') loadSettings();
             if (targetId === 'faq-view') loadAdminFaq();
             if (targetId === 'roadmap-view') loadAdminRoadmap();
@@ -251,8 +275,8 @@ function renderAdminPosts() {
             <td class="p-4 text-gray-500" data-label="Дата">${formatDate(post.createdAt)}</td>
             <td class="p-4 text-gray-500" data-label="Просмотры">${post.views || 0}</td>
             <td class="p-4 text-right" data-label="Действия">
-                <button onclick="window.editPost('${escapeHtml(post.id)}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
-                <button onclick="window.deletePostHandler('${escapeHtml(post.id)}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                <button data-action="edit" data-id="${escapeHtml(post.id)}" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                <button data-action="delete" data-id="${escapeHtml(post.id)}" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('');
@@ -280,7 +304,7 @@ function renderAdminComments() {
             <td class="p-4 text-gray-500 truncate max-w-xs" data-label="Текст">${escapeHtml(comment.text)}</td>
             <td class="p-4 text-gray-500" data-label="Дата">${formatDate(comment.createdAt)}</td>
             <td class="p-4 text-right" data-label="Действия">
-                <button onclick="window.deleteCommentHandler('${comment.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                <button data-action="delete-comment" data-id="${escapeHtml(comment.id)}" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('');
@@ -326,7 +350,7 @@ function renderAdminReviews() {
             <td class="p-4 text-gray-600 dark:text-gray-400 truncate max-w-xs" data-label="Текст">${escapeHtml(review.text)}</td>
             <td class="p-4 text-gray-500 text-sm" data-label="Дата">${formatDate(review.createdAt)}</td>
             <td class="p-4 text-right" data-label="Действия">
-                <button onclick="window.deleteReviewHandler('${review.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition" title="Удалить">
+                <button data-action="delete-review" data-id="${escapeHtml(review.id)}" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition" title="Удалить">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -346,6 +370,158 @@ window.deleteReviewHandler = async (id) => {
         }
     }
 };
+
+// --- Tariffs Management ---
+let tariffsData = [];
+
+async function loadAdminTariffs() {
+    try {
+        tariffsData = await getTariffs();
+        renderTariffs();
+    } catch (error) {
+        console.error(error);
+        showToast('Ошибка при загрузке тарифов', 'error');
+    }
+}
+
+function renderTariffs() {
+    const container = document.getElementById('tariffs-list');
+    if (!container) return;
+
+    if (tariffsData.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-tags text-4xl mb-4"></i>
+                <p>Нет тарифов. Добавьте первый тариф.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = tariffsData.map(tariff => {
+        const features = tariff.features || [];
+        const featuresHtml = features.length > 0
+            ? `<ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">${features.map(f => `<li><i class="fas fa-check text-green-500 mr-2"></i>${escapeHtml(f)}</li>`).join('')}</ul>`
+            : '';
+
+        return `
+            <div class="tariff-card bg-white dark:bg-gray-800 rounded-2xl shadow-sm border ${tariff.isPopular ? 'border-primary ring-2 ring-primary/20' : 'border-gray-100 dark:border-gray-700'} p-6 relative overflow-hidden">
+                ${tariff.isPopular ? '<div class="absolute top-0 right-0 bg-primary text-white text-xs px-3 py-1 rounded-bl-lg">Популярный</div>' : ''}
+                ${!tariff.isActive ? '<div class="absolute top-0 right-0 bg-gray-400 text-white text-xs px-3 py-1 rounded-bl-lg">Неактивен</div>' : ''}
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold">${escapeHtml(tariff.name)}</h3>
+                        <p class="text-3xl font-bold text-primary mt-2">${tariff.price || 0} ₽<span class="text-sm font-normal text-gray-500">/мес</span></p>
+                    </div>
+                </div>
+                
+                ${tariff.description ? `<p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${escapeHtml(tariff.description)}</p>` : ''}
+                
+                ${tariff.productsLimit ? `<p class="text-sm text-gray-500 mb-4"><i class="fas fa-box mr-2"></i>До ${tariff.productsLimit} товаров</p>` : '<p class="text-sm text-gray-500 mb-4"><i class="fas fa-infinity mr-2"></i>Безлимит товаров</p>'}
+                
+                ${featuresHtml}
+                
+                <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button data-action="edit-tariff" data-id="${escapeHtml(tariff.id)}" class="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                        <i class="fas fa-edit mr-1"></i>Изменить
+                    </button>
+                    <button data-action="delete-tariff" data-id="${escapeHtml(tariff.id)}" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Add tariff event handlers to the main event delegation
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="edit-tariff"][data-id], [data-action="delete-tariff"][data-id]');
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if (action === 'edit-tariff') {
+        const tariff = tariffsData.find(t => t.id === id);
+        if (tariff) {
+            document.getElementById('tariff-id').value = tariff.id;
+            document.getElementById('tariff-name').value = tariff.name || '';
+            document.getElementById('tariff-price').value = tariff.price || '';
+            document.getElementById('tariff-description').value = tariff.description || '';
+            document.getElementById('tariff-products-limit').value = tariff.productsLimit || '';
+            document.getElementById('tariff-features').value = (tariff.features || []).join(', ');
+            document.getElementById('tariff-popular').checked = tariff.isPopular || false;
+            document.getElementById('tariff-active').checked = tariff.isActive !== false;
+
+            document.getElementById('tariff-form-container').classList.remove('hidden');
+            document.getElementById('tariff-name').focus();
+        }
+    } else if (action === 'delete-tariff') {
+        if (confirm('Вы уверены, что хотите удалить этот тариф?')) {
+            deleteTariff(id).then(() => {
+                showToast('Тариф удален', 'success');
+                loadAdminTariffs();
+            }).catch(err => {
+                console.error(err);
+                showToast('Ошибка при удалении', 'error');
+            });
+        }
+    }
+});
+
+// Tariff form handling
+document.addEventListener('DOMContentLoaded', () => {
+    const addTariffBtn = document.getElementById('add-tariff-btn');
+    const cancelTariffBtn = document.getElementById('cancel-tariff-btn');
+    const tariffForm = document.getElementById('tariff-form');
+
+    if (addTariffBtn) {
+        addTariffBtn.addEventListener('click', () => {
+            document.getElementById('tariff-form').reset();
+            document.getElementById('tariff-id').value = '';
+            document.getElementById('tariff-active').checked = true;
+            document.getElementById('tariff-form-container').classList.remove('hidden');
+            document.getElementById('tariff-name').focus();
+        });
+    }
+
+    if (cancelTariffBtn) {
+        cancelTariffBtn.addEventListener('click', () => {
+            document.getElementById('tariff-form-container').classList.add('hidden');
+            document.getElementById('tariff-form').reset();
+        });
+    }
+
+    if (tariffForm) {
+        tariffForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const tariff = {
+                id: document.getElementById('tariff-id').value || null,
+                name: document.getElementById('tariff-name').value,
+                price: document.getElementById('tariff-price').value,
+                description: document.getElementById('tariff-description').value,
+                productsLimit: document.getElementById('tariff-products-limit').value,
+                features: document.getElementById('tariff-features').value,
+                isPopular: document.getElementById('tariff-popular').checked,
+                isActive: document.getElementById('tariff-active').checked
+            };
+
+            try {
+                await saveTariff(tariff);
+                showToast(tariff.id ? 'Тариф обновлен' : 'Тариф добавлен', 'success');
+                document.getElementById('tariff-form-container').classList.add('hidden');
+                document.getElementById('tariff-form').reset();
+                await loadAdminTariffs();
+            } catch (error) {
+                console.error(error);
+                showToast('Ошибка при сохранении', 'error');
+            }
+        });
+    }
+});
 
 function initChart() {
     const ctx = document.getElementById('viewsChart');
