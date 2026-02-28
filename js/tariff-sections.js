@@ -114,6 +114,8 @@ const defaultSections = [
  * Получить все разделы тарифов
  */
 export async function getTariffSections() {
+    console.log("getTariffSections called, db:", db ? "initialized" : "NOT initialized");
+
     if (!db) {
         console.warn("Firebase not configured, using default sections");
         return defaultSections;
@@ -142,6 +144,8 @@ export async function getTariffSections() {
  * Сохранить раздел тарифов (создать или обновить)
  */
 export async function saveTariffSection(section) {
+    console.log("saveTariffSection called, db:", db ? "initialized" : "NOT initialized");
+
     if (!db) throw new Error("Firebase not configured");
 
     let sectionData = {
@@ -185,6 +189,8 @@ export async function saveTariffSection(section) {
  * Удалить раздел тарифов
  */
 export async function deleteTariffSection(id) {
+    console.log("deleteTariffSection called, db:", db ? "initialized" : "NOT initialized");
+
     if (!db) throw new Error("Firebase not configured");
     return await deleteDoc(doc(db, COLLECTION_NAME, id));
 }
@@ -193,6 +199,8 @@ export async function deleteTariffSection(id) {
  * Добавить товар/услугу в раздел
  */
 export async function addProductToSection(sectionId, product) {
+    console.log("addProductToSection called, sectionId:", sectionId, "db:", db ? "initialized" : "NOT initialized");
+
     if (!db) throw new Error("Firebase not configured");
 
     if (!sectionId) {
@@ -239,6 +247,8 @@ export async function addProductToSection(sectionId, product) {
  * Обновить товар в разделе
  */
 export async function updateProductInSection(sectionId, productId, productData) {
+    console.log("updateProductInSection called, sectionId:", sectionId, "productId:", productId, "db:", db ? "initialized" : "NOT initialized");
+
     if (!db) throw new Error("Firebase not configured");
 
     if (!sectionId || !productId) {
@@ -289,6 +299,8 @@ export async function updateProductInSection(sectionId, productId, productData) 
  * Удалить товар из раздела
  */
 export async function deleteProductFromSection(sectionId, productId) {
+    console.log("deleteProductFromSection called, sectionId:", sectionId, "productId:", productId, "db:", db ? "initialized" : "NOT initialized");
+
     if (!db) throw new Error("Firebase not configured");
 
     if (!sectionId || !productId) {
@@ -321,7 +333,12 @@ export async function deleteProductFromSection(sectionId, productId) {
  * Инициализация разделов по умолчанию (для первой загрузки)
  */
 export async function initDefaultSections() {
-    if (!db) return;
+    console.log("initDefaultSections called, db:", db ? "initialized" : "NOT initialized");
+
+    if (!db) {
+        console.warn("Firebase not configured, skipping initDefaultSections");
+        return;
+    }
 
     try {
         const snapshot = await getDocs(collection(db, COLLECTION_NAME));
