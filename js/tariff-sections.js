@@ -343,19 +343,34 @@ export async function initDefaultSections() {
 
     try {
         const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+        const existingIds = new Set(snapshot.docs.map(doc => doc.id));
 
-        // Если база данных пуста - создаём разделы по умолчанию
-        if (snapshot.empty) {
-            console.log("No tariff sections found, creating defaults...");
+        // Создаём разделы по умолчанию, только если их нет в базе
+        let createdCount = 0;
+        for (const section of defaultSections) {
+            if (!existingIds.has(section.id)) {
+                await setDoc(doc(db, COLLECTION_NAME, section.id), {
+                    ...section,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+                createdCount++;
+                console.log(`Created default section: ${section.id}`);
+            }
+        }
+
+        if (createdCount > 0) {
+            console.log(`Created ${createdCount} default tariff sections`);
+        } else if (snapshot.empty) {
+            // Если база пуста и нет defaultSections - создаём всё
             for (const section of defaultSections) {
-                // Используем setDoc с явным ID вместо addDoc, чтобы сохранить локальные ID
                 await setDoc(doc(db, COLLECTION_NAME, section.id), {
                     ...section,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 });
             }
-            console.log('Default tariff sections created with explicit IDs');
+            console.log('Default tariff sections created (empty database)');
         } else {
             console.log(`Found ${snapshot.size} existing sections, keeping them`);
         }
