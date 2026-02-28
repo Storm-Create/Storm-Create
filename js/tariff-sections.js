@@ -189,9 +189,10 @@ export async function saveTariffSection(section) {
  * Удалить раздел тарифов
  */
 export async function deleteTariffSection(id) {
-    console.log("deleteTariffSection called, db:", db ? "initialized" : "NOT initialized");
+    console.log("deleteTariffSection called, db:", db ? "initialized" : "NOT initialized", "id:", id);
 
     if (!db) throw new Error("Firebase not configured");
+    if (!id) throw new Error("ID раздела обязателен для удаления");
     return await deleteDoc(doc(db, COLLECTION_NAME, id));
 }
 
