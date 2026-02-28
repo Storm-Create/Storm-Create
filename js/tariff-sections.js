@@ -342,18 +342,25 @@ export async function initDefaultSections() {
 
     try {
         const snapshot = await getDocs(collection(db, COLLECTION_NAME));
-        if (snapshot.empty) {
-            // Создаем разделы по умолчанию с явным ID
-            for (const section of defaultSections) {
-                // Используем setDoc с явным ID вместо addDoc, чтобы сохранить локальные ID
-                await setDoc(doc(db, COLLECTION_NAME, section.id), {
-                    ...section,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                });
+
+        // Если есть документы со старыми случайными ID - удаляем их
+        if (!snapshot.empty) {
+            console.log(`Found ${snapshot.size} existing sections, clearing for fresh start with explicit IDs`);
+            for (const doc of snapshot.docs) {
+                await deleteDoc(doc.ref);
             }
-            console.log('Default tariff sections created');
         }
+
+        // Создаем разделы по умолчанию с явным ID
+        for (const section of defaultSections) {
+            // Используем setDoc с явным ID вместо addDoc, чтобы сохранить локальные ID
+            await setDoc(doc(db, COLLECTION_NAME, section.id), {
+                ...section,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+        }
+        console.log('Default tariff sections created with explicit IDs');
     } catch (e) {
         console.error("Error initializing default sections:", e);
     }
