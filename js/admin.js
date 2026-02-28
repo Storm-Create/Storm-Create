@@ -440,10 +440,10 @@ function renderTariffSections() {
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button data-action="edit-section" data-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                            <button data-action="edit-section" data-section-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
                                 <i class="fas fa-edit mr-1"></i>Изменить
                             </button>
-                            <button data-action="delete-section" data-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                            <button data-action="delete-section" data-section-id="${escapeHtml(section.id)}" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
