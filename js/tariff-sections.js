@@ -343,9 +343,10 @@ export async function initDefaultSections() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTION_NAME));
         if (snapshot.empty) {
-            // Создаем разделы по умолчанию
+            // Создаем разделы по умолчанию с явным ID
             for (const section of defaultSections) {
-                await addDoc(collection(db, COLLECTION_NAME), {
+                // Используем setDoc с явным ID вместо addDoc, чтобы сохранить локальные ID
+                await setDoc(doc(db, COLLECTION_NAME, section.id), {
                     ...section,
                     createdAt: new Date(),
                     updatedAt: new Date()
