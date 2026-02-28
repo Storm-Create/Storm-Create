@@ -118,59 +118,8 @@
             <h2 class="text-3xl font-bold text-center mb-12">Сравнение возможностей</h2>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="p-4 font-medium text-gray-500">Возможность</th>
-                            <th class="p-4 font-medium text-center text-gray-500">Базовый</th>
-                            <th class="p-4 font-medium text-center text-gray-500">Pro</th>
-                            <th class="p-4 font-medium text-center text-gray-500">Ultra</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr>
-                            <td class="p-4">Товаров</td>
-                            <td class="p-4 text-center">До 50</td>
-                            <td class="p-4 text-center">До 500</td>
-                            <td class="p-4 text-center text-green-500 font-medium">Безлимит</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Без рекламы</td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Кнопки в магазине</td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Чеки (PDF)</td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Кастомные домены</td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center">1 домен</td>
-                            <td class="p-4 text-center text-green-500 font-medium">Безлимит</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">Приоритетная поддержка</td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="p-4">API доступ</td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-gray-400"><i class="fas fa-times"></i></td>
-                            <td class="p-4 text-center text-green-500"><i class="fas fa-check"></i></td>
-                        </tr>
-                    </tbody>
+                <table class="w-full text-left border-collapse" id="comparison-table">
+                    <!-- Table content will be rendered by JavaScript -->
                 </table>
             </div>
         </div>
@@ -181,27 +130,8 @@
         <div class="max-w-3xl mx-auto">
             <h2 class="text-3xl font-bold text-center mb-12">Частые вопросы о тарифах</h2>
 
-            <div class="space-y-6" id="tariffs-faq">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-lg mb-2">Можно ли сменить тариф позже?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Да, вы можете сменить тариф в любой момент. При переходе
-                        на более дорогой тариф разница будет зачислена на ваш счёт.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-lg mb-2">Как оплатить подписку?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Оплата производится через Telegram бот. Мы принимаем
-                        карты, ЮMoney, криптовалюту и другие способы оплаты.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-lg mb-2">Есть ли пробный период?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Да, каждый новый пользователь получает 3 дня бесплатного
-                        периода на тарифе Pro для ознакомления с функционалом.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-lg mb-2">Что происходит при окончании подписки?</h3>
-                    <p class="text-gray-600 dark:text-gray-400">При окончании подписки магазин переводится в режим
-                        чтения. У вас будет 7 дней на продление, после чего данные могут быть удалены.</p>
-                </div>
+            <div class="space-y-4" id="tariffs-faq">
+                <!-- FAQ items will be rendered by JavaScript -->
             </div>
         </div>
     </section>

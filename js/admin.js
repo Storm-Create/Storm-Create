@@ -253,6 +253,7 @@ async function initDashboard() {
     await loadAdminPosts();
     await loadAdminComments();
     await loadAdminReviews();
+    await loadAdminTariffs();
     updateDashboardStats();
     initChart();
 }

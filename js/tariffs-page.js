@@ -3,6 +3,56 @@ import { formatDate, showToast, initTheme } from './ui.js';
 import { db } from './firebase.js';
 import { addDoc, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// FAQ data
+const faqData = [
+    {
+        question: 'Можно ли сменить тариф позже?',
+        answer: 'Да, вы можете сменить тариф в любой момент. При переходе на более дорогой тариф разница будет зачислена на ваш счёт.'
+    },
+    {
+        question: 'Как оплатить подписку?',
+        answer: 'Оплата производится через Telegram бот. Мы принимаем карты, ЮMoney, криптовалюту и другие способы оплаты.'
+    },
+    {
+        question: 'Есть ли пробный период?',
+        answer: 'Да, каждый новый пользователь получает 3 дня бесплатного периода на тарифе Pro для ознакомления с функционалом.'
+    },
+    {
+        question: 'Что происходит при окончании подписки?',
+        answer: 'При окончании подписки магазин переводится в режим чтения. У вас будет 7 дней на продление, после чего данные могут быть удалены.'
+    },
+    {
+        question: 'Какие способы оплаты вы принимаем?',
+        answer: 'Мы принимаем банковские карты (Visa, MasterCard, МИР), электронные кошельки (ЮMoney, Qiwi), криптовалюту (BTC, ETH, USDT) и переводы через Telegram.'
+    },
+    {
+        question: 'Можно ли получить чек на оплату?',
+        answer: 'Да, на тарифах Pro и Ultra доступна автоматическая отправка чеков в PDF формате на email после каждой оплаты.'
+    }
+];
+
+// Comparison features
+const comparisonFeatures = [
+    { key: 'users', label: 'Пользователей', type: 'text' },
+    { key: 'products', label: 'Товаров', type: 'text' },
+    { key: 'adFree', label: 'Без рекламы', type: 'boolean' },
+    { key: 'storeButtons', label: 'Кнопки в магазине', type: 'boolean' },
+    { key: 'pdfReceipts', label: 'Чеки (PDF)', type: 'boolean' },
+    { key: 'customDomains', label: 'Кастомные домены', type: 'text' },
+    { key: 'prioritySupport', label: 'Приоритетная поддержка', type: 'boolean' },
+    { key: 'apiAccess', label: 'API доступ', type: 'boolean' }
+];
+
+// Default comparison data based on default products
+const defaultComparison = {
+    'bot-basic': { users: 'До 1000', products: 'До 50', adFree: true, storeButtons: false, pdfReceipts: false, customDomains: '0', prioritySupport: false, apiAccess: false },
+    'bot-pro': { users: 'Безлимит', products: 'До 500', adFree: true, storeButtons: true, pdfReceipts: false, customDomains: '1', prioritySupport: true, apiAccess: true },
+    'channel-sub': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: false, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: false },
+    'group-lifetime': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true },
+    'sub-monthly': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true },
+    'sub-yearly': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true }
+};
+
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
     if (!text) return '';
@@ -46,6 +96,8 @@ async function initTariffsPage() {
     initTheme();
     loadTariffs();
     setupSupportForm();
+    renderComparisonTable();
+    renderFAQ();
 }
 
 async function loadTariffs() {
@@ -284,3 +336,191 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', initTariffsPage);
+
+// Render comparison table
+function renderComparisonTable() {
+    const tableContainer = document.getElementById('comparison-table');
+    if (!tableContainer) return;
+
+    // Get products from sections for comparison
+    const productsForComparison = [];
+
+    // Try to get products from sections
+    getTariffSections().then(sections => {
+        sections.forEach(section => {
+            if (section.products) {
+                section.products.forEach(product => {
+                    if (product.isActive !== false) {
+                        productsForComparison.push({
+                            ...product,
+                            sectionName: section.name
+                        });
+                    }
+                });
+            }
+        });
+
+        // Use default comparison if no products
+        if (productsForComparison.length === 0) {
+            renderDefaultComparison(tableContainer);
+            return;
+        }
+
+        // Limit to 4 products for readability
+        const displayProducts = productsForComparison.slice(0, 4);
+
+        let html = `
+            <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-4 font-medium text-gray-500 w-1/4">Возможность</th>
+        `;
+
+        displayProducts.forEach(product => {
+            html += `<th class="p-4 font-medium text-center text-gray-500">${escapeHtml(product.name)}</th>`;
+        });
+
+        html += '</tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">';
+
+        // Render feature rows
+        comparisonFeatures.forEach(feature => {
+            html += `<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">`;
+            html += `<td class="p-4 font-medium">${feature.label}</td>`;
+
+            displayProducts.forEach(product => {
+                const value = product.comparison?.[feature.key] ?? defaultComparison[product.id]?.[feature.key];
+                const cellClass = getComparisonCellClass(feature.type, value);
+                html += `<td class="p-4 text-center ${cellClass}">${formatComparisonValue(feature.type, value)}</td>`;
+            });
+
+            html += '</tr>';
+        });
+
+        html += '</tbody>';
+        tableContainer.innerHTML = html;
+    }).catch(() => {
+        renderDefaultComparison(tableContainer);
+    });
+}
+
+function renderDefaultComparison(tableContainer) {
+    // Fallback to static comparison with 3 main plans
+    const plans = [
+        { name: 'Базовый', id: 'basic' },
+        { name: 'Pro', id: 'pro' },
+        { name: 'Ultra', id: 'ultra' }
+    ];
+
+    const staticData = {
+        basic: { products: 'До 50', adFree: true, storeButtons: false, pdfReceipts: false, customDomains: '0', prioritySupport: false, apiAccess: false },
+        pro: { products: 'До 500', adFree: true, storeButtons: true, pdfReceipts: false, customDomains: '1', prioritySupport: false, apiAccess: false },
+        ultra: { products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true }
+    };
+
+    let html = `
+        <thead>
+            <tr class="border-b border-gray-200 dark:border-gray-700">
+                <th class="p-4 font-medium text-gray-500 w-1/4">Возможность</th>
+    `;
+
+    plans.forEach(plan => {
+        html += `<th class="p-4 font-medium text-center text-gray-500">${plan.name}</th>`;
+    });
+
+    html += '</tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">';
+
+    const features = [
+        { key: 'products', label: 'Товаров', type: 'text' },
+        { key: 'adFree', label: 'Без рекламы', type: 'boolean' },
+        { key: 'storeButtons', label: 'Кнопки в магазине', type: 'boolean' },
+        { key: 'pdfReceipts', label: 'Чеки (PDF)', type: 'boolean' },
+        { key: 'customDomains', label: 'Кастомные домены', type: 'text' },
+        { key: 'prioritySupport', label: 'Приоритетная поддержка', type: 'boolean' },
+        { key: 'apiAccess', label: 'API доступ', type: 'boolean' }
+    ];
+
+    features.forEach(feature => {
+        html += `<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">`;
+        html += `<td class="p-4 font-medium">${feature.label}</td>`;
+
+        plans.forEach(plan => {
+            const value = staticData[plan.id]?.[feature.key];
+            const cellClass = getComparisonCellClass(feature.type, value);
+            html += `<td class="p-4 text-center ${cellClass}">${formatComparisonValue(feature.type, value)}</td>`;
+        });
+
+        html += '</tr>';
+    });
+
+    html += '</tbody>';
+    tableContainer.innerHTML = html;
+}
+
+function getComparisonCellClass(type, value) {
+    if (type === 'boolean') {
+        return value ? 'text-green-500 font-medium' : 'text-gray-400';
+    }
+    if (value === 'Безлимит' || value === true) {
+        return 'text-green-500 font-medium';
+    }
+    return '';
+}
+
+function formatComparisonValue(type, value) {
+    if (type === 'boolean') {
+        return value ? '<i class="fas fa-check text-xl"></i>' : '<i class="fas fa-times text-xl"></i>';
+    }
+    return escapeHtml(String(value));
+}
+
+// Render FAQ accordion
+function renderFAQ() {
+    const faqContainer = document.getElementById('tariffs-faq');
+    if (!faqContainer) return;
+
+    faqContainer.innerHTML = faqData.map((item, index) => `
+        <div class="faq-item bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                    onclick="window.toggleFAQ(${index})">
+                <span class="font-medium text-lg">${escapeHtml(item.question)}</span>
+                <i class="fas fa-chevron-down faq-icon text-gray-400 transition-transform duration-300"></i>
+            </button>
+            <div class="faq-answer overflow-hidden max-h-0 transition-all duration-300">
+                <div class="px-6 pb-4 text-gray-600 dark:text-gray-400">
+                    ${escapeHtml(item.answer)}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Toggle FAQ item
+window.toggleFAQ = function (index) {
+    const faqItems = document.querySelectorAll('.faq-item');
+    const item = faqItems[index];
+    const answer = item.querySelector('.faq-answer');
+    const icon = item.querySelector('.faq-icon');
+
+    const isOpen = answer.classList.contains('open');
+
+    // Close all other items
+    faqItems.forEach((otherItem, otherIndex) => {
+        if (otherIndex !== index) {
+            const otherAnswer = otherItem.querySelector('.faq-answer');
+            const otherIcon = otherItem.querySelector('.faq-icon');
+            otherAnswer.style.maxHeight = '0';
+            otherAnswer.classList.remove('open');
+            otherIcon.classList.remove('rotate-180');
+        }
+    });
+
+    // Toggle current item
+    if (isOpen) {
+        answer.style.maxHeight = '0';
+        answer.classList.remove('open');
+        icon.classList.remove('rotate-180');
+    } else {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        answer.classList.add('open');
+        icon.classList.add('rotate-180');
+    }
+};

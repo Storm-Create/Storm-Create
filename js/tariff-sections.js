@@ -134,22 +134,31 @@ export async function getTariffSections() {
 export async function saveTariffSection(section) {
     if (!db) throw new Error("Firebase not configured");
 
-    const sectionData = {
+    let sectionData = {
         name: section.name?.trim() || 'Новый раздел',
         icon: section.icon || 'fa-tag',
         description: section.description?.trim() || '',
         sortOrder: Number(section.sortOrder) || 1,
         isActive: Boolean(section.isActive),
-        products: section.products || [],
         updatedAt: new Date()
     };
 
     if (section.id) {
-        // Обновить существующий
+        // При обновлении нужно сохранить существующие продукты
+        const q = query(collection(db, COLLECTION_NAME));
+        const snapshot = await getDocs(q);
+        const existingSection = snapshot.docs.find(d => d.id === section.id);
+
+        if (existingSection) {
+            const existingData = existingSection.data();
+            sectionData.products = existingData.products || [];
+        }
+
         await setDoc(doc(db, COLLECTION_NAME, section.id), sectionData, { merge: true });
         return section.id;
     } else {
         // Создать новый
+        sectionData.products = section.products || [];
         sectionData.createdAt = new Date();
         const docRef = await addDoc(collection(db, COLLECTION_NAME), sectionData);
         return docRef.id;
