@@ -4,7 +4,7 @@
  */
 
 import { db } from './firebase.js';
-import { collection, getDocs, addDoc, deleteDoc, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, getDocs, getDoc, addDoc, deleteDoc, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const COLLECTION_NAME = 'tariff_sections';
 
@@ -114,14 +114,24 @@ const defaultSections = [
  * Получить все разделы тарифов
  */
 export async function getTariffSections() {
-    if (!db) return defaultSections;
+    if (!db) {
+        console.warn("Firebase not configured, using default sections");
+        return defaultSections;
+    }
+
     try {
         const q = query(collection(db, COLLECTION_NAME), orderBy('sortOrder', 'asc'));
         const snapshot = await getDocs(q);
         const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Если нет данных в БД, возвращаем дефолтные
-        return sections.length > 0 ? sections : defaultSections;
+        if (sections.length === 0) {
+            console.log("No tariff sections found in database, using defaults");
+            return defaultSections;
+        }
+
+        console.log("Loaded tariff sections:", sections.length);
+        return sections;
     } catch (e) {
         console.error("Error getting tariff sections:", e);
         return defaultSections;
@@ -145,17 +155,23 @@ export async function saveTariffSection(section) {
 
     if (section.id) {
         // При обновлении нужно сохранить существующие продукты
-        const q = query(collection(db, COLLECTION_NAME));
-        const snapshot = await getDocs(q);
-        const existingSection = snapshot.docs.find(d => d.id === section.id);
+        try {
+            const sectionRef = doc(db, COLLECTION_NAME, section.id);
+            const existingSectionSnap = await getDoc(sectionRef);
 
-        if (existingSection) {
-            const existingData = existingSection.data();
-            sectionData.products = existingData.products || [];
+            if (existingSectionSnap.exists()) {
+                const existingData = existingSectionSnap.data();
+                sectionData.products = existingData.products || [];
+            } else {
+                sectionData.products = section.products || [];
+            }
+
+            await setDoc(sectionRef, sectionData, { merge: true });
+            return section.id;
+        } catch (error) {
+            console.error("Error saving tariff section:", error);
+            throw error;
         }
-
-        await setDoc(doc(db, COLLECTION_NAME, section.id), sectionData, { merge: true });
-        return section.id;
     } else {
         // Создать новый
         sectionData.products = section.products || [];
@@ -179,34 +195,44 @@ export async function deleteTariffSection(id) {
 export async function addProductToSection(sectionId, product) {
     if (!db) throw new Error("Firebase not configured");
 
-    const sectionDoc = await getDocs(query(collection(db, COLLECTION_NAME)));
-    const section = sectionDoc.docs.find(d => d.id === sectionId);
+    if (!sectionId) {
+        console.error("addProductToSection: sectionId is required");
+        throw new Error("ID раздела обязателен");
+    }
 
-    if (!section) throw new Error("Раздел не найден");
+    try {
+        const sectionRef = doc(db, COLLECTION_NAME, sectionId);
+        const sectionSnap = await getDoc(sectionRef);
 
-    const sectionData = section.data();
-    const products = sectionData.products || [];
+        if (!sectionSnap.exists()) {
+            console.error("Section not found:", sectionId);
+            throw new Error("Раздел не найден");
+        }
 
-    const newProduct = {
-        id: product.id || `prod_${Date.now()}`,
-        name: product.name?.trim() || 'Новый товар',
-        description: product.description?.trim() || '',
-        price: Number(product.price) || 0,
-        paymentType: product.paymentType || 'one-time', // 'one-time' | 'subscription'
-        subscriptionPeriod: Number(product.subscriptionPeriod) || 30,
-        features: Array.isArray(product.features) ? product.features : [],
-        isActive: Boolean(product.isActive),
-        createdAt: new Date()
-    };
+        const sectionData = sectionSnap.data();
+        const products = sectionData.products || [];
 
-    products.push(newProduct);
+        const newProduct = {
+            id: product.id || `prod_${Date.now()}`,
+            name: product.name?.trim() || 'Новый товар',
+            description: product.description?.trim() || '',
+            price: Number(product.price) || 0,
+            paymentType: product.paymentType || 'one-time',
+            subscriptionPeriod: Number(product.subscriptionPeriod) || 30,
+            features: Array.isArray(product.features) ? product.features : [],
+            isActive: Boolean(product.isActive),
+            createdAt: new Date()
+        };
 
-    await setDoc(doc(db, COLLECTION_NAME, sectionId),
-        { products, updatedAt: new Date() },
-        { merge: true }
-    );
+        products.push(newProduct);
 
-    return newProduct.id;
+        await setDoc(sectionRef, { products, updatedAt: new Date() }, { merge: true });
+
+        return newProduct.id;
+    } catch (error) {
+        console.error("Error adding product to section:", error);
+        throw error;
+    }
 }
 
 /**
@@ -215,35 +241,48 @@ export async function addProductToSection(sectionId, product) {
 export async function updateProductInSection(sectionId, productId, productData) {
     if (!db) throw new Error("Firebase not configured");
 
-    const sectionDoc = await getDocs(query(collection(db, COLLECTION_NAME)));
-    const section = sectionDoc.docs.find(d => d.id === sectionId);
+    if (!sectionId || !productId) {
+        console.error("updateProductInSection: sectionId and productId are required");
+        throw new Error("ID раздела и товара обязательны");
+    }
 
-    if (!section) throw new Error("Раздел не найден");
+    try {
+        const sectionRef = doc(db, COLLECTION_NAME, sectionId);
+        const sectionSnap = await getDoc(sectionRef);
 
-    const sectionData = section.data();
-    const products = sectionData.products || [];
-    const productIndex = products.findIndex(p => p.id === productId);
+        if (!sectionSnap.exists()) {
+            console.error("Section not found:", sectionId);
+            throw new Error("Раздел не найден");
+        }
 
-    if (productIndex === -1) throw new Error("Товар не найден");
+        const sectionData = sectionSnap.data();
+        const products = sectionData.products || [];
+        const productIndex = products.findIndex(p => p.id === productId);
 
-    products[productIndex] = {
-        ...products[productIndex],
-        name: productData.name?.trim() || products[productIndex].name,
-        description: productData.description?.trim() || products[productIndex].description,
-        price: Number(productData.price) || products[productIndex].price,
-        paymentType: productData.paymentType || products[productIndex].paymentType,
-        subscriptionPeriod: Number(productData.subscriptionPeriod) || products[productIndex].subscriptionPeriod,
-        features: Array.isArray(productData.features) ? productData.features : products[productIndex].features,
-        isActive: productData.isActive !== undefined ? Boolean(productData.isActive) : products[productIndex].isActive,
-        updatedAt: new Date()
-    };
+        if (productIndex === -1) {
+            console.error("Product not found:", productId);
+            throw new Error("Товар не найден");
+        }
 
-    await setDoc(doc(db, COLLECTION_NAME, sectionId),
-        { products, updatedAt: new Date() },
-        { merge: true }
-    );
+        products[productIndex] = {
+            ...products[productIndex],
+            name: productData.name?.trim() || products[productIndex].name,
+            description: productData.description?.trim() || products[productIndex].description,
+            price: Number(productData.price) || products[productIndex].price,
+            paymentType: productData.paymentType || products[productIndex].paymentType,
+            subscriptionPeriod: Number(productData.subscriptionPeriod) || products[productIndex].subscriptionPeriod,
+            features: Array.isArray(productData.features) ? productData.features : products[productIndex].features,
+            isActive: productData.isActive !== undefined ? Boolean(productData.isActive) : products[productIndex].isActive,
+            updatedAt: new Date()
+        };
 
-    return productId;
+        await setDoc(sectionRef, { products, updatedAt: new Date() }, { merge: true });
+
+        return productId;
+    } catch (error) {
+        console.error("Error updating product in section:", error);
+        throw error;
+    }
 }
 
 /**
@@ -252,20 +291,30 @@ export async function updateProductInSection(sectionId, productId, productData) 
 export async function deleteProductFromSection(sectionId, productId) {
     if (!db) throw new Error("Firebase not configured");
 
-    const sectionDoc = await getDocs(query(collection(db, COLLECTION_NAME)));
-    const section = sectionDoc.docs.find(d => d.id === sectionId);
+    if (!sectionId || !productId) {
+        console.error("deleteProductFromSection: sectionId and productId are required");
+        throw new Error("ID раздела и товара обязательны");
+    }
 
-    if (!section) throw new Error("Раздел не найден");
+    try {
+        const sectionRef = doc(db, COLLECTION_NAME, sectionId);
+        const sectionSnap = await getDoc(sectionRef);
 
-    const sectionData = section.data();
-    const products = (sectionData.products || []).filter(p => p.id !== productId);
+        if (!sectionSnap.exists()) {
+            console.error("Section not found:", sectionId);
+            throw new Error("Раздел не найден");
+        }
 
-    await setDoc(doc(db, COLLECTION_NAME, sectionId),
-        { products, updatedAt: new Date() },
-        { merge: true }
-    );
+        const sectionData = sectionSnap.data();
+        const products = (sectionData.products || []).filter(p => p.id !== productId);
 
-    return true;
+        await setDoc(sectionRef, { products, updatedAt: new Date() }, { merge: true });
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting product from section:", error);
+        throw error;
+    }
 }
 
 /**

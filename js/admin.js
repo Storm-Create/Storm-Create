@@ -389,15 +389,21 @@ let tariffSectionsData = [];
 
 async function loadAdminTariffs() {
     try {
+        console.log('Loading tariff sections...');
+
         // Initialize default sections if needed
         await initDefaultSections();
 
         // Load new tariff sections
         tariffSectionsData = await getTariffSections();
+        console.log('Loaded tariff sections:', tariffSectionsData.length);
+        tariffSectionsData.forEach(s => {
+            console.log(`  - ${s.name}: ${(s.products || []).length} products`);
+        });
         renderTariffSections();
     } catch (error) {
         console.error('Error loading tariff sections:', error);
-        showToast('Ошибка при загрузке разделов тарифов', 'error');
+        showToast('Ошибка при загрузке разделов тарифов: ' + error.message, 'error');
     }
 }
 
@@ -570,7 +576,17 @@ document.addEventListener('click', (e) => {
 
         case 'edit-product':
             const sec = tariffSectionsData.find(s => s.id === sectionId);
+            if (!sec) {
+                console.error('Section not found:', sectionId);
+                showToast('Раздел не найден', 'error');
+                return;
+            }
             const product = sec?.products?.find(p => p.id === productId);
+            if (!product) {
+                console.error('Product not found:', productId);
+                showToast('Товар не найден', 'error');
+                return;
+            }
             if (product) {
                 document.getElementById('product-section-id').value = sectionId;
                 document.getElementById('product-id').value = product.id;
@@ -595,12 +611,13 @@ document.addEventListener('click', (e) => {
 
         case 'delete-product':
             if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+                console.log('Deleting product:', { sectionId, productId });
                 deleteProductFromSection(sectionId, productId).then(() => {
                     showToast('Товар удален', 'success');
                     loadAdminTariffs();
                 }).catch(err => {
-                    console.error(err);
-                    showToast('Ошибка при удалении', 'error');
+                    console.error('Delete product error:', err);
+                    showToast('Ошибка при удалении: ' + (err.message || 'Неизвестная ошибка'), 'error');
                 });
             }
             break;
@@ -645,14 +662,15 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
+                console.log('Saving section:', section);
                 await saveTariffSection(section);
                 showToast(section.id ? 'Раздел обновлен' : 'Раздел добавлен', 'success');
                 document.getElementById('section-form-modal').classList.add('hidden');
                 document.getElementById('section-form').reset();
                 await loadAdminTariffs();
             } catch (error) {
-                console.error(error);
-                showToast('Ошибка при сохранении', 'error');
+                console.error('Save section error:', error);
+                showToast('Ошибка при сохранении: ' + (error.message || 'Неизвестная ошибка'), 'error');
             }
         });
     }
@@ -692,10 +710,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (productId) {
                     // Update existing product
+                    console.log('Updating product:', { sectionId, productId, productData });
                     await updateProductInSection(sectionId, productId, productData);
                     showToast('Товар обновлен', 'success');
                 } else {
                     // Add new product
+                    console.log('Adding product:', { sectionId, productData });
                     await addProductToSection(sectionId, {
                         ...productData,
                         id: `prod_${Date.now()}`
@@ -706,8 +726,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('product-form').reset();
                 await loadAdminTariffs();
             } catch (error) {
-                console.error(error);
-                showToast('Ошибка при сохранении', 'error');
+                console.error('Save product error:', error);
+                showToast('Ошибка при сохранении: ' + (error.message || 'Неизвестная ошибка'), 'error');
             }
         });
     }

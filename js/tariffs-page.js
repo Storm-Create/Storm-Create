@@ -104,7 +104,13 @@ async function loadTariffs() {
     const grid = document.getElementById('tariff-sections-public');
 
     try {
+        console.log('Loading tariff sections for public page...');
         const sections = await getTariffSections();
+        console.log('Loaded sections:', sections.length);
+        sections.forEach(s => {
+            const activeProducts = (s.products || []).filter(p => p.isActive !== false);
+            console.log(`  - ${s.name}: ${activeProducts.length} active products`);
+        });
         renderTariffSections(sections);
     } catch (error) {
         console.error('Error loading tariffs:', error);
