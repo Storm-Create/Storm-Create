@@ -2,7 +2,6 @@ import { checkAuth, login, logout } from './auth.js';
 import { getPosts, createPost, updatePost, deletePost } from './posts.js';
 import { getAllComments, deleteComment, replyToComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
-import { getTariffs, saveTariff, deleteTariff } from './tariffs.js';
 import { getTariffSections, saveTariffSection, deleteTariffSection, addProductToSection, updateProductInSection, deleteProductFromSection, initDefaultSections } from './tariff-sections.js';
 import { showToast, formatDate, initTheme } from './ui.js';
 import { storage, db } from './firebase.js';
@@ -1498,6 +1497,7 @@ window.viewTicket = (id) => {
                 updatedAt: new Date()
             }, { merge: true });
             showToast('Ответ отправлен!', 'success');
+            await loadAdminTickets();
             window.viewTicket(id); // Перезагрузить тикет
         } catch (e) {
             console.error(e);

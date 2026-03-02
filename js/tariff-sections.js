@@ -126,12 +126,6 @@ export async function getTariffSections() {
         const snapshot = await getDocs(q);
         const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Если нет данных в БД, возвращаем дефолтные
-        if (sections.length === 0) {
-            console.log("No tariff sections found in database, using defaults");
-            return defaultSections;
-        }
-
         console.log("Loaded tariff sections:", sections.length);
         return sections;
     } catch (e) {
