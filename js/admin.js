@@ -27,19 +27,18 @@ function initMobileSidebar() {
         sidebar.classList.add('mobile-open');
         if (backdrop) backdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
+        sidebarToggle.setAttribute('aria-expanded', 'true');
     };
 
-    const closeSidebar = () => {
+    const closeSidebar = ({ restoreFocus = false } = {}) => {
         sidebar.classList.remove('mobile-open');
         if (backdrop) backdrop.classList.remove('active');
         document.body.style.overflow = '';
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+        if (restoreFocus) {
+            sidebarToggle.focus();
+        }
     };
-
-    sidebarToggle.addEventListener('click', openSidebar);
-
-    if (backdrop) {
-        backdrop.addEventListener('click', closeSidebar);
-    }
 
     // Close sidebar when clicking nav buttons on mobile
     const navBtns = document.querySelectorAll('.nav-btn');
@@ -63,30 +62,20 @@ function initMobileSidebar() {
     // Keyboard accessibility - close on ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-            closeSidebar();
-            sidebarToggle.focus();
+            closeSidebar({ restoreFocus: true });
         }
     });
 
-    // Focus trap inside sidebar when opened
-    const openSidebarWithFocus = () => {
+    // Open sidebar and focus first actionable item for keyboard users
+    sidebarToggle.addEventListener('click', () => {
         openSidebar();
         const firstFocusable = sidebar.querySelector('a, button');
         if (firstFocusable) {
             setTimeout(() => firstFocusable.focus(), 100);
         }
-        sidebarToggle.setAttribute('aria-expanded', 'true');
-    };
-
-    const closeSidebarWithFocus = () => {
-        closeSidebar();
-        sidebarToggle.focus();
-        sidebarToggle.setAttribute('aria-expanded', 'false');
-    };
-
-    sidebarToggle.addEventListener('click', openSidebarWithFocus);
+    });
     if (backdrop) {
-        backdrop.addEventListener('click', closeSidebarWithFocus);
+        backdrop.addEventListener('click', () => closeSidebar({ restoreFocus: true }));
     }
 
     // Mobile theme toggle - use existing initTheme from ui.js
@@ -217,6 +206,7 @@ function setupLogout() {
 
 function setupNavigation() {
     const navBtns = document.querySelectorAll('.nav-btn');
+    const mainContent = document.querySelector('#admin-dashboard main');
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             // Update active state
@@ -233,6 +223,9 @@ function setupNavigation() {
                 view.classList.add('hidden');
             });
             document.getElementById(targetId).classList.remove('hidden');
+            if (mainContent) {
+                mainContent.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            }
 
             if (targetId === 'dashboard-view') updateDashboardStats();
             if (targetId === 'posts-view') loadAdminPosts();
@@ -385,13 +378,17 @@ window.deleteReviewHandler = async (id) => {
 // --- Tariffs Management ---
 let tariffsData = [];
 let tariffSectionsData = [];
+let tariffDefaultsInitialized = false;
 
 async function loadAdminTariffs() {
     try {
         console.log('Loading tariff sections...');
 
         // Initialize default sections if needed
-        await initDefaultSections();
+        if (!tariffDefaultsInitialized) {
+            await initDefaultSections();
+            tariffDefaultsInitialized = true;
+        }
 
         // Load new tariff sections
         tariffSectionsData = await getTariffSections();

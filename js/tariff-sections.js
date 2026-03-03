@@ -338,6 +338,10 @@ export async function initDefaultSections() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTION_NAME));
         const existingIds = new Set(snapshot.docs.map(doc => doc.id));
+        if (!snapshot.empty) {
+            console.log(`Found ${snapshot.size} existing sections, keeping them`);
+            return;
+        }
 
         // Создаём разделы по умолчанию, только если их нет в базе
         let createdCount = 0;
