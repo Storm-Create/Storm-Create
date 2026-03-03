@@ -1,10 +1,10 @@
 import { getTariffSections } from './tariff-sections.js';
 import { showToast, initTheme, initScrollAnimations } from './ui.js';
 import { db } from './firebase.js';
-import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { addDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // FAQ data
-const faqData = [
+const defaultFaqData = [
     {
         question: 'Можно ли сменить тариф позже?',
         answer: 'Да, вы можете сменить тариф в любой момент. При переходе на более дорогой тариф разница будет зачислена на ваш счёт.'
@@ -30,6 +30,7 @@ const faqData = [
         answer: 'Да, на тарифах Pro и Ultra доступна автоматическая отправка чеков в PDF формате на email после каждой оплаты.'
     }
 ];
+let tariffsFaqData = [...defaultFaqData];
 
 // Comparison features
 const comparisonFeatures = [
@@ -61,39 +62,26 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Default tariffs if none in database
-const defaultTariffs = [
-    {
-        id: 'basic',
-        name: 'Базовый',
-        description: 'Идеально для старта',
-        price: 1500,
-        features: ['Без рекламы', 'До 50 товаров', 'Базовая поддержка'],
-        isPopular: false,
-        productsLimit: 50
-    },
-    {
-        id: 'pro',
-        name: 'Pro',
-        description: 'Для растущих продаж',
-        price: 2300,
-        features: ['Без рекламы', 'До 500 товаров', 'Кнопки в магазине', '1 кастомный домен'],
-        isPopular: true,
-        productsLimit: 500
-    },
-    {
-        id: 'ultra',
-        name: 'Ultra',
-        description: 'Максимум возможностей',
-        price: 3000,
-        features: ['Безлимит товаров', 'Безлимит доменов', 'Чеки PDF', 'Приоритетная поддержка', 'API доступ'],
-        isPopular: false,
-        productsLimit: 0
+async function loadTariffsFaqData() {
+    if (!db) {
+        tariffsFaqData = [...defaultFaqData];
+        return;
     }
-];
+
+    try {
+        const q = query(collection(db, 'tariffs_faq'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
+        const loadedFaq = snap.docs.map((item) => item.data()).filter(Boolean);
+        tariffsFaqData = loadedFaq;
+    } catch (error) {
+        console.error('Error loading tariffs FAQ:', error);
+        tariffsFaqData = [...defaultFaqData];
+    }
+}
 
 async function initTariffsPage() {
     initTheme();
+    await loadTariffsFaqData();
     loadTariffs();
     setupSupportForm();
     renderComparisonTable();
@@ -101,8 +89,6 @@ async function initTariffsPage() {
 }
 
 async function loadTariffs() {
-    const grid = document.getElementById('tariff-sections-public');
-
     try {
         console.log('Loading tariff sections for public page...');
         const sections = await getTariffSections();
@@ -114,7 +100,7 @@ async function loadTariffs() {
         renderTariffSections(sections);
     } catch (error) {
         console.error('Error loading tariffs:', error);
-        renderDefaultTariffs();
+        renderTariffSections([]);
     }
 }
 
@@ -212,55 +198,6 @@ function renderTariffSections(sections) {
     }).join('');
 
     // Re-bind scroll animations for dynamically rendered sections.
-    initScrollAnimations();
-}
-
-function renderDefaultTariffs() {
-    // Fallback to old display if no sections available
-    const container = document.getElementById('tariff-sections-public');
-    const billingPeriod = parseInt(document.getElementById('billing-period')?.value || 1);
-    const discount = billingPeriod === 3 ? 0.95 : billingPeriod === 6 ? 0.90 : billingPeriod === 12 ? 0.80 : 1;
-    const periodLabel = billingPeriod === 1 ? 'руб/мес' : 'руб';
-
-    container.innerHTML = `
-        <div class="grid md:grid-cols-3 gap-8">
-            ${defaultTariffs.map((tariff, index) => {
-        const monthlyPrice = Math.round(tariff.price * discount);
-        const totalPrice = monthlyPrice * billingPeriod;
-        const isPopular = tariff.isPopular;
-
-        return `
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition ${isPopular ? 'ring-2 ring-primary transform md:-translate-y-4' : ''}">
-                        ${isPopular ? `
-                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
-                                Популярный
-                            </div>
-                        ` : ''}
-                        <h3 class="text-xl font-bold mb-2">${escapeHtml(tariff.name)}</h3>
-                        <p class="text-gray-500 text-sm mb-6">${escapeHtml(tariff.description)}</p>
-                        <div class="mb-6">
-                            <span class="text-4xl font-bold">${totalPrice}</span>
-                            <span class="text-gray-500"> ${periodLabel}</span>
-                            ${billingPeriod > 1 ? `<div class="text-sm text-gray-400">${monthlyPrice} × ${billingPeriod} мес</div>` : ''}
-                        </div>
-                        <ul class="space-y-4 mb-8 flex-1">
-                            ${tariff.features.map(feature => `
-                                <li class="flex items-center">
-                                    <i class="fas fa-check text-green-500 mr-3"></i> ${escapeHtml(feature)}
-                                </li>
-                            `).join('')}
-                        </ul>
-                        <a href="https://t.me/stormcreatebot?start=plan${tariff.id}" target="_blank"
-                            class="block w-full py-3 rounded-lg font-medium ${isPopular ? 'bg-primary text-white hover:bg-blue-600' : 'border-2 border-primary text-primary hover:bg-primary hover:text-white'} transition text-center">
-                            Выбрать
-                        </a>
-                    </div>
-                `;
-    }).join('')}
-        </div>
-    `;
-
-    // Keep fallback cards visible/animated after dynamic render.
     initScrollAnimations();
 }
 
@@ -399,7 +336,8 @@ function renderComparisonTable() {
             html += `<td class="p-4 font-medium">${feature.label}</td>`;
 
             displayProducts.forEach(product => {
-                const value = product.comparison?.[feature.key] ?? defaultComparison[product.id]?.[feature.key];
+                const normalizedProductId = String(product.id ?? product.productId ?? '');
+                const value = product.comparison?.[feature.key] ?? defaultComparison[normalizedProductId]?.[feature.key];
                 const cellClass = getComparisonCellClass(feature.type, value);
                 html += `<td class="p-4 text-center ${cellClass}">${formatComparisonValue(feature.type, value)}</td>`;
             });
@@ -481,6 +419,9 @@ function formatComparisonValue(type, value) {
     if (type === 'boolean') {
         return value ? '<i class="fas fa-check text-xl"></i>' : '<i class="fas fa-times text-xl"></i>';
     }
+    if (value === undefined || value === null || value === '') {
+        return '—';
+    }
     return escapeHtml(String(value));
 }
 
@@ -489,7 +430,17 @@ function renderFAQ() {
     const faqContainer = document.getElementById('tariffs-faq');
     if (!faqContainer) return;
 
-    faqContainer.innerHTML = faqData.map((item, index) => `
+    if (!tariffsFaqData.length) {
+        faqContainer.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-question-circle text-2xl mb-2"></i>
+                <p>FAQ скоро появится</p>
+            </div>
+        `;
+        return;
+    }
+
+    faqContainer.innerHTML = tariffsFaqData.map((item, index) => `
         <div class="faq-item bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
                     onclick="window.toggleFAQ(${index})">
@@ -536,3 +487,5 @@ window.toggleFAQ = function (index) {
         icon.classList.add('rotate-180');
     }
 };
+
+
