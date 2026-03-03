@@ -1,5 +1,5 @@
 import { getTariffSections } from './tariff-sections.js';
-import { showToast, initTheme } from './ui.js';
+import { showToast, initTheme, initScrollAnimations } from './ui.js';
 import { db } from './firebase.js';
 import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -210,6 +210,9 @@ function renderTariffSections(sections) {
             </div>
         `;
     }).join('');
+
+    // Re-bind scroll animations for dynamically rendered sections.
+    initScrollAnimations();
 }
 
 function renderDefaultTariffs() {
@@ -256,6 +259,9 @@ function renderDefaultTariffs() {
     }).join('')}
         </div>
     `;
+
+    // Keep fallback cards visible/animated after dynamic render.
+    initScrollAnimations();
 }
 
 window.updatePricing = function () {
