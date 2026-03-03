@@ -517,25 +517,6 @@ function setupSupportForm() {
     };
 }
 
-window.updatePricing = () => {
-    const period = parseInt(document.getElementById('billing-period').value);
-    let discount = 0;
-    if (period === 3) discount = 0.05;
-    if (period === 6) discount = 0.10;
-    if (period === 12) discount = 0.20;
-
-    const basePrices = { basic: 1500, pro: 2300, ultra: 3000 };
-
-    const label = period === 1 ? 'руб/мес' : `руб за ${period} мес`;
-
-    document.getElementById('price-basic').innerText = Math.round(basePrices.basic * (1 - discount) * period);
-    document.getElementById('price-pro').innerText = Math.round(basePrices.pro * (1 - discount) * period);
-    document.getElementById('price-ultra').innerText = Math.round(basePrices.ultra * (1 - discount) * period);
-
-    document.getElementById('price-label-basic').innerText = label;
-    document.getElementById('price-label-pro').innerText = label;
-    document.getElementById('price-label-ultra').innerText = label;
-};
 
 document.addEventListener('DOMContentLoaded', () => {
     loadLatestPosts();
