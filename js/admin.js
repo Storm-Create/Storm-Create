@@ -2,7 +2,7 @@ import { checkAuth, login, logout } from './auth.js';
 import { getPosts, createPost, updatePost, deletePost } from './posts.js';
 import { getAllComments, deleteComment, replyToComment } from './comments.js';
 import { getReviews, deleteReview } from './reviews.js';
-import { getTariffSections, saveTariffSection, deleteTariffSection, addProductToSection, updateProductInSection, deleteProductFromSection, initDefaultSections } from './tariff-sections.js';
+import { getTariffSections, saveTariffSection, deleteTariffSection, addProductToSection, updateProductInSection, deleteProductFromSection } from './tariff-sections.js';
 import { showToast, formatDate, initTheme } from './ui.js';
 import { storage, db } from './firebase.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
@@ -379,7 +379,6 @@ window.deleteReviewHandler = async (id) => {
 // --- Tariffs Management ---
 let tariffsData = [];
 let tariffSectionsData = [];
-let tariffDefaultsInitialized = false;
 let tariffsFaqData = [];
 
 const comparisonFieldConfig = [
@@ -437,12 +436,6 @@ function readComparisonFormValues() {
 async function loadAdminTariffs() {
     try {
         console.log('Loading tariff sections...');
-
-        // Initialize default sections if needed
-        if (!tariffDefaultsInitialized) {
-            await initDefaultSections();
-            tariffDefaultsInitialized = true;
-        }
 
         // Load new tariff sections
         tariffSectionsData = await getTariffSections();

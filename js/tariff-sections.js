@@ -4,7 +4,7 @@
  */
 
 import { db } from './firebase.js';
-import { collection, getDocs, getDoc, addDoc, deleteDoc, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, getDocs, getDoc, addDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const COLLECTION_NAME = 'tariff_sections';
 
@@ -117,20 +117,31 @@ export async function getTariffSections() {
     console.log("getTariffSections called, db:", db ? "initialized" : "NOT initialized");
 
     if (!db) {
-        console.warn("Firebase not configured, using default sections");
-        return defaultSections;
+        console.warn("Firebase not configured, returning empty sections list");
+        return [];
     }
 
     try {
-        const q = query(collection(db, COLLECTION_NAME), orderBy('sortOrder', 'asc'));
-        const snapshot = await getDocs(q);
-        const sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+        const sections = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => {
+                const aSort = Number.isFinite(Number(a.sortOrder)) ? Number(a.sortOrder) : Number.MAX_SAFE_INTEGER;
+                const bSort = Number.isFinite(Number(b.sortOrder)) ? Number(b.sortOrder) : Number.MAX_SAFE_INTEGER;
+                if (aSort !== bSort) return aSort - bSort;
+
+                const aCreated = a.createdAt?.toMillis?.() || 0;
+                const bCreated = b.createdAt?.toMillis?.() || 0;
+                if (aCreated !== bCreated) return aCreated - bCreated;
+
+                return String(a.name || '').localeCompare(String(b.name || ''));
+            });
 
         console.log("Loaded tariff sections:", sections.length);
         return sections;
     } catch (e) {
         console.error("Error getting tariff sections:", e);
-        return defaultSections;
+        return [];
     }
 }
 
