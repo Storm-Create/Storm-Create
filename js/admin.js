@@ -457,7 +457,7 @@ function renderTariffSections() {
                     
                     ${products.length > 0 ? `
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${products.map(product => `
+                            ${products.map((product, productIndex) => `
                                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border ${product.isActive ? 'border-gray-200 dark:border-gray-600' : 'border-red-200 dark:border-red-800'} relative">
                                     ${!product.isActive ? '<span class="absolute top-2 right-2 text-xs bg-red-500 text-white px-2 py-1 rounded">Неактивен</span>' : ''}
                                     
@@ -486,10 +486,10 @@ function renderTariffSections() {
                                     ` : ''}
                                     
                                     <div class="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                        <button data-action="edit-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(product.id)}" class="flex-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-xs">
+                                        <button data-action="edit-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(String(product.id ?? product.productId ?? ''))}" data-product-index="${productIndex}" class="flex-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-xs">
                                             <i class="fas fa-edit mr-1"></i>Изменить
                                         </button>
-                                        <button data-action="delete-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(product.id)}" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-xs">
+                                        <button data-action="delete-product" data-section-id="${escapeHtml(section.id)}" data-product-id="${escapeHtml(String(product.id ?? product.productId ?? ''))}" data-product-index="${productIndex}" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-xs">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -527,6 +527,7 @@ document.addEventListener('click', (e) => {
     const action = btn.dataset.action;
     const sectionId = btn.dataset.sectionId;
     const productId = btn.dataset.productId;
+    const productIndex = btn.dataset.productIndex;
 
     switch (action) {
         case 'edit-section':
@@ -556,6 +557,8 @@ document.addEventListener('click', (e) => {
             break;
 
         case 'add-product':
+            const addProductFormEl = document.getElementById('product-form');
+            if (addProductFormEl) addProductFormEl.dataset.productIndex = '';
             document.getElementById('product-section-id').value = sectionId;
             document.getElementById('product-id').value = '';
             document.getElementById('product-name').value = '';
@@ -577,15 +580,27 @@ document.addEventListener('click', (e) => {
                 showToast('Раздел не найден', 'error');
                 return;
             }
-            const product = sec?.products?.find(p => p.id === productId);
+            const parsedProductIndex = Number.parseInt(productIndex, 10);
+            const normalizedProductId = String(productId || '');
+            let resolvedProductIndex = (sec.products || []).findIndex(p =>
+                String(p?.id ?? p?.productId ?? '') === normalizedProductId
+            );
+            if (resolvedProductIndex === -1 && Number.isInteger(parsedProductIndex)) {
+                if (parsedProductIndex >= 0 && parsedProductIndex < (sec.products || []).length) {
+                    resolvedProductIndex = parsedProductIndex;
+                }
+            }
+            const product = resolvedProductIndex >= 0 ? sec.products[resolvedProductIndex] : null;
             if (!product) {
-                console.error('Product not found:', productId);
+                console.error('Product not found:', { productId, productIndex });
                 showToast('Товар не найден', 'error');
                 return;
             }
             if (product) {
+                const editProductFormEl = document.getElementById('product-form');
+                if (editProductFormEl) editProductFormEl.dataset.productIndex = String(resolvedProductIndex);
                 document.getElementById('product-section-id').value = sectionId;
-                document.getElementById('product-id').value = product.id;
+                document.getElementById('product-id').value = String(product.id ?? product.productId ?? normalizedProductId);
                 document.getElementById('product-name').value = product.name || '';
                 document.getElementById('product-price').value = product.price || '';
                 document.getElementById('product-description').value = product.description || '';
@@ -608,7 +623,7 @@ document.addEventListener('click', (e) => {
         case 'delete-product':
             if (confirm('Вы уверены, что хотите удалить этот товар?')) {
                 console.log('Deleting product:', { sectionId, productId });
-                deleteProductFromSection(sectionId, productId).then(() => {
+                deleteProductFromSection(sectionId, productId, productIndex).then(() => {
                     showToast('Товар удален', 'success');
                     loadAdminTariffs();
                 }).catch(err => {
@@ -679,6 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelProductBtn.addEventListener('click', () => {
             document.getElementById('product-form-modal').classList.add('hidden');
             document.getElementById('product-form').reset();
+            if (productForm) productForm.dataset.productIndex = '';
         });
     }
 
@@ -688,6 +704,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const sectionId = document.getElementById('product-section-id').value;
             const productId = document.getElementById('product-id').value;
+            const productIndexRaw = productForm?.dataset?.productIndex ?? '';
+            const productIndex = productIndexRaw !== '' ? Number.parseInt(productIndexRaw, 10) : null;
             const features = document.getElementById('product-features').value
                 .split(',')
                 .map(f => f.trim())
@@ -706,8 +724,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (productId) {
                     // Update existing product
-                    console.log('Updating product:', { sectionId, productId, productData });
-                    await updateProductInSection(sectionId, productId, productData);
+                    console.log('Updating product:', { sectionId, productId, productIndex, productData });
+                    await updateProductInSection(sectionId, productId, productData, productIndex);
                     showToast('Товар обновлен', 'success');
                 } else {
                     // Add new product
@@ -720,6 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 document.getElementById('product-form-modal').classList.add('hidden');
                 document.getElementById('product-form').reset();
+                if (productForm) productForm.dataset.productIndex = '';
                 await loadAdminTariffs();
             } catch (error) {
                 console.error('Save product error:', error);

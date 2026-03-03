@@ -241,13 +241,15 @@ export async function addProductToSection(sectionId, product) {
 /**
  * Обновить товар в разделе
  */
-export async function updateProductInSection(sectionId, productId, productData) {
+export async function updateProductInSection(sectionId, productId, productData, fallbackIndex = null) {
     console.log("updateProductInSection called, sectionId:", sectionId, "productId:", productId, "db:", db ? "initialized" : "NOT initialized");
 
     if (!db) throw new Error("Firebase not configured");
 
-    if (!sectionId || !productId) {
-        console.error("updateProductInSection: sectionId and productId are required");
+    const parsedFallbackIndex = Number.parseInt(fallbackIndex, 10);
+    const hasFallbackIndex = Number.isInteger(parsedFallbackIndex) && parsedFallbackIndex >= 0;
+    if (!sectionId || (!productId && !hasFallbackIndex)) {
+        console.error("updateProductInSection: sectionId and productId/fallbackIndex are required");
         throw new Error("ID раздела и товара обязательны");
     }
 
@@ -262,28 +264,41 @@ export async function updateProductInSection(sectionId, productId, productData) 
 
         const sectionData = sectionSnap.data();
         const products = sectionData.products || [];
-        const productIndex = products.findIndex(p => p.id === productId);
+        const normalizedProductId = String(productId || '');
+        let productIndex = products.findIndex(p =>
+            String(p?.id ?? p?.productId ?? '') === normalizedProductId
+        );
+        if (productIndex === -1 && hasFallbackIndex && parsedFallbackIndex < products.length) {
+            productIndex = parsedFallbackIndex;
+        }
 
         if (productIndex === -1) {
             console.error("Product not found:", productId);
             throw new Error("Товар не найден");
         }
 
+        const currentProduct = products[productIndex] || {};
+        const parsedPrice = Number(productData.price);
+        const parsedSubscriptionPeriod = Number(productData.subscriptionPeriod);
+
         products[productIndex] = {
-            ...products[productIndex],
-            name: productData.name?.trim() || products[productIndex].name,
-            description: productData.description?.trim() || products[productIndex].description,
-            price: Number(productData.price) || products[productIndex].price,
-            paymentType: productData.paymentType || products[productIndex].paymentType,
-            subscriptionPeriod: Number(productData.subscriptionPeriod) || products[productIndex].subscriptionPeriod,
-            features: Array.isArray(productData.features) ? productData.features : products[productIndex].features,
-            isActive: productData.isActive !== undefined ? Boolean(productData.isActive) : products[productIndex].isActive,
+            ...currentProduct,
+            id: String((currentProduct.id ?? currentProduct.productId ?? normalizedProductId) || `prod_${Date.now()}`),
+            name: productData.name?.trim() || currentProduct.name || 'Новый товар',
+            description: typeof productData.description === 'string' ? productData.description.trim() : (currentProduct.description || ''),
+            price: Number.isFinite(parsedPrice) ? parsedPrice : (currentProduct.price || 0),
+            paymentType: productData.paymentType || currentProduct.paymentType || 'one-time',
+            subscriptionPeriod: Number.isFinite(parsedSubscriptionPeriod) && parsedSubscriptionPeriod > 0
+                ? parsedSubscriptionPeriod
+                : (currentProduct.subscriptionPeriod || 30),
+            features: Array.isArray(productData.features) ? productData.features : (currentProduct.features || []),
+            isActive: productData.isActive !== undefined ? Boolean(productData.isActive) : currentProduct.isActive !== false,
             updatedAt: new Date()
         };
 
         await setDoc(sectionRef, { products, updatedAt: new Date() }, { merge: true });
 
-        return productId;
+        return products[productIndex].id;
     } catch (error) {
         console.error("Error updating product in section:", error);
         throw error;
@@ -293,13 +308,15 @@ export async function updateProductInSection(sectionId, productId, productData) 
 /**
  * Удалить товар из раздела
  */
-export async function deleteProductFromSection(sectionId, productId) {
+export async function deleteProductFromSection(sectionId, productId, fallbackIndex = null) {
     console.log("deleteProductFromSection called, sectionId:", sectionId, "productId:", productId, "db:", db ? "initialized" : "NOT initialized");
 
     if (!db) throw new Error("Firebase not configured");
 
-    if (!sectionId || !productId) {
-        console.error("deleteProductFromSection: sectionId and productId are required");
+    const parsedFallbackIndex = Number.parseInt(fallbackIndex, 10);
+    const hasFallbackIndex = Number.isInteger(parsedFallbackIndex) && parsedFallbackIndex >= 0;
+    if (!sectionId || (!productId && !hasFallbackIndex)) {
+        console.error("deleteProductFromSection: sectionId and productId/fallbackIndex are required");
         throw new Error("ID раздела и товара обязательны");
     }
 
@@ -313,7 +330,16 @@ export async function deleteProductFromSection(sectionId, productId) {
         }
 
         const sectionData = sectionSnap.data();
-        const products = (sectionData.products || []).filter(p => p.id !== productId);
+        const currentProducts = sectionData.products || [];
+        const normalizedProductId = String(productId || '');
+        let products = currentProducts.filter(p =>
+            String(p?.id ?? p?.productId ?? '') !== normalizedProductId
+        );
+
+        // Legacy fallback: delete by index when id is absent or mismatched.
+        if (products.length === currentProducts.length && hasFallbackIndex && parsedFallbackIndex < currentProducts.length) {
+            products = currentProducts.filter((_, index) => index !== parsedFallbackIndex);
+        }
 
         await setDoc(sectionRef, { products, updatedAt: new Date() }, { merge: true });
 
