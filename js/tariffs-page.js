@@ -1,7 +1,7 @@
 import { getTariffSections } from './tariff-sections.js';
-import { formatDate, showToast, initTheme } from './ui.js';
+import { showToast, initTheme } from './ui.js';
 import { db } from './firebase.js';
-import { addDoc, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // FAQ data
 const faqData = [
@@ -22,7 +22,7 @@ const faqData = [
         answer: 'При окончании подписки магазин переводится в режим чтения. У вас будет 7 дней на продление, после чего данные могут быть удалены.'
     },
     {
-        question: 'Какие способы оплаты вы принимаем?',
+        question: 'Какие способы оплаты вы принимаете?',
         answer: 'Мы принимаем банковские карты (Visa, MasterCard, МИР), электронные кошельки (ЮMoney, Qiwi), криптовалюту (BTC, ETH, USDT) и переводы через Telegram.'
     },
     {
@@ -124,7 +124,6 @@ function renderTariffSections(sections) {
 
     const discount = billingPeriod === 3 ? 0.95 : billingPeriod === 6 ? 0.90 : billingPeriod === 12 ? 0.80 : 1;
     const periodLabel = billingPeriod === 1 ? 'руб/мес' : 'руб';
-    const periodText = billingPeriod > 1 ? `за ${billingPeriod} мес` : '';
 
     if (!sections || sections.length === 0) {
         container.innerHTML = `
@@ -218,6 +217,7 @@ function renderDefaultTariffs() {
     const container = document.getElementById('tariff-sections-public');
     const billingPeriod = parseInt(document.getElementById('billing-period')?.value || 1);
     const discount = billingPeriod === 3 ? 0.95 : billingPeriod === 6 ? 0.90 : billingPeriod === 12 ? 0.80 : 1;
+    const periodLabel = billingPeriod === 1 ? 'руб/мес' : 'руб';
 
     container.innerHTML = `
         <div class="grid md:grid-cols-3 gap-8">
@@ -237,7 +237,7 @@ function renderDefaultTariffs() {
                         <p class="text-gray-500 text-sm mb-6">${escapeHtml(tariff.description)}</p>
                         <div class="mb-6">
                             <span class="text-4xl font-bold">${totalPrice}</span>
-                            <span class="text-gray-500"> руб/мес</span>
+                            <span class="text-gray-500"> ${periodLabel}</span>
                             ${billingPeriod > 1 ? `<div class="text-sm text-gray-400">${monthlyPrice} × ${billingPeriod} мес</div>` : ''}
                         </div>
                         <ul class="space-y-4 mb-8 flex-1">
