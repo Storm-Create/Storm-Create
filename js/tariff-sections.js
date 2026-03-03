@@ -223,6 +223,9 @@ export async function addProductToSection(sectionId, product) {
             paymentType: product.paymentType || 'one-time',
             subscriptionPeriod: Number(product.subscriptionPeriod) || 30,
             features: Array.isArray(product.features) ? product.features : [],
+            comparison: product.comparison && typeof product.comparison === 'object' && !Array.isArray(product.comparison)
+                ? product.comparison
+                : {},
             isActive: Boolean(product.isActive),
             createdAt: new Date()
         };
@@ -292,6 +295,9 @@ export async function updateProductInSection(sectionId, productId, productData, 
                 ? parsedSubscriptionPeriod
                 : (currentProduct.subscriptionPeriod || 30),
             features: Array.isArray(productData.features) ? productData.features : (currentProduct.features || []),
+            comparison: productData.comparison && typeof productData.comparison === 'object' && !Array.isArray(productData.comparison)
+                ? productData.comparison
+                : (currentProduct.comparison || {}),
             isActive: productData.isActive !== undefined ? Boolean(productData.isActive) : currentProduct.isActive !== false,
             updatedAt: new Date()
         };

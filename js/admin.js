@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFaqHandlers();
     setupRoadmapHandlers();
     setupDocsHandlers();
+    setupTariffFaqHandlers();
 });
 
 function setupLogin() {
@@ -379,6 +380,59 @@ window.deleteReviewHandler = async (id) => {
 let tariffsData = [];
 let tariffSectionsData = [];
 let tariffDefaultsInitialized = false;
+let tariffsFaqData = [];
+
+const comparisonFieldConfig = [
+    { key: 'users', id: 'comparison-users', type: 'text' },
+    { key: 'products', id: 'comparison-products', type: 'text' },
+    { key: 'customDomains', id: 'comparison-custom-domains', type: 'text' },
+    { key: 'adFree', id: 'comparison-ad-free', type: 'boolean' },
+    { key: 'storeButtons', id: 'comparison-store-buttons', type: 'boolean' },
+    { key: 'pdfReceipts', id: 'comparison-pdf-receipts', type: 'boolean' },
+    { key: 'prioritySupport', id: 'comparison-priority-support', type: 'boolean' },
+    { key: 'apiAccess', id: 'comparison-api-access', type: 'boolean' }
+];
+
+const comparisonDefaultsByProductId = {
+    'bot-basic': { users: 'До 1000', products: 'До 50', adFree: true, storeButtons: false, pdfReceipts: false, customDomains: '0', prioritySupport: false, apiAccess: false },
+    'bot-pro': { users: 'Безлимит', products: 'До 500', adFree: true, storeButtons: true, pdfReceipts: false, customDomains: '1', prioritySupport: true, apiAccess: true },
+    'channel-sub': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: false, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: false },
+    'group-lifetime': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true },
+    'sub-monthly': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true },
+    'sub-yearly': { users: 'Безлимит', products: 'Безлимит', adFree: true, storeButtons: true, pdfReceipts: true, customDomains: 'Безлимит', prioritySupport: true, apiAccess: true }
+};
+
+function setComparisonFormValues(comparison = {}) {
+    comparisonFieldConfig.forEach((field) => {
+        const element = document.getElementById(field.id);
+        if (!element) return;
+
+        if (field.type === 'boolean') {
+            element.checked = Boolean(comparison[field.key]);
+        } else {
+            element.value = comparison[field.key] !== undefined ? String(comparison[field.key]) : '';
+        }
+    });
+}
+
+function readComparisonFormValues() {
+    const comparison = {};
+
+    comparisonFieldConfig.forEach((field) => {
+        const element = document.getElementById(field.id);
+        if (!element) return;
+
+        if (field.type === 'boolean') {
+            comparison[field.key] = element.checked;
+            return;
+        }
+
+        const value = element.value.trim();
+        comparison[field.key] = value;
+    });
+
+    return comparison;
+}
 
 async function loadAdminTariffs() {
     try {
@@ -397,6 +451,7 @@ async function loadAdminTariffs() {
             console.log(`  - ${s.name}: ${(s.products || []).length} products`);
         });
         renderTariffSections();
+        await loadAdminTariffsFaq();
     } catch (error) {
         console.error('Error loading tariff sections:', error);
         showToast('Ошибка при загрузке разделов тарифов: ' + error.message, 'error');
@@ -568,6 +623,7 @@ document.addEventListener('click', (e) => {
             document.getElementById('product-subscription-period').value = '30';
             document.getElementById('product-features').value = '';
             document.getElementById('product-active').checked = true;
+            setComparisonFormValues({});
             document.getElementById('subscription-period-container').classList.add('hidden');
             document.getElementById('product-form-modal').classList.remove('hidden');
             document.getElementById('product-name').focus();
@@ -608,6 +664,8 @@ document.addEventListener('click', (e) => {
                 document.getElementById('product-subscription-period').value = product.subscriptionPeriod || '30';
                 document.getElementById('product-features').value = (product.features || []).join(', ');
                 document.getElementById('product-active').checked = product.isActive !== false;
+                const comparisonSeed = product.comparison || comparisonDefaultsByProductId[String(product.id ?? product.productId ?? '')] || {};
+                setComparisonFormValues(comparisonSeed);
 
                 if (product.paymentType === 'subscription') {
                     document.getElementById('subscription-period-container').classList.remove('hidden');
@@ -695,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('product-form-modal').classList.add('hidden');
             document.getElementById('product-form').reset();
             if (productForm) productForm.dataset.productIndex = '';
+            setComparisonFormValues({});
         });
     }
 
@@ -718,7 +777,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 paymentType: document.getElementById('product-payment-type').value,
                 subscriptionPeriod: document.getElementById('product-subscription-period').value,
                 features: features,
-                isActive: document.getElementById('product-active').checked
+                isActive: document.getElementById('product-active').checked,
+                comparison: readComparisonFormValues()
             };
 
             try {
@@ -739,6 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('product-form-modal').classList.add('hidden');
                 document.getElementById('product-form').reset();
                 if (productForm) productForm.dataset.productIndex = '';
+                setComparisonFormValues({});
                 await loadAdminTariffs();
             } catch (error) {
                 console.error('Save product error:', error);
@@ -1046,6 +1107,145 @@ function setupSettings() {
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save"></i> Сохранить настройки';
+        }
+    });
+}
+
+// --- Tariffs FAQ Management ---
+
+async function loadAdminTariffsFaq() {
+    const list = document.getElementById('tariffs-faq-admin-list');
+    if (!list) return;
+
+    if (!db) {
+        list.innerHTML = '<div class="text-center py-6 text-gray-500">Firebase не настроен</div>';
+        return;
+    }
+
+    list.innerHTML = '<div class="text-center py-6 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка...</div>';
+
+    try {
+        const q = query(collection(db, 'tariffs_faq'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
+        tariffsFaqData = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+
+        if (tariffsFaqData.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <p class="text-gray-500">FAQ для тарифов пока пуст. Добавьте первый вопрос.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = tariffsFaqData.map(item => `
+            <div class="bg-gray-50 dark:bg-gray-700/40 p-4 rounded-xl border border-gray-200 dark:border-gray-600 flex justify-between items-start gap-3">
+                <div>
+                    <div class="font-semibold flex items-center gap-2">
+                        <span class="text-xs text-gray-400">#${item.order || 0}</span>
+                        <span>${escapeHtml(item.question || '')}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">${escapeHtml(item.answer || '')}</p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="window.editTariffFaq('${item.id}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                    <button onclick="window.deleteTariffFaq('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Load tariffs FAQ error:', error);
+        list.innerHTML = '<div class="text-center py-6 text-red-500">Ошибка загрузки FAQ</div>';
+    }
+}
+
+function setupTariffFaqHandlers() {
+    const addBtn = document.getElementById('add-tariff-faq-btn');
+    const modal = document.getElementById('tariff-faq-modal');
+    const form = document.getElementById('tariff-faq-form');
+    const cancelBtn = document.getElementById('cancel-tariff-faq-btn');
+
+    if (!modal || !form) return;
+
+    const closeModal = () => {
+        modal.classList.add('hidden');
+        form.reset();
+    };
+
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            document.getElementById('tariff-faq-modal-title').innerText = 'Добавить вопрос';
+            document.getElementById('tariff-faq-id').value = '';
+            form.reset();
+            modal.classList.remove('hidden');
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeModal);
+    }
+
+    window.editTariffFaq = (id) => {
+        const item = tariffsFaqData.find((faq) => faq.id === id);
+        if (!item) return;
+
+        document.getElementById('tariff-faq-modal-title').innerText = 'Редактировать вопрос';
+        document.getElementById('tariff-faq-id').value = item.id;
+        document.getElementById('tariff-faq-question').value = item.question || '';
+        document.getElementById('tariff-faq-answer').value = item.answer || '';
+        document.getElementById('tariff-faq-order').value = item.order || 0;
+        modal.classList.remove('hidden');
+    };
+
+    window.deleteTariffFaq = async (id) => {
+        if (!confirm('Удалить этот вопрос из FAQ тарифов?')) return;
+
+        try {
+            await deleteDoc(doc(db, 'tariffs_faq', id));
+            showToast('Вопрос удален', 'success');
+            await loadAdminTariffsFaq();
+        } catch (error) {
+            console.error('Delete tariff FAQ error:', error);
+            showToast('Ошибка удаления', 'error');
+        }
+    };
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('tariff-faq-id').value;
+        const question = document.getElementById('tariff-faq-question').value.trim();
+        const answer = document.getElementById('tariff-faq-answer').value.trim();
+        const order = parseInt(document.getElementById('tariff-faq-order').value, 10) || 0;
+
+        if (!question || !answer) {
+            showToast('Заполните вопрос и ответ', 'error');
+            return;
+        }
+
+        const data = {
+            question,
+            answer,
+            order,
+            updatedAt: new Date().toISOString()
+        };
+
+        try {
+            if (id) {
+                await setDoc(doc(db, 'tariffs_faq', id), data, { merge: true });
+            } else {
+                await addDoc(collection(db, 'tariffs_faq'), {
+                    ...data,
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            closeModal();
+            showToast('FAQ тарифов сохранен', 'success');
+            await loadAdminTariffsFaq();
+        } catch (error) {
+            console.error('Save tariff FAQ error:', error);
+            showToast('Ошибка сохранения FAQ тарифов', 'error');
         }
     });
 }
