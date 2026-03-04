@@ -1,7 +1,7 @@
 import { getTariffSections } from './tariff-sections.js';
 import { showToast, initTheme, initScrollAnimations } from './ui.js';
 import { db } from './firebase.js';
-import { addDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { addDoc, collection, getDocs, query, orderBy, doc, onSnapshot, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // FAQ data
 const defaultFaqData = [
@@ -32,9 +32,12 @@ const defaultFaqData = [
 ];
 let tariffsFaqData = [...defaultFaqData];
 const SUPPORT_CHAT_STORAGE_PREFIX = 'storm_support_chat_history_v1';
+const SUPPORT_CHAT_TICKETS_PREFIX = 'storm_support_chat_tickets_v1';
 const SUPPORT_CHAT_MAX_MESSAGES = 80;
 let supportChatMessages = [];
 let supportChatSending = false;
+let supportChatTicketUnsubs = [];
+let supportChatKnownReplyKeys = new Set();
 
 // Comparison features
 const comparisonFeatures = [
@@ -416,10 +419,66 @@ window.toggleFAQ = function (index) {
 // Support chat functionality (new mini chat widget)
 function getSupportHistoryKey() {
     const userKey =
-        localStorage.getItem('userEmail') ||
         localStorage.getItem('supportContact') ||
+        localStorage.getItem('userEmail') ||
         'guest';
     return `${SUPPORT_CHAT_STORAGE_PREFIX}:${String(userKey).toLowerCase()}`;
+}
+
+function getSupportTicketsKey() {
+    const userKey =
+        localStorage.getItem('supportContact') ||
+        localStorage.getItem('userEmail') ||
+        'guest';
+    return `${SUPPORT_CHAT_TICKETS_PREFIX}:${String(userKey).toLowerCase()}`;
+}
+
+function loadSupportTicketIds() {
+    try {
+        const raw = localStorage.getItem(getSupportTicketsKey());
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter((id) => typeof id === 'string' && id.trim().length > 0);
+    } catch (error) {
+        console.error('Support ticket ids parse error:', error);
+        return [];
+    }
+}
+
+function saveSupportTicketIds(ids) {
+    const normalized = Array.from(new Set((ids || []).filter(Boolean))).slice(-30);
+    localStorage.setItem(getSupportTicketsKey(), JSON.stringify(normalized));
+}
+
+function normalizeSupportTimestamp(value) {
+    if (!value) return Date.now();
+    if (typeof value === 'number') return value;
+    if (value instanceof Date) return value.getTime();
+    if (typeof value === 'string') {
+        const parsed = Date.parse(value);
+        return Number.isNaN(parsed) ? Date.now() : parsed;
+    }
+    if (typeof value?.toDate === 'function') {
+        return value.toDate().getTime();
+    }
+    if (typeof value?.seconds === 'number') {
+        return value.seconds * 1000;
+    }
+    return Date.now();
+}
+
+function buildSupportReplyKey(ticketId, reply) {
+    const ts = normalizeSupportTimestamp(reply?.createdAt);
+    return `${ticketId}:${reply?.author || ''}:${ts}:${reply?.text || ''}`;
+}
+
+function rebuildKnownSupportReplyKeys() {
+    supportChatKnownReplyKeys = new Set(
+        supportChatMessages
+            .map((message) => message?.replyKey)
+            .filter((key) => typeof key === 'string' && key.length > 0)
+    );
 }
 
 function loadSupportChatHistory() {
@@ -486,6 +545,106 @@ function renderSupportChatMessages() {
     }).join('');
 
     container.scrollTop = container.scrollHeight;
+}
+
+function cleanupSupportTicketListeners() {
+    supportChatTicketUnsubs.forEach((unsubscribe) => {
+        if (typeof unsubscribe === 'function') {
+            unsubscribe();
+        }
+    });
+    supportChatTicketUnsubs = [];
+}
+
+function syncRepliesFromTicket(ticketId, ticketData) {
+    const replies = Array.isArray(ticketData?.replies) ? ticketData.replies : [];
+    let changed = false;
+
+    replies.forEach((reply) => {
+        const text = String(reply?.text || '').trim();
+        if (!text) return;
+
+        const replyKey = buildSupportReplyKey(ticketId, reply);
+        if (supportChatKnownReplyKeys.has(replyKey)) return;
+
+        supportChatKnownReplyKeys.add(replyKey);
+        supportChatMessages.push({
+            role: 'support',
+            text,
+            ts: normalizeSupportTimestamp(reply?.createdAt),
+            ticketId,
+            replyKey
+        });
+        changed = true;
+    });
+
+    if (changed) {
+        supportChatMessages = supportChatMessages.slice(-SUPPORT_CHAT_MAX_MESSAGES);
+        saveSupportChatHistory();
+        renderSupportChatMessages();
+    }
+}
+
+function subscribeToSupportTicket(ticketId) {
+    if (!db || !ticketId) return;
+    const ticketRef = doc(db, 'tickets', ticketId);
+
+    const unsubscribe = onSnapshot(ticketRef, (snapshot) => {
+        if (!snapshot.exists()) return;
+        syncRepliesFromTicket(ticketId, snapshot.data());
+    }, (error) => {
+        console.error(`Support ticket subscribe error (${ticketId}):`, error);
+    });
+
+    supportChatTicketUnsubs.push(unsubscribe);
+}
+
+function startSupportTicketsSync() {
+    cleanupSupportTicketListeners();
+    const ids = loadSupportTicketIds();
+    ids.forEach((ticketId) => subscribeToSupportTicket(ticketId));
+}
+
+function registerSupportTicket(ticketId) {
+    if (!ticketId) return;
+    const ids = loadSupportTicketIds();
+    if (!ids.includes(ticketId)) {
+        ids.push(ticketId);
+        saveSupportTicketIds(ids);
+    }
+    subscribeToSupportTicket(ticketId);
+}
+
+async function backfillSupportTicketIds() {
+    if (!db) return;
+    const identity = getSupportIdentity();
+    const userEmail = String(identity.userEmail || '').trim().toLowerCase();
+    if (!userEmail) return;
+
+    try {
+        const recentTicketsQuery = query(
+            collection(db, 'tickets'),
+            orderBy('createdAt', 'desc'),
+            limit(100)
+        );
+        const snapshot = await getDocs(recentTicketsQuery);
+        const matchedIds = snapshot.docs
+            .filter((ticketDoc) => String(ticketDoc.data()?.userEmail || '').trim().toLowerCase() === userEmail)
+            .slice(0, 30)
+            .map((ticketDoc) => ticketDoc.id);
+
+        if (!matchedIds.length) return;
+
+        const currentIds = loadSupportTicketIds();
+        const mergedIds = Array.from(new Set([...currentIds, ...matchedIds]));
+
+        if (mergedIds.length !== currentIds.length) {
+            saveSupportTicketIds(mergedIds);
+            startSupportTicketsSync();
+        }
+    } catch (error) {
+        console.error('Support ticket backfill error:', error);
+    }
 }
 
 function setSupportChatSendingState(isSending) {
@@ -572,11 +731,13 @@ async function sendSupportChatMessage() {
             category,
             subject,
             message: messageText,
+            replies: [],
             status: 'open',
             source: 'tariffs_chat',
             createdAt: new Date(),
             updatedAt: new Date()
         });
+        registerSupportTicket(docRef.id);
 
         supportChatMessages.push({
             role: 'support',
@@ -653,12 +814,15 @@ function setupSupportChat() {
         ];
         saveSupportChatHistory();
     }
+    rebuildKnownSupportReplyKeys();
+    startSupportTicketsSync();
     renderSupportChatMessages();
 
     const emailFromProfile = localStorage.getItem('userEmail') || '';
     if (contactInput && emailFromProfile && !contactInput.value) {
         contactInput.value = emailFromProfile;
     }
+    void backfillSupportTicketIds();
 
     toggleBtn.addEventListener('click', window.toggleSupportChat);
     closeBtn.addEventListener('click', window.closeSupportChat);
@@ -673,6 +837,14 @@ function setupSupportChat() {
             e.preventDefault();
             await sendSupportChatMessage();
         }
+    });
+
+    contactInput?.addEventListener('change', () => {
+        const nextContact = contactInput.value.trim();
+        if (!nextContact) return;
+        localStorage.setItem('supportContact', nextContact);
+        startSupportTicketsSync();
+        void backfillSupportTicketIds();
     });
 
     document.addEventListener('click', (e) => {
