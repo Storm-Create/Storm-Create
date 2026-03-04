@@ -8,6 +8,10 @@ import { doc, getDoc, collection, getDocs, query, orderBy, addDoc } from "https:
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' or 'register'
+const SUPPORT_CHAT_STORAGE_PREFIX = 'storm_support_chat_history_v1';
+const SUPPORT_CHAT_MAX_MESSAGES = 80;
+let supportChatMessages = [];
+let supportChatSending = false;
 
 async function loadLatestPosts() {
     const container = document.getElementById('latest-posts');
@@ -454,67 +458,294 @@ function setupReviewForm() {
 
 // --- Support Logic ---
 
-window.openSupportModal = () => {
-    if (!currentUser) {
-        showToast('Пожалуйста, войдите в аккаунт, чтобы связаться с поддержкой', 'info');
-        window.openAuthModal('login');
+
+function escapeSupportChatText(text) {
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getSupportHistoryKey() {
+    const userKey =
+        currentUser?.uid ||
+        currentUser?.email ||
+        localStorage.getItem('userEmail') ||
+        'guest';
+    return `${SUPPORT_CHAT_STORAGE_PREFIX}:${String(userKey).toLowerCase()}`;
+}
+
+function loadSupportChatHistory() {
+    try {
+        const raw = localStorage.getItem(getSupportHistoryKey());
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        console.error('Support chat history parse error:', error);
+        return [];
+    }
+}
+
+function saveSupportChatHistory() {
+    localStorage.setItem(
+        getSupportHistoryKey(),
+        JSON.stringify(supportChatMessages.slice(-SUPPORT_CHAT_MAX_MESSAGES))
+    );
+}
+
+function formatSupportMessageTime(ts) {
+    try {
+        const date = new Date(ts);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+        return '';
+    }
+}
+
+function renderSupportChatMessages() {
+    const container = document.getElementById('support-chat-messages');
+    if (!container) return;
+
+    if (!supportChatMessages.length) {
+        container.innerHTML = `
+            <div class="text-center text-xs text-gray-500 dark:text-gray-400 py-4">
+                Напишите в чат, и мы поможем с проектом, оплатой и настройкой.
+            </div>
+        `;
         return;
     }
-    const modal = document.getElementById('support-modal');
-    modal.classList.remove('hidden');
-    void modal.offsetWidth;
-    modal.classList.remove('opacity-0');
-};
 
-window.closeSupportModal = () => {
-    const modal = document.getElementById('support-modal');
-    modal.classList.add('opacity-0');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-};
+    container.innerHTML = supportChatMessages.map((message) => {
+        const role = message.role || 'system';
+        const isUser = role === 'user';
+        const isSupport = role === 'support';
+        const wrapperClass = isUser ? 'justify-end' : 'justify-start';
+        const bubbleClass = isUser
+            ? 'bg-primary text-white rounded-2xl rounded-br-md'
+            : isSupport
+                ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-600'
+                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 rounded-2xl rounded-bl-md border border-amber-200 dark:border-amber-800';
 
-function setupSupportForm() {
-    const form = document.getElementById('support-form');
-    if (!form) return;
+        return `
+            <div class="flex ${wrapperClass}">
+                <div class="max-w-[85%] px-3 py-2 text-sm ${bubbleClass}">
+                    <div class="whitespace-pre-wrap break-words">${escapeSupportChatText(message.text || '')}</div>
+                    <div class="mt-1 text-[10px] opacity-70 text-right">${formatSupportMessageTime(message.ts)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
 
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        if (!currentUser) return;
+    container.scrollTop = container.scrollHeight;
+}
 
-        const btn = document.getElementById('support-submit-btn');
-        const data = {
-            userId: currentUser.uid,
-            userName: currentUser.displayName || 'Без имени',
-            userEmail: currentUser.email,
-            category: document.getElementById('support-category').value,
-            subject: document.getElementById('support-subject').value.trim(),
-            message: document.getElementById('support-message').value.trim(),
-            status: 'open',
-            createdAt: new Date().toISOString()
-        };
+function setSupportChatSendingState(isSending) {
+    supportChatSending = isSending;
+    const sendBtn = document.getElementById('support-chat-send');
+    if (!sendBtn) return;
+    sendBtn.disabled = isSending;
+    sendBtn.innerHTML = isSending
+        ? '<i class="fas fa-spinner fa-spin"></i>'
+        : '<i class="fas fa-paper-plane"></i>';
+}
 
-        if (data.message.length < 10) {
-            showToast('Сообщение слишком короткое', 'error');
-            return;
-        }
+function getSupportIdentity() {
+    const profileEmail = currentUser?.email || localStorage.getItem('userEmail') || '';
+    const profileName = currentUser?.displayName || localStorage.getItem('userName') || '';
+    const contactInput = document.getElementById('support-chat-contact');
+    const enteredContact = contactInput?.value?.trim() || '';
+    const savedContact = localStorage.getItem('supportContact') || '';
+    const contact = enteredContact || savedContact;
 
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+    if (enteredContact) {
+        localStorage.setItem('supportContact', enteredContact);
+    }
 
-        try {
-            await addDoc(collection(db, 'tickets'), data);
-            showToast('Тикет успешно отправлен! Мы свяжемся с вами.', 'success');
-            form.reset();
-            window.closeSupportModal();
-        } catch (error) {
-            console.error(error);
-            showToast('Ошибка при отправке тикета', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'Отправить тикет';
-        }
+    return {
+        userId: currentUser?.uid || null,
+        userEmail: profileEmail || contact,
+        userName: profileName || profileEmail || contact || 'Гость'
     };
+}
+
+function buildSupportSubject(category, message) {
+    const categoryLabelMap = {
+        technical: 'Техподдержка',
+        billing: 'Оплата',
+        partnership: 'Партнерство',
+        other: 'Другое'
+    };
+    const prefix = categoryLabelMap[category] || 'Поддержка';
+    const shortMessage = message.replace(/\s+/g, ' ').trim().slice(0, 56);
+    return `${prefix}: ${shortMessage || 'Новое обращение'}`;
+}
+
+async function sendSupportChatMessage() {
+    if (supportChatSending) return;
+
+    const input = document.getElementById('support-chat-input');
+    const categorySelect = document.getElementById('support-chat-category');
+    const contactInput = document.getElementById('support-chat-contact');
+    if (!input || !categorySelect) return;
+
+    const messageText = input.value.trim();
+    if (!messageText) return;
+
+    const identity = getSupportIdentity();
+    if (!identity.userEmail) {
+        showToast('Укажите контакт: email или @username', 'error');
+        contactInput?.focus();
+        return;
+    }
+
+    supportChatMessages.push({
+        role: 'user',
+        text: messageText,
+        ts: Date.now()
+    });
+    supportChatMessages = supportChatMessages.slice(-SUPPORT_CHAT_MAX_MESSAGES);
+    saveSupportChatHistory();
+    renderSupportChatMessages();
+
+    input.value = '';
+    setSupportChatSendingState(true);
+
+    const category = categorySelect.value || 'other';
+    const subject = buildSupportSubject(category, messageText);
+
+    try {
+        if (!db) {
+            throw new Error('Firebase is not configured');
+        }
+
+        const docRef = await addDoc(collection(db, 'tickets'), {
+            userId: identity.userId,
+            userName: identity.userName,
+            userEmail: identity.userEmail,
+            category,
+            subject,
+            message: messageText,
+            status: 'open',
+            source: 'landing_chat',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        supportChatMessages.push({
+            role: 'support',
+            text: `Сообщение отправлено. Номер обращения: ${docRef.id.slice(0, 8)}. Скоро ответим.`,
+            ts: Date.now()
+        });
+        supportChatMessages = supportChatMessages.slice(-SUPPORT_CHAT_MAX_MESSAGES);
+        saveSupportChatHistory();
+        renderSupportChatMessages();
+        showToast('Сообщение отправлено в поддержку', 'success');
+    } catch (error) {
+        console.error('Support chat send error:', error);
+        supportChatMessages.push({
+            role: 'system',
+            text: 'Не удалось отправить сообщение. Проверьте подключение и попробуйте снова.',
+            ts: Date.now()
+        });
+        supportChatMessages = supportChatMessages.slice(-SUPPORT_CHAT_MAX_MESSAGES);
+        saveSupportChatHistory();
+        renderSupportChatMessages();
+        showToast('Ошибка отправки сообщения', 'error');
+    } finally {
+        setSupportChatSendingState(false);
+        input.focus();
+    }
+}
+
+window.openSupportChat = () => {
+    const panel = document.getElementById('support-chat-panel');
+    if (!panel) return;
+    panel.classList.remove('hidden');
+    renderSupportChatMessages();
+    document.getElementById('support-chat-input')?.focus();
+};
+
+window.closeSupportChat = () => {
+    const panel = document.getElementById('support-chat-panel');
+    if (!panel) return;
+    panel.classList.add('hidden');
+};
+
+window.toggleSupportChat = () => {
+    const panel = document.getElementById('support-chat-panel');
+    if (!panel) return;
+    if (panel.classList.contains('hidden')) {
+        window.openSupportChat();
+    } else {
+        window.closeSupportChat();
+    }
+};
+
+// Backward compatibility with old handlers.
+window.openSupportModal = window.openSupportChat;
+window.closeSupportModal = window.closeSupportChat;
+
+function setupSupportChat() {
+    const panel = document.getElementById('support-chat-panel');
+    const toggleBtn = document.getElementById('support-chat-toggle');
+    const closeBtn = document.getElementById('support-chat-close');
+    const form = document.getElementById('support-chat-form');
+    const input = document.getElementById('support-chat-input');
+    const contactInput = document.getElementById('support-chat-contact');
+
+    if (!panel || !toggleBtn || !closeBtn || !form || !input) return;
+
+    supportChatMessages = loadSupportChatHistory();
+    if (!supportChatMessages.length) {
+        supportChatMessages = [
+            {
+                role: 'support',
+                text: 'Здравствуйте! Это чат поддержки StormCreate. Напишите ваш вопрос, и мы поможем.',
+                ts: Date.now()
+            }
+        ];
+        saveSupportChatHistory();
+    }
+    renderSupportChatMessages();
+
+    const emailFromProfile = currentUser?.email || localStorage.getItem('userEmail') || localStorage.getItem('supportContact') || '';
+    if (contactInput && emailFromProfile && !contactInput.value) {
+        contactInput.value = emailFromProfile;
+    }
+
+    toggleBtn.addEventListener('click', window.toggleSupportChat);
+    closeBtn.addEventListener('click', window.closeSupportChat);
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await sendSupportChatMessage();
+    });
+
+    input.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            await sendSupportChatMessage();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (panel.classList.contains('hidden')) return;
+        const isInsidePanel = panel.contains(e.target);
+        const isToggle = toggleBtn.contains(e.target);
+        if (!isInsidePanel && !isToggle) {
+            window.closeSupportChat();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            window.closeSupportChat();
+        }
+    });
 }
 
 
@@ -524,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReviews();
     setupReviewForm();
     setupProfileForm();
-    setupSupportForm();
+    setupSupportChat();
     loadSiteSettings();
     loadFaq();
     loadRoadmap();
