@@ -50,13 +50,46 @@
         </div>
     </nav>
 
-    <div class="pt-24 pb-20">
+    <div class="pt-24 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section id="docs-hero"
+                class="mb-8 rounded-3xl overflow-hidden border border-blue-100/70 dark:border-blue-900/40 shadow-lg shadow-blue-100/40 dark:shadow-black/30">
+                <div class="relative px-6 py-8 md:px-10 md:py-10 bg-gradient-to-br from-blue-600 via-sky-600 to-cyan-500">
+                    <div class="absolute inset-0 opacity-30"
+                        style="background-image: radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.28) 0, transparent 42%), radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.2) 0, transparent 38%), linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 40%);">
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-100">Storm Create Docs</p>
+                        <h1 id="docs-summary-title" class="text-2xl md:text-4xl font-black mt-2 text-white">
+                            Полная пользовательская документация
+                        </h1>
+                        <p class="mt-3 text-sm md:text-base text-blue-50/95 max-w-3xl">
+                            Практические инструкции по запуску, настройке и администрированию Shop- и VPN-ботов в одном интерактивном руководстве.
+                        </p>
+                        <div class="mt-5 flex flex-wrap gap-2 text-xs md:text-sm">
+                            <span id="docs-summary-updated"
+                                class="px-3 py-1.5 rounded-full bg-white/18 text-white border border-white/30 backdrop-blur-sm">
+                                Актуальность: загрузка...
+                            </span>
+                            <span id="docs-summary-count"
+                                class="px-3 py-1.5 rounded-full bg-white/12 text-white border border-white/25 backdrop-blur-sm">
+                                Разделов: ...
+                            </span>
+                            <span
+                                class="px-3 py-1.5 rounded-full bg-white/12 text-white border border-white/25 backdrop-blur-sm">
+                                Формат: структурированный гид
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Sidebar Navigation -->
-                <aside class="w-full lg:w-64 flex-shrink-0">
+                <aside class="w-full lg:w-72 flex-shrink-0">
                     <div class="sticky top-24 space-y-8">
-                        <div>
+                        <div
+                            class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/60 backdrop-blur-sm p-4 md:p-5">
                             <div class="relative mb-6">
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
@@ -80,7 +113,7 @@
                 <!-- Main Content -->
                 <main class="flex-grow">
                     <div id="docs-content"
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[600px]">
+                        class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[600px]">
                         <div id="doc-placeholder" class="text-center py-20">
                             <i class="fas fa-book-open text-6xl text-gray-200 dark:text-gray-700 mb-6"></i>
                             <h2 class="text-2xl font-bold mb-2">Добро пожаловать в базу знаний</h2>
