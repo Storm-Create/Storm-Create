@@ -373,13 +373,13 @@ async function selectDoc(id, options = {}) {
     }
 
     render.innerHTML = `
-        <div class="fade-in">
+        <div class="fade-in visible">
             <div class="mb-8 pb-8 border-b border-gray-100 dark:border-gray-700">
                 <span class="text-xs font-bold text-primary uppercase tracking-widest mb-2 block">${docItem.category || 'Общее'}</span>
                 <h1 class="text-3xl md:text-4xl font-extrabold">${docItem.title}</h1>
             </div>
             <div class="prose prose-blue dark:prose-invert max-w-none">
-                ${window.marked ? marked.parse(docItem.content || '') : docItem.content || ''}
+                ${window.marked ? window.marked.parse(docItem.content || '') : docItem.content || ''}
             </div>
         </div>
     `;
