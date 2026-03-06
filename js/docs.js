@@ -7,9 +7,11 @@ const DEFAULT_SUMMARY_TITLE = 'Полная пользовательская д�
 
 let docsData = [];
 let activeDocId = null;
+let closeDocsSidebar = () => { };
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    setupResponsiveSidebar();
     loadSiteSettings();
     loadDocs();
     setupSearch();
@@ -384,10 +386,73 @@ async function selectDoc(id, options = {}) {
         </div>
     `;
 
+    closeDocsSidebar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 window.selectDoc = selectDoc;
+
+function setupResponsiveSidebar() {
+    const layout = document.getElementById('docs-layout');
+    const sidebar = document.getElementById('docs-sidebar');
+    const toggle = document.getElementById('docs-menu-toggle');
+    const close = document.getElementById('docs-menu-close');
+    const backdrop = document.getElementById('docs-sidebar-backdrop');
+    const mobileMedia = window.matchMedia('(max-width: 1023px)');
+
+    if (!layout || !sidebar || !toggle || !backdrop) {
+        closeDocsSidebar = () => { };
+        return;
+    }
+
+    const syncAria = (isOpen) => {
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        sidebar.setAttribute('aria-hidden', isOpen ? 'false' : (mobileMedia.matches ? 'true' : 'false'));
+    };
+
+    const openSidebar = () => {
+        if (!mobileMedia.matches) return;
+        layout.classList.add('docs-sidebar-open');
+        backdrop.classList.add('active');
+        document.body.classList.add('docs-lock-scroll');
+        syncAria(true);
+    };
+
+    closeDocsSidebar = () => {
+        layout.classList.remove('docs-sidebar-open');
+        backdrop.classList.remove('active');
+        document.body.classList.remove('docs-lock-scroll');
+        syncAria(false);
+    };
+
+    const handleViewportChange = () => {
+        if (!mobileMedia.matches) {
+            closeDocsSidebar();
+            sidebar.setAttribute('aria-hidden', 'false');
+        }
+    };
+
+    toggle.addEventListener('click', () => {
+        if (layout.classList.contains('docs-sidebar-open')) {
+            closeDocsSidebar();
+            return;
+        }
+        openSidebar();
+    });
+
+    close?.addEventListener('click', closeDocsSidebar);
+    backdrop.addEventListener('click', closeDocsSidebar);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && layout.classList.contains('docs-sidebar-open')) {
+            closeDocsSidebar();
+        }
+    });
+
+    window.addEventListener('resize', handleViewportChange);
+    handleViewportChange();
+    syncAria(false);
+}
 
 function setupSearch() {
     const input = document.getElementById('docs-search');

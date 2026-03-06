@@ -25,7 +25,7 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-darker text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Navigation -->
+    
     <nav
         class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,12 +84,20 @@
                 </div>
             </section>
 
-            <div class="flex flex-col lg:flex-row gap-8">
-                <!-- Sidebar Navigation -->
-                <aside class="w-full lg:w-72 flex-shrink-0">
-                    <div class="sticky top-24 space-y-8">
-                        <div
+            <div id="docs-layout" class="flex flex-col lg:flex-row gap-8">
+                
+                <aside id="docs-sidebar" class="w-full lg:w-72 flex-shrink-0">
+                    <div id="docs-sidebar-sticky" class="sticky top-24 space-y-8">
+                        <div id="docs-sidebar-panel"
                             class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/60 backdrop-blur-sm p-4 md:p-5">
+                            <div class="flex items-center justify-between gap-3 mb-4 lg:hidden">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Sections</h3>
+                                <button id="docs-menu-close" type="button"
+                                    class="inline-flex items-center justify-center h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:text-primary hover:border-primary transition"
+                                    aria-label="Close sections">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                             <div class="relative mb-6">
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
@@ -99,7 +107,7 @@
 
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Разделы</h3>
                             <nav id="docs-nav" class="space-y-1">
-                                <!-- Docs categories/items will be injected here -->
+                                
                                 <div class="animate-pulse space-y-2">
                                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
@@ -110,8 +118,16 @@
                     </div>
                 </aside>
 
-                <!-- Main Content -->
+                
                 <main class="flex-grow">
+                    <div class="lg:hidden mb-4">
+                        <button id="docs-menu-toggle" type="button"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-100 hover:border-primary hover:text-primary transition"
+                            aria-expanded="false" aria-controls="docs-sidebar">
+                            <i class="fas fa-bars"></i>
+                            <span>Sections</span>
+                        </button>
+                    </div>
                     <div id="docs-content"
                         class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[600px]">
                         <div id="doc-placeholder" class="text-center py-20">
@@ -121,15 +137,16 @@
                                 раздел в меню слева, чтобы начать изучение документации StormCreate.</p>
                         </div>
                         <div id="doc-render" class="markdown-body hidden">
-                            <!-- Selected doc will be rendered here -->
+                            
                         </div>
                     </div>
                 </main>
             </div>
+            <div id="docs-sidebar-backdrop" class="docs-sidebar-backdrop" aria-hidden="true"></div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module" src="js/docs.js"></script>
 </body>

@@ -19,7 +19,7 @@
 <body
     class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 transition-colors duration-300 font-sans flex flex-col min-h-screen">
 
-    <!-- Login Section -->
+    
     <div id="login-section" class="flex-grow flex items-center justify-center px-4 py-12 hidden">
         <div
             class="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700">
@@ -48,9 +48,9 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
+    
     <div id="admin-dashboard" class="hidden flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
-        <!-- Mobile Header -->
+        
         <div
             class="admin-mobile-header fixed top-0 left-0 right-0 h-14 bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800 z-50 px-4 items-center justify-between">
             <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -64,9 +64,9 @@
                 <i class="fas fa-sun hidden dark:block"></i>
             </button>
         </div>
-        <!-- Sidebar backdrop for mobile -->
+        
         <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
-        <!-- Sidebar -->
+        
         <aside
             class="w-full md:w-64 bg-white dark:bg-dark border-r border-gray-200 dark:border-gray-800 flex flex-col h-full">
             <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -152,10 +152,10 @@
             </div>
         </aside>
 
-        <!-- Main Content Area -->
+        
         <main class="flex-grow bg-gray-50 dark:bg-darker overflow-y-auto p-4 md:p-8 mt-14 md:mt-0">
 
-            <!-- Dashboard View -->
+            
             <div id="dashboard-view" class="view-section">
                 <h2 class="text-2xl font-bold mb-6">Обзор</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -207,7 +207,7 @@
                 </div>
             </div>
 
-            <!-- Posts View -->
+            
             <div id="posts-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Управление постами</h2>
@@ -231,14 +231,14 @@
                                 </tr>
                             </thead>
                             <tbody id="admin-posts-list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Posts injected here -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Post Editor View -->
+            
             <div id="editor-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold" id="editor-title">Создание поста</h2>
@@ -292,7 +292,7 @@
                 </form>
             </div>
 
-            <!-- Comments View -->
+            
             <div id="comments-view" class="view-section hidden">
                 <h2 class="text-2xl font-bold mb-6">Управление комментариями</h2>
                 <div
@@ -310,14 +310,14 @@
                                 </tr>
                             </thead>
                             <tbody id="admin-comments-list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Comments injected here -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Reviews View -->
+            
             <div id="reviews-view" class="view-section hidden">
                 <h2 class="text-2xl font-bold mb-6">Управление отзывами</h2>
                 <div
@@ -335,14 +335,14 @@
                                 </tr>
                             </thead>
                             <tbody id="admin-reviews-list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Reviews injected here -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Tariffs View (New Version with Sections) -->
+            
             <div id="tariffs-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Управление тарифами и услугами</h2>
@@ -352,7 +352,7 @@
                     </button>
                 </div>
 
-                <!-- Section Form Modal -->
+                
                 <div id="section-form-modal" class="hidden mb-6">
                     <form id="section-form"
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
@@ -420,7 +420,7 @@
                     </form>
                 </div>
 
-                <!-- Product Form Modal -->
+                
                 <div id="product-form-modal" class="hidden mb-6">
                     <form id="product-form"
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
@@ -539,9 +539,9 @@
                     </form>
                 </div>
 
-                <!-- Tariff Sections Container -->
+                
                 <div id="tariff-sections-container" class="space-y-8">
-                    <!-- Sections will be loaded here -->
+                    
                 </div>
 
                 <div
@@ -559,11 +559,11 @@
                 </div>
             </div>
 
-            <!-- Settings View -->
+            
             <div id="settings-view" class="view-section hidden">
                 <h2 class="text-2xl font-bold mb-6">Настройки сайта</h2>
                 <form id="settings-form" class="space-y-8">
-                    <!-- Hero Section Settings -->
+                    
                     <div
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
@@ -584,7 +584,7 @@
                         </div>
                     </div>
 
-                    <!-- Links Settings -->
+                    
                     <div
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
@@ -603,7 +603,7 @@
                         </div>
                     </div>
 
-                    <!-- Footer Settings -->
+                    
                     <div
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
@@ -622,7 +622,7 @@
                         </div>
                     </div>
 
-                    <!-- Statistics Management -->
+                    
                     <div
                         class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
@@ -646,7 +646,7 @@
                         </div>
                     </div>
 
-                    <!-- Theme Settings -->
+                    
                     <div
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i
@@ -671,7 +671,7 @@
                     </button>
                 </form>
             </div>
-            <!-- FAQ View -->
+            
             <div id="faq-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Управление FAQ</h2>
@@ -680,11 +680,11 @@
                     </button>
                 </div>
                 <div id="faq-admin-list" class="space-y-4">
-                    <!-- FAQ items for admin -->
+                    
                 </div>
             </div>
 
-            <!-- Roadmap View -->
+            
             <div id="roadmap-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Управление Roadmap</h2>
@@ -694,11 +694,11 @@
                     </button>
                 </div>
                 <div id="roadmap-admin-list" class="space-y-4">
-                    <!-- Roadmap items for admin -->
+                    
                 </div>
             </div>
 
-            <!-- FAQ Modal -->
+            
             <div id="faq-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full scale-animation">
                     <h3 id="faq-modal-title" class="text-xl font-bold mb-4">Добавить вопрос</h3>
@@ -730,7 +730,7 @@
                 </div>
             </div>
 
-            <!-- Tariffs FAQ Modal -->
+            
             <div id="tariff-faq-modal"
                 class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-xl w-full scale-animation">
@@ -761,7 +761,7 @@
                 </div>
             </div>
 
-            <!-- Roadmap Modal -->
+            
             <div id="roadmap-modal"
                 class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full scale-animation">
@@ -805,7 +805,7 @@
                     </form>
                 </div>
             </div>
-            <!-- Docs View -->
+            
             <div id="docs-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Управление документацией</h2>
@@ -814,11 +814,11 @@
                     </button>
                 </div>
                 <div id="docs-admin-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Doc list items -->
+                    
                 </div>
             </div>
 
-            <!-- Doc Modal -->
+            
             <div id="doc-modal" class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div
                     class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-full h-[90vh] flex flex-col scale-animation">
@@ -859,7 +859,7 @@
                     </form>
                 </div>
             </div>
-            <!-- Tickets View -->
+            
             <div id="tickets-view" class="view-section hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Запросы в техподдержку</h2>
@@ -870,11 +870,11 @@
                     </div>
                 </div>
                 <div id="tickets-list" class="space-y-4">
-                    <!-- Ticket items -->
+                    
                 </div>
             </div>
 
-            <!-- Ticket Modal -->
+            
             <div id="ticket-modal"
                 class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div
@@ -885,7 +885,7 @@
                             class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
                     </div>
                     <div id="ticket-details" class="space-y-6">
-                        <!-- Content -->
+                        
                     </div>
                     <div class="flex gap-3 justify-end mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
                         <button onclick="document.getElementById('ticket-modal').classList.add('hidden')"
@@ -897,7 +897,7 @@
                 </div>
             </div>
 
-            <!-- Comment Reply Modal -->
+            
             <div id="comment-reply-modal"
                 class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full scale-animation">
