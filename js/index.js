@@ -931,6 +931,7 @@ function setupSupportChat() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    setupHeroScene();
     loadLatestPosts();
     setupAuth();
     loadReviews();
@@ -1020,6 +1021,79 @@ function animateCounter(id, target) {
             el.textContent = Math.floor(current).toLocaleString() + '+';
         }
     }, stepTime);
+}
+
+function setupHeroScene() {
+    const hero = document.getElementById('hero');
+    const particleContainer = document.getElementById('hero-particles');
+    if (!hero || !particleContainer) return;
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let resizeTimer = null;
+
+    const renderParticles = () => {
+        particleContainer.innerHTML = '';
+
+        if (reducedMotionQuery.matches) {
+            return;
+        }
+
+        const count = window.innerWidth < 640 ? 12 : window.innerWidth < 1024 ? 18 : 24;
+
+        for (let i = 0; i < count; i += 1) {
+            const particle = document.createElement('span');
+            const size = Math.round(Math.random() * 16 + 8);
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const driftX = Math.round(Math.random() * 120 - 60);
+            const driftY = Math.round(Math.random() * 120 - 60);
+            const duration = (Math.random() * 10 + 14).toFixed(2);
+            const delay = (Math.random() * -18).toFixed(2);
+            const opacity = (Math.random() * 0.35 + 0.18).toFixed(2);
+
+            particle.className = 'hero-particle';
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.top = `${top}%`;
+            particle.style.opacity = opacity;
+            particle.style.setProperty('--particle-x', `${driftX}px`);
+            particle.style.setProperty('--particle-y', `${driftY}px`);
+            particle.style.setProperty('--particle-duration', `${duration}s`);
+            particle.style.setProperty('--particle-delay', `${delay}s`);
+
+            particleContainer.appendChild(particle);
+        }
+    };
+
+    const handlePointerMove = (event) => {
+        const rect = hero.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+        hero.style.setProperty('--pointer-x', `${x}%`);
+        hero.style.setProperty('--pointer-y', `${y}%`);
+    };
+
+    const resetPointer = () => {
+        hero.style.setProperty('--pointer-x', '50%');
+        hero.style.setProperty('--pointer-y', '50%');
+    };
+
+    renderParticles();
+    resetPointer();
+
+    hero.addEventListener('pointermove', handlePointerMove);
+    hero.addEventListener('pointerleave', resetPointer);
+
+    window.addEventListener('resize', () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(renderParticles, 150);
+    });
+
+    if (typeof reducedMotionQuery.addEventListener === 'function') {
+        reducedMotionQuery.addEventListener('change', renderParticles);
+    }
 }
 
 async function loadFaq() {

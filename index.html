@@ -20,15 +20,27 @@
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 transition-colors duration-300 font-sans">
+<body class="site-body text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans">
+
+    <div class="site-background" aria-hidden="true">
+        <div class="site-background__mesh"></div>
+        <div class="site-background__glow site-background__glow--one"></div>
+        <div class="site-background__glow site-background__glow--two"></div>
+        <div class="site-background__noise"></div>
+    </div>
 
     
     <nav
-        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        class="site-nav fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <a href="index.html"
@@ -56,7 +68,7 @@
         </div>
         
         <div id="mobile-menu"
-            class="hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
+            class="site-mobile-menu hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 text-primary font-medium">Главная</a>
                 <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
@@ -73,28 +85,125 @@
     </nav>
 
     
-    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center fade-in">
-        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+    <section id="hero" class="hero-section pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto fade-in">
+        <div class="hero-backdrop" aria-hidden="true">
+            <div class="hero-grid"></div>
+            <div class="hero-glow hero-glow--one"></div>
+            <div class="hero-glow hero-glow--two"></div>
+            <div class="hero-orbit hero-orbit--one"></div>
+            <div class="hero-orbit hero-orbit--two"></div>
+            <div id="hero-particles" class="hero-particles"></div>
+        </div>
+        <div class="hero-layout">
+            <div class="hero-copy">
+                <div class="hero-kicker">
+                    <span class="hero-kicker-dot"></span>
+                    <span>Telegram commerce platform</span>
+                </div>
+        <h1 class="hero-title text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
             <span id="hero-title-text">Создавай бурю продаж с</span> <span
                 class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
         </h1>
-        <p id="hero-subtitle-text" class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto">
+        <p id="hero-subtitle-text" class="hero-subtitle text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10">
             Мощный конструктор Telegram-магазинов для бизнеса. Создайте своего персонального бота‑продавца без программирования. Полноценный интернет‑магазин с корзиной, онлайн‑оплатой, цифровыми товарами и удобной админкой — всё, что нужно для старта продаж прямо в Telegram. Подходит для розницы, услуг, инфобизнеса и любого другого дела.
         </p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <div class="hero-actions flex flex-col sm:flex-row gap-4">
             <a id="hero-bot-link" href="https://t.me/StormCreateBot" target="_blank"
-                class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-lg transition shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+                class="hero-button hero-button-primary px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-lg transition shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
                 <i class="fas fa-robot"></i> Создать магазин
             </a>
             <a id="hero-channel-link" href="https://t.me/StormCreation" target="_blank"
-                class="px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-semibold text-lg transition flex items-center justify-center gap-2">
+                class="hero-button hero-button-secondary px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-semibold text-lg transition flex items-center justify-center gap-2">
                 <i class="fab fa-telegram-plane text-blue-500"></i> Наш Telegram канал
             </a>
+        </div>
+        <div class="hero-highlights">
+            <div class="hero-highlight">
+                <strong>15 min</strong>
+                <span>fast launch</span>
+            </div>
+            <div class="hero-highlight">
+                <strong>24/7</strong>
+                <span>sales online</span>
+            </div>
+            <div class="hero-highlight">
+                <strong>No code</strong>
+                <span>easy start</span>
+            </div>
+        </div>
+            </div>
+            <div class="hero-visual fade-in" style="transition-delay: 150ms;">
+                <div class="hero-visual-card hero-visual-card--main">
+                    <div class="hero-visual-top">
+                        <div class="hero-visual-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="hero-visual-badge">
+                            <i class="fas fa-bolt"></i>
+                            <span>Live storefront</span>
+                        </div>
+                    </div>
+                    <div class="hero-visual-panel">
+                        <div class="hero-visual-chip-row">
+                            <span class="hero-visual-chip hero-visual-chip--active">Catalog</span>
+                            <span class="hero-visual-chip">Pay</span>
+                            <span class="hero-visual-chip">CRM</span>
+                        </div>
+                        <div class="hero-visual-list">
+                            <div class="hero-visual-item">
+                                <div class="hero-visual-icon"><i class="fas fa-store"></i></div>
+                                <div class="hero-visual-lines"><span></span><span></span></div>
+                                <div class="hero-visual-pill">24/7</div>
+                            </div>
+                            <div class="hero-visual-item">
+                                <div class="hero-visual-icon"><i class="fas fa-credit-card"></i></div>
+                                <div class="hero-visual-lines"><span></span><span></span></div>
+                                <div class="hero-visual-pill">One tap</div>
+                            </div>
+                            <div class="hero-visual-item">
+                                <div class="hero-visual-icon"><i class="fas fa-chart-line"></i></div>
+                                <div class="hero-visual-lines"><span></span><span></span></div>
+                                <div class="hero-visual-pill">Growth</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual-metrics">
+                        <div>
+                            <strong>3 min</strong>
+                            <span>launch</span>
+                        </div>
+                        <div>
+                            <strong>AI</strong>
+                            <span>assisted</span>
+                        </div>
+                        <div>
+                            <strong>Scale</strong>
+                            <span>ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-float-card hero-float-card--top">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <strong>Auto flow</strong>
+                        <span>sales funnel</span>
+                    </div>
+                </div>
+                <div class="hero-float-card hero-float-card--bottom">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>Fast checkout</strong>
+                        <span>secure payments</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     
-    <section id="features" class="py-20 bg-white dark:bg-dark">
+    <section id="features" class="section-shell py-24 bg-white dark:bg-dark">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 fade-in">Возможности магазина</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -169,7 +278,7 @@
     </section>
 
     
-    <section class="py-20 bg-blue-600 dark:bg-blue-700">
+    <section id="stats" class="stats-section py-24 bg-blue-600 dark:bg-blue-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-white">
                 <div class="fade-in">
@@ -189,7 +298,7 @@
     </section>
 
     
-    <section id="reviews" class="py-20 bg-gray-50 dark:bg-darker">
+    <section id="reviews" class="section-shell section-shell-muted py-24 bg-gray-50 dark:bg-darker">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 fade-in">Отзывы о проекте</h2>
 
@@ -237,7 +346,7 @@
     </section>
 
     
-    <section class="py-20">
+    <section id="news" class="section-shell py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-end mb-12 fade-in">
                 <div>
@@ -264,7 +373,7 @@
     </section>
 
     
-    <section id="faq" class="py-20 bg-gray-50 dark:bg-darker">
+    <section id="faq" class="section-shell section-shell-muted py-24 bg-gray-50 dark:bg-darker">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 fade-in">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Часто задаваемые вопросы</h2>
@@ -279,7 +388,7 @@
     </section>
 
     
-    <section id="roadmap" class="py-20">
+    <section id="roadmap" class="section-shell py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Roadmap развития</h2>
@@ -385,7 +494,7 @@
     </div>
 
     
-    <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <section id="partners" class="section-shell section-shell-border py-24 border-t border-gray-100 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 fade-in">
                 <h2 class="text-2xl font-bold text-gray-400 uppercase tracking-widest">Нам доверяют</h2>
@@ -409,7 +518,7 @@
     </section>
 
     
-    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-12">
+    <footer class="site-footer bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
             <div class="mb-4 md:mb-0">
                 <span
@@ -484,7 +593,7 @@
 
     
     <a href="https://t.me/StormCreation" target="_blank"
-        class="fixed bottom-6 right-6 z-[60] w-14 h-14 bg-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:rotate-12 transition-all duration-300 group">
+        class="site-floating-link fixed bottom-6 right-6 z-[60] w-14 h-14 bg-[#229ED9] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:rotate-12 transition-all duration-300 group">
         <i class="fab fa-telegram-plane text-2xl"></i>
         <span
             class="absolute right-full mr-3 px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
