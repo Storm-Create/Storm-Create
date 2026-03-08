@@ -20,81 +20,93 @@
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-gray-50 dark:bg-darker text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    
+<body class="site-body dark:text-gray-100 text-gray-900 transition-colors duration-300">
+
+    <div class="site-background" aria-hidden="true">
+        <div class="site-background__mesh"></div>
+        <div class="site-background__glow site-background__glow--one"></div>
+        <div class="site-background__glow site-background__glow--two"></div>
+        <div class="site-background__noise"></div>
+    </div>
+
     <nav
-        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+        class="site-nav fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="index.html" class="flex items-center space-x-2 group">
-                    <span
-                        class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 group-hover:from-blue-600 group-hover:to-purple-700 transition-all duration-300">StormCreate</span>
-                    <span
-                        class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Docs</span>
-                </a>
-                <div class="flex items-center space-x-4">
+                <a href="index.html"
+                    class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</a>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html" class="hover:text-primary transition">Главная</a>
+                    <a href="blog.html" class="hover:text-primary transition">Блог</a>
+                    <a href="tariffs.html" class="hover:text-primary transition">Тарифы</a>
+                    <a href="docs.html" class="text-primary font-medium transition">Документация</a>
                     <button id="theme-toggle"
-                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                        class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                         <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block text-yellow-500"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
                     </button>
-                    <a href="index.html"
-                        class="text-gray-600 dark:text-gray-400 hover:text-primary transition font-medium">Вернуться на
-                        главную</a>
                 </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="p-2 text-gray-600 dark:text-gray-300">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu"
+            class="site-mobile-menu hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 hover:text-primary">Главная</a>
+                <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
+                <a href="tariffs.html" class="block px-3 py-2 hover:text-primary">Тарифы</a>
+                <a href="docs.html" class="block px-3 py-2 text-primary font-medium">Документация</a>
+                <button id="theme-toggle-mobile" class="w-full text-left px-3 py-2 hover:text-primary">
+                    Переключить тему
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="pt-24 pb-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <section id="docs-hero"
-                class="mb-8 rounded-3xl overflow-hidden border border-blue-100/70 dark:border-blue-900/40 shadow-lg shadow-blue-100/40 dark:shadow-black/30">
-                <div class="relative px-6 py-8 md:px-10 md:py-10 bg-gradient-to-br from-blue-600 via-sky-600 to-cyan-500">
-                    <div class="absolute inset-0 opacity-30"
-                        style="background-image: radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.28) 0, transparent 42%), radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.2) 0, transparent 38%), linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 40%);">
-                    </div>
-                    <div class="relative z-10">
-                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-100">Storm Create Docs</p>
-                        <h1 id="docs-summary-title" class="text-2xl md:text-4xl font-black mt-2 text-white">
-                            Полная пользовательская документация
-                        </h1>
-                        <p class="mt-3 text-sm md:text-base text-blue-50/95 max-w-3xl">
-                            Практические инструкции по запуску, настройке и администрированию Shop- и VPN-ботов в одном интерактивном руководстве.
-                        </p>
-                        <div class="mt-5 flex flex-wrap gap-2 text-xs md:text-sm">
-                            <span id="docs-summary-updated"
-                                class="px-3 py-1.5 rounded-full bg-white/18 text-white border border-white/30 backdrop-blur-sm">
-                                Актуальность: загрузка...
-                            </span>
-                            <span id="docs-summary-count"
-                                class="px-3 py-1.5 rounded-full bg-white/12 text-white border border-white/25 backdrop-blur-sm">
-                                Разделов: ...
-                            </span>
-                            <span
-                                class="px-3 py-1.5 rounded-full bg-white/12 text-white border border-white/25 backdrop-blur-sm">
-                                Формат: структурированный гид
-                            </span>
-                        </div>
-                    </div>
+    <section class="page-hero max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in">
+        <div class="page-hero__card">
+            <div class="page-hero__content">
+                <div class="page-hero__kicker">
+                    <span class="hero-kicker-dot"></span>
+                    <span>Storm Create - ваш бизнес, ваши правила.</span>
                 </div>
-            </section>
+                <h1 id="docs-summary-title" class="page-hero__title">Полная пользовательская документация</h1>
+                <p class="page-hero__text">Практические инструкции по запуску, настройке и администрированию Shop- и VPN-ботов в одном интерактивном руководстве.</p>
+                <div class="page-hero__meta">
+                    <span id="docs-summary-updated" class="page-hero__chip"><i class="fas fa-clock"></i> Актуальность: загрузка...</span>
+                    <span id="docs-summary-count" class="page-hero__chip"><i class="fas fa-layer-group"></i> Разделов: ...</span>
+                    <span class="page-hero__chip"><i class="fas fa-book-open"></i> Формат: структурированный гид</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <div class="page-shell pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="docs-layout" class="flex flex-col lg:flex-row gap-8">
-                
                 <aside id="docs-sidebar" class="w-full lg:w-72 flex-shrink-0">
                     <div id="docs-sidebar-sticky" class="sticky top-24 space-y-8">
                         <div id="docs-sidebar-panel"
-                            class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/60 backdrop-blur-sm p-4 md:p-5">
+                            class="glass-card rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-5">
                             <div class="flex items-center justify-between gap-3 mb-4 lg:hidden">
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Sections</h3>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Разделы</h3>
                                 <button id="docs-menu-close" type="button"
                                     class="inline-flex items-center justify-center h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:text-primary hover:border-primary transition"
-                                    aria-label="Close sections">
+                                    aria-label="Закрыть разделы">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -107,7 +119,6 @@
 
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Разделы</h3>
                             <nav id="docs-nav" class="space-y-1">
-                                
                                 <div class="animate-pulse space-y-2">
                                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
@@ -118,27 +129,23 @@
                     </div>
                 </aside>
 
-                
                 <main class="flex-grow">
                     <div class="lg:hidden mb-4">
                         <button id="docs-menu-toggle" type="button"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-100 hover:border-primary hover:text-primary transition"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass-card shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-100 hover:border-primary hover:text-primary transition"
                             aria-expanded="false" aria-controls="docs-sidebar">
                             <i class="fas fa-bars"></i>
-                            <span>Sections</span>
+                            <span>Разделы</span>
                         </button>
                     </div>
                     <div id="docs-content"
-                        class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 min-h-[600px]">
+                        class="page-panel min-h-[600px]">
                         <div id="doc-placeholder" class="text-center py-20">
                             <i class="fas fa-book-open text-6xl text-gray-200 dark:text-gray-700 mb-6"></i>
                             <h2 class="text-2xl font-bold mb-2">Добро пожаловать в базу знаний</h2>
-                            <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">Выберите интересующий вас
-                                раздел в меню слева, чтобы начать изучение документации StormCreate.</p>
+                            <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">Выберите интересующий вас раздел в меню слева, чтобы начать изучение документации Storm Create.</p>
                         </div>
-                        <div id="doc-render" class="markdown-body hidden">
-                            
-                        </div>
+                        <div id="doc-render" class="markdown-body hidden"></div>
                     </div>
                 </main>
             </div>
@@ -146,7 +153,21 @@
         </div>
     </div>
 
-    
+    <footer class="site-footer py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <span
+                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
+                <p class="page-footer-tagline text-sm mt-2">Storm Create - ваш бизнес, ваши правила.</p>
+                <p class="text-gray-500 text-sm mt-1">© 2026 Все права защищены.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="blog.html" class="text-gray-400 hover:text-primary text-sm font-medium transition">Блог</a>
+                <a href="tariffs.html" class="text-gray-400 hover:text-primary text-sm font-medium transition">Тарифы</a>
+            </div>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module" src="js/docs.js"></script>
 </body>

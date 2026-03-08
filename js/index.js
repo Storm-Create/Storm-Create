@@ -137,7 +137,7 @@ function updateNavAuth() {
         const mobileAdminLink = isAdmin ? `<a href="admin.html" class="block px-3 py-2 text-primary hover:text-blue-600 font-medium"><i class="fas fa-cog"></i> Админка</a>` : '';
 
         const avatarUrl = currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || currentUser.email)}&background=random`;
-        const avatarImg = `<img src="${avatarUrl}" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-primary object-cover inline-block mr-2">`;
+        const avatarImg = `<img src="${avatarUrl}" alt="Аватар" class="w-8 h-8 rounded-full border-2 border-primary object-cover inline-block mr-2">`;
 
         const html = `
             ${adminLink}

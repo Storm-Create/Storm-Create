@@ -86,7 +86,7 @@ function renderPosts() {
     const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
 
     container.innerHTML = paginatedPosts.map((post, index) => `
-        <a href="post.html?id=${post.id}" class="group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-xl transition fade-in visible" style="animation-delay: ${index * 50}ms">
+        <a href="post.html?id=${post.id}" class="group block glass-card glass-card--lift rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 fade-in visible" style="animation-delay: ${index * 50}ms">
             ${post.imageUrl ? `<div class="h-48 overflow-hidden"><img src="${post.imageUrl}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>` : '<div class="h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center"><i class="fas fa-image text-4xl text-gray-300 dark:text-gray-600"></i></div>'}
             <div class="p-6">
                 <div class="flex flex-wrap gap-2 mb-3">
@@ -115,7 +115,7 @@ function renderPagination(totalPages) {
 
     let html = '';
     for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn w-10 h-10 rounded-lg font-medium transition ${i === currentPage ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}" data-page="${i}">${i}</button>`;
+        html += `<button class="page-btn w-10 h-10 rounded-lg font-medium transition ${i === currentPage ? 'bg-primary text-white shadow-md' : 'glass-card text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:text-primary'}" data-page="${i}">${i}</button>`;
     }
     container.innerHTML = html;
 

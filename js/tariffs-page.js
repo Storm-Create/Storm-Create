@@ -157,7 +157,7 @@ function renderTariffSections(sections) {
             const productLink = `https://t.me/stormcreatebot?start=product${product.id}`;
 
             return `
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 relative flex flex-col hover:shadow-lg transition ${isPopular ? 'ring-2 ring-primary transform md:-translate-y-2' : ''}">
+                            <div class="glass-card glass-card--lift rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 relative flex flex-col ${isPopular ? 'ring-2 ring-primary transform md:-translate-y-2' : ''}">
                                 ${isPopular ? `
                                     <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
                                         Популярный
@@ -369,7 +369,7 @@ function renderFAQ() {
     }
 
     faqContainer.innerHTML = tariffsFaqData.map((item, index) => `
-        <div class="faq-item bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="faq-item glass-card rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
                     onclick="window.toggleFAQ(${index})">
                 <span class="font-medium text-lg">${escapeHtml(item.question)}</span>

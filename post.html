@@ -4,11 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пост - StormCreate</title>
+    <title>Пост | Storm Create</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: 'var(--primary-color, #3b82f6)', dark: '#0f172a', darker: '#020617' } } } }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
@@ -16,19 +21,26 @@
 </head>
 
 <body
-    class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 transition-colors duration-300 font-sans flex flex-col min-h-screen">
+    class="site-body text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans flex flex-col min-h-screen">
 
-    
+    <div class="site-background" aria-hidden="true">
+        <div class="site-background__mesh"></div>
+        <div class="site-background__glow site-background__glow--one"></div>
+        <div class="site-background__glow site-background__glow--two"></div>
+        <div class="site-background__noise"></div>
+    </div>
+
     <nav
-        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        class="site-nav fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <a href="index.html"
                     class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</a>
                 <div class="hidden md:flex space-x-8 items-center">
                     <a href="index.html" class="hover:text-primary transition">Главная</a>
-                    <a href="blog.html" class="hover:text-primary transition">Блог</a>
+                    <a href="blog.html" class="text-primary font-medium transition">Блог</a>
                     <a href="tariffs.html" class="hover:text-primary transition">Тарифы</a>
+                    <a href="docs.html" class="hover:text-primary transition">Документация</a>
                     <button id="theme-toggle"
                         class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                         <i class="fas fa-moon dark:hidden"></i>
@@ -42,13 +54,14 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="mobile-menu"
-            class="hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
+            class="site-mobile-menu hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 hover:text-primary">Главная</a>
-                <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
+                <a href="blog.html" class="block px-3 py-2 text-primary font-medium">Блог</a>
                 <a href="tariffs.html" class="block px-3 py-2 hover:text-primary">Тарифы</a>
+                <a href="docs.html" class="block px-3 py-2 hover:text-primary">Документация</a>
                 <button id="theme-toggle-mobile" class="w-full text-left px-3 py-2 hover:text-primary">
                     Переключить тему
                 </button>
@@ -56,27 +69,40 @@
         </div>
     </nav>
 
-    
-    <main class="flex-grow pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
-        <div id="post-content-container">
-            <div class="text-center py-20 text-gray-500">Загрузка поста...</div>
+    <section class="page-hero max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 fade-in">
+        <div class="page-hero__card">
+            <div class="page-hero__content">
+                <div class="page-hero__kicker">
+                    <span class="hero-kicker-dot"></span>
+                    <span>Storm Create - ваш бизнес, ваши правила.</span>
+                </div>
+                <h1 class="page-hero__title">Материалы и обновления Storm Create</h1>
+                <p class="page-hero__text">Читайте разборы, продуктовые новости и прикладные советы по запуску продаж в Telegram.</p>
+                <div class="page-hero__meta">
+                    <span class="page-hero__chip"><i class="fas fa-book-open"></i> Полезные статьи</span>
+                    <span class="page-hero__chip"><i class="fas fa-comments"></i> Комментарии и обсуждение</span>
+                </div>
+            </div>
         </div>
+    </section>
 
-        
-        <div id="related-posts-section" class="mt-16 pt-10 border-t border-gray-200 dark:border-gray-800 hidden">
-            <h3 class="text-2xl font-bold mb-8">Похожие посты</h3>
-            <div id="related-posts-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+    <main class="page-shell flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20">
+        <div class="page-panel">
+            <div id="post-content-container">
+                <div class="text-center py-20 text-gray-500">Загрузка поста...</div>
             </div>
         </div>
 
-        
-        <div id="comments-section" class="mt-16 pt-10 border-t border-gray-200 dark:border-gray-800 hidden">
+        <div id="related-posts-section" class="page-panel mt-12 hidden">
+            <h3 class="text-2xl font-bold mb-8">Похожие посты</h3>
+            <div id="related-posts-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+
+        <div id="comments-section" class="page-panel mt-12 hidden">
             <h3 class="text-2xl font-bold mb-8">Комментарии</h3>
 
-            
             <form id="comment-form"
-                class="mb-10 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+                class="glass-card mb-10 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Имя</label>
                     <input type="text" id="comment-name" required
@@ -91,24 +117,28 @@
                     class="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-lg font-medium transition">Отправить</button>
             </form>
 
-            
-            <div id="comments-list" class="space-y-6">
-                
-            </div>
+            <div id="comments-list" class="space-y-6"></div>
         </div>
     </main>
 
-    
     <div id="image-modal"
         class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <button id="close-modal" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300">&times;</button>
         <img id="modal-image" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
     </div>
 
-    
-    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
-            © 2026 StormCreate. Все права защищены.
+    <footer class="site-footer py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <span
+                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
+                <p class="page-footer-tagline text-sm mt-2">Storm Create - ваш бизнес, ваши правила.</p>
+                <p class="text-gray-500 text-sm mt-1">© 2026 Все права защищены.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="blog.html" class="text-gray-400 hover:text-primary text-sm font-medium transition">Блог</a>
+                <a href="docs.html" class="text-gray-400 hover:text-primary text-sm font-medium transition">Документация</a>
+            </div>
         </div>
     </footer>
 

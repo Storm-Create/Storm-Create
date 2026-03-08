@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тарифы - StormCreate</title>
+    <title>Тарифы | Storm Create</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,15 +20,26 @@
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-gray-50 text-gray-900 dark:bg-darker dark:text-gray-100 transition-colors duration-300 font-sans">
+<body class="site-body text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans">
 
-    <!-- Navbar -->
+    <div class="site-background" aria-hidden="true">
+        <div class="site-background__mesh"></div>
+        <div class="site-background__glow site-background__glow--one"></div>
+        <div class="site-background__glow site-background__glow--two"></div>
+        <div class="site-background__noise"></div>
+    </div>
+
     <nav
-        class="fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        class="site-nav fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <a href="index.html"
@@ -37,14 +48,13 @@
                     <a href="index.html" class="hover:text-primary transition">Главная</a>
                     <a href="blog.html" class="hover:text-primary transition">Блог</a>
                     <a href="tariffs.html" class="text-primary font-medium transition">Тарифы</a>
+                    <a href="docs.html" class="hover:text-primary transition">Документация</a>
                     <button id="theme-toggle"
                         class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                         <i class="fas fa-moon dark:hidden"></i>
                         <i class="fas fa-sun hidden dark:block"></i>
                     </button>
-                    <div id="nav-auth-section">
-                        <!-- Injected by JS -->
-                    </div>
+                    <div id="nav-auth-section"></div>
                 </div>
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-btn" class="p-2 text-gray-600 dark:text-gray-300">
@@ -53,13 +63,14 @@
                 </div>
             </div>
         </div>
-        <!-- Mobile Menu -->
+
         <div id="mobile-menu"
-            class="hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
+            class="site-mobile-menu hidden md:hidden bg-white dark:bg-dark border-b border-gray-200 dark:border-gray-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="index.html" class="block px-3 py-2 hover:text-primary">Главная</a>
                 <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
                 <a href="tariffs.html" class="block px-3 py-2 text-primary font-medium">Тарифы</a>
+                <a href="docs.html" class="block px-3 py-2 hover:text-primary">Документация</a>
                 <button id="theme-toggle-mobile" class="w-full text-left px-3 py-2 hover:text-primary">
                     Переключить тему
                 </button>
@@ -67,44 +78,52 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="pt-40 md:pt-36 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center fade-in">
-        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight md:leading-tight mb-6">
-            Тарифы и <span
-                class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">Цены</span>
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Выберите оптимальный план для вашего бизнеса. Все тарифы включают бесплатную техническую поддержку.
-        </p>
-
-    </section>
-
-    <!-- Pricing Cards -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <!-- Period Selector -->
-        <div class="flex justify-center items-center space-x-4 mb-8">
-            <span class="text-sm font-medium">Период:</span>
-            <select id="billing-period"
-                class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
-                onchange="window.updatePricing()">
-                <option value="1">1 месяц</option>
-                <option value="3">3 месяца (скидка 5%)</option>
-                <option value="6">6 месяцев (скидка 10%)</option>
-                <option value="12">12 месяцев (скидка 20%)</option>
-            </select>
-        </div>
-
-        <!-- New Sections-based Tariffs -->
-        <div id="tariff-sections-public" class="space-y-12">
-            <!-- Sections will be loaded here -->
-            <div class="text-center py-10 text-gray-500">Загрузка тарифов...</div>
+    <section class="page-hero max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in">
+        <div class="page-hero__card">
+            <div class="page-hero__content">
+                <div class="page-hero__kicker">
+                    <span class="hero-kicker-dot"></span>
+                    <span>Storm Create - ваш бизнес, ваши правила.</span>
+                </div>
+                <h1 class="page-hero__title">Тарифы и варианты запуска</h1>
+                <p class="page-hero__text">Выберите оптимальный формат для вашего проекта: от быстрого старта до продвинутой автоматизации продаж в Telegram.</p>
+                <div class="page-hero__meta">
+                    <span class="page-hero__chip"><i class="fas fa-headset"></i> Поддержка включена</span>
+                    <span class="page-hero__chip"><i class="fas fa-sliders-h"></i> Гибкая настройка</span>
+                    <span class="page-hero__chip"><i class="fas fa-rocket"></i> Быстрый запуск</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Features -->
-    <section id="features-highlights"
-        class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50 via-white to-white dark:from-gray-900 dark:via-darker dark:to-darker">
-        <div class="max-w-7xl mx-auto">
+    <section class="page-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="page-panel">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold">Подберите тариф под масштаб задач</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mt-3 max-w-2xl">Сравните условия, период оплаты и набор функций. Все решения оформлены в том же визуальном стиле, что и главная страница, чтобы сайт оставался цельным.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <span class="text-sm font-medium">Период:</span>
+                    <select id="billing-period"
+                        class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                        onchange="window.updatePricing()">
+                        <option value="1">1 месяц</option>
+                        <option value="3">3 месяца (скидка 5%)</option>
+                        <option value="6">6 месяцев (скидка 10%)</option>
+                        <option value="12">12 месяцев (скидка 20%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="tariff-sections-public" class="space-y-12">
+                <div class="text-center py-10 text-gray-500">Загрузка тарифов...</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features-highlights" class="section-shell py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto page-panel">
             <div class="text-center mb-12">
                 <span
                     class="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-sm font-semibold text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/30 dark:text-blue-300">
@@ -112,14 +131,13 @@
                 </span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-4">Что получает ваш бизнес с StormCreate</h2>
                 <p class="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                    Четыре ключевых раздела, которые помогают быстро запустить продажи, автоматизировать рутину и
-                    масштабировать магазин в Telegram.
+                    Четыре ключевых направления, которые помогают быстрее запустить продажи, автоматизировать рутину и управлять магазином без лишней сложности.
                 </p>
             </div>
 
             <div class="grid gap-6 md:grid-cols-2">
                 <article
-                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/60 p-6 shadow-sm hover:shadow-lg transition">
+                    class="glass-card glass-card--lift rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     <div
                         class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 flex items-center justify-center text-xl mb-4">
                         <i class="fas fa-rocket"></i>
@@ -133,7 +151,7 @@
                 </article>
 
                 <article
-                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/60 p-6 shadow-sm hover:shadow-lg transition">
+                    class="glass-card glass-card--lift rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     <div
                         class="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300 flex items-center justify-center text-xl mb-4">
                         <i class="fas fa-bolt"></i>
@@ -147,12 +165,12 @@
                 </article>
 
                 <article
-                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/60 p-6 shadow-sm hover:shadow-lg transition">
+                    class="glass-card glass-card--lift rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     <div
                         class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300 flex items-center justify-center text-xl mb-4">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Надёжность и контроль</h3>
+                    <h3 class="text-xl font-bold mb-3">Надежность и контроль</h3>
                     <ul class="space-y-2 text-gray-600 dark:text-gray-300">
                         <li><i class="fas fa-check text-green-500 mr-2"></i>Гибкие роли администраторов</li>
                         <li><i class="fas fa-check text-green-500 mr-2"></i>Защита от ошибок в заказах</li>
@@ -161,7 +179,7 @@
                 </article>
 
                 <article
-                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/60 p-6 shadow-sm hover:shadow-lg transition">
+                    class="glass-card glass-card--lift rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     <div
                         class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-300 flex items-center justify-center text-xl mb-4">
                         <i class="fas fa-chart-line"></i>
@@ -177,61 +195,56 @@
         </div>
     </section>
 
-    <!-- Features Comparison -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-dark">
-        <div class="max-w-5xl mx-auto">
+    <section class="page-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="page-panel">
             <h2 class="text-3xl font-bold text-center mb-12">Сравнение возможностей</h2>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse" id="comparison-table">
-                    <!-- Table content will be rendered by JavaScript -->
-                </table>
+                <table class="w-full text-left border-collapse" id="comparison-table"></table>
             </div>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto">
+    <section class="page-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="page-panel max-w-3xl mx-auto">
             <h2 class="text-3xl font-bold text-center mb-12">Частые вопросы о тарифах</h2>
 
-            <div class="space-y-4" id="tariffs-faq">
-                <!-- FAQ items will be rendered by JavaScript -->
+            <div class="space-y-4" id="tariffs-faq"></div>
+        </div>
+    </section>
+
+    <section class="py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center text-white rounded-[2rem] overflow-hidden shadow-2xl"
+            style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #7c3aed 100%);">
+            <div class="px-8 py-12">
+                <h2 class="text-3xl font-bold mb-4">Готовы начать?</h2>
+                <p class="text-blue-100 mb-3 text-lg">Storm Create - ваш бизнес, ваши правила.</p>
+                <p class="text-blue-100/90 mb-8 text-lg">Создайте свой магазин в Telegram за пару минут и начните продавать уже сегодня.</p>
+                <a href="https://t.me/StormCreateBot" target="_blank"
+                    class="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 hover:bg-gray-100 rounded-full font-semibold text-lg transition shadow-lg">
+                    <i class="fas fa-rocket"></i> Создать магазин бесплатно
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div class="max-w-3xl mx-auto text-center text-white">
-            <h2 class="text-3xl font-bold mb-4">Готовы начать?</h2>
-            <p class="text-blue-100 mb-8 text-lg">Создайте свой магазин в Telegram за пару минут и начните продавать уже
-                сегодня.</p>
-            <a href="https://t.me/StormCreateBot" target="_blank"
-                class="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 hover:bg-gray-100 rounded-full font-semibold text-lg transition shadow-lg">
-                <i class="fas fa-rocket"></i> Создать магазин бесплатно
-            </a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-dark border-t border-gray-200 dark:border-gray-800 py-12">
+    <footer class="site-footer py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
             <div class="mb-4 md:mb-0">
                 <span
                     class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">StormCreate</span>
-                <p class="text-gray-500 text-sm mt-2">© 2026 Все права защищены.</p>
+                <p class="page-footer-tagline text-sm mt-2">Storm Create - ваш бизнес, ваши правила.</p>
+                <p class="text-gray-500 text-sm mt-1">© 2026 Все права защищены.</p>
             </div>
             <div class="flex space-x-6">
                 <button onclick="window.openSupportChat()"
                     class="text-gray-400 hover:text-primary text-sm font-medium transition">Поддержка</button>
-                <a href="tariffs.html"
-                    class="text-gray-400 hover:text-primary text-sm font-medium transition">Тарифы</a>
+                <a href="docs.html"
+                    class="text-gray-400 hover:text-primary text-sm font-medium transition">Документация</a>
             </div>
         </div>
     </footer>
 
-    <!-- Support Chat Widget -->
     <div id="support-chat-widget" class="fixed bottom-5 right-5 z-[110]">
         <button id="support-chat-toggle"
             class="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-primary text-white shadow-xl hover:bg-blue-600 transition">

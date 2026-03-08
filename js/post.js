@@ -51,7 +51,7 @@ async function loadRelatedPosts(tags, currentId) {
         if (related.length > 0) {
             section.classList.remove('hidden');
             list.innerHTML = related.map(post => `
-                <a href="post.html?id=${post.id}" class="group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-xl transition">
+                <a href="post.html?id=${post.id}" class="group block glass-card glass-card--lift rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
                     ${post.imageUrl ? `<div class="h-32 overflow-hidden"><img src="${post.imageUrl}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>` : ''}
                     <div class="p-4">
                         <h4 class="font-bold mb-2 group-hover:text-primary transition line-clamp-2">${post.title}</h4>
@@ -153,7 +153,7 @@ async function loadComments() {
         }
 
         list.innerHTML = comments.map(comment => `
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+            <div class="glass-card p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">

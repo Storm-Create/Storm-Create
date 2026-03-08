@@ -805,6 +805,194 @@ html.dark .site-footer {
     border-color: rgba(148, 163, 184, 0.14) !important;
 }
 
+.page-shell {
+    position: relative;
+    z-index: 1;
+}
+
+.page-hero {
+    position: relative;
+    z-index: 1;
+    padding-top: 7rem;
+    padding-bottom: 2rem;
+}
+
+.page-hero__card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(2rem, 4vw, 3.25rem);
+    border-radius: 2.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.74));
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    box-shadow: var(--shadow-deep);
+    isolation: isolate;
+}
+
+html.dark .page-hero__card {
+    background: linear-gradient(135deg, rgba(7, 15, 31, 0.94), rgba(2, 6, 23, 0.84));
+    border-color: rgba(148, 163, 184, 0.16);
+}
+
+.page-hero__card::before,
+.page-hero__card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.page-hero__card::before {
+    background-image:
+        linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2));
+    opacity: 0.65;
+}
+
+.page-hero__card::after {
+    inset: -25%;
+    background:
+        radial-gradient(circle at 16% 18%, rgba(56, 189, 248, 0.24), transparent 30%),
+        radial-gradient(circle at 84% 14%, rgba(34, 197, 94, 0.16), transparent 24%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 42%);
+}
+
+.page-hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 52rem;
+}
+
+.page-hero__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 1rem;
+    margin-bottom: 1.25rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+html.dark .page-hero__kicker {
+    background: rgba(15, 23, 42, 0.56);
+    border-color: rgba(148, 163, 184, 0.16);
+    color: #e2e8f0;
+}
+
+.page-hero__title {
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    font-size: clamp(2.35rem, 5vw, 4.5rem);
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+}
+
+.page-hero__text {
+    margin-top: 1rem;
+    max-width: 44rem;
+    font-size: clamp(1rem, 2vw, 1.22rem);
+    line-height: 1.75;
+    color: var(--text-soft);
+}
+
+html.dark .page-hero__text {
+    color: #94a3b8;
+}
+
+.page-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.page-hero__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px);
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+html.dark .page-hero__chip {
+    background: rgba(15, 23, 42, 0.56);
+    border-color: rgba(148, 163, 184, 0.16);
+    color: #e2e8f0;
+}
+
+.page-panel {
+    position: relative;
+    z-index: 1;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: 2rem;
+    background: linear-gradient(180deg, var(--surface-light-strong), var(--surface-light));
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(24px);
+}
+
+html.dark .page-panel {
+    background: linear-gradient(180deg, rgba(10, 18, 35, 0.82), rgba(2, 6, 23, 0.74));
+    border-color: var(--border-dark);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.68) !important;
+    border: 1px solid rgba(255, 255, 255, 0.62) !important;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(18px);
+}
+
+html.dark .glass-card {
+    background: rgba(10, 18, 35, 0.78) !important;
+    border-color: rgba(148, 163, 184, 0.14) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.glass-card--lift {
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease, border-color 0.45s ease, background-color 0.45s ease;
+}
+
+.glass-card--lift:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-deep);
+    border-color: rgba(96, 165, 250, 0.24) !important;
+}
+
+.page-grid {
+    display: grid;
+    gap: 2rem;
+}
+
+.page-grid--sidebar {
+    grid-template-columns: minmax(17rem, 19rem) minmax(0, 1fr);
+    align-items: start;
+}
+
+.page-footer-tagline {
+    color: var(--text-soft);
+}
+
+html.dark .page-footer-tagline {
+    color: #94a3b8;
+}
+
 #support-chat-widget button,
 .site-floating-link {
     box-shadow: 0 18px 40px rgba(2, 132, 199, 0.32);
@@ -1602,6 +1790,10 @@ body.mobile-menu-open {
 
 /* Typography and compact spacing for smaller screens */
 @media (max-width: 1024px) {
+    .page-grid--sidebar {
+        grid-template-columns: 1fr;
+    }
+
     .text-5xl.md\:text-7xl {
         font-size: clamp(2.15rem, 9vw, 3.95rem);
         line-height: 1.05;
@@ -1626,6 +1818,21 @@ body.mobile-menu-open {
 }
 
 @media (max-width: 768px) {
+    .page-hero {
+        padding-top: 6rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .page-hero__card {
+        padding: 1.5rem;
+        border-radius: 1.75rem;
+    }
+
+    .page-panel {
+        padding: 1.25rem;
+        border-radius: 1.5rem;
+    }
+
     .toast {
         min-width: 0;
         width: min(100%, 420px);
