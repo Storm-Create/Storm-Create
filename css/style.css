@@ -225,16 +225,39 @@ html.dark .hero-backdrop {
 
 .hero-particle {
     position: absolute;
-    border-radius: 999px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(125, 211, 252, 0.5) 40%, rgba(96, 165, 250, 0.08) 70%, transparent 72%);
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #229ED9, #1a8bbf);
+    box-shadow: 0 0 18px rgba(34, 158, 217, 0.4), 0 4px 12px rgba(34, 158, 217, 0.25);
     animation: heroParticleFloat var(--particle-duration, 16s) ease-in-out infinite;
     animation-delay: var(--particle-delay, 0s);
+    color: white;
+    will-change: transform;
+}
+
+.hero-particle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent);
+}
+
+/* SVG Telegram icon via clip-path mask */
+.hero-particle svg {
+    width: 55%;
+    height: 55%;
+    fill: white;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
 }
 
 html.dark .hero-particle {
-    background: radial-gradient(circle at 30% 30%, rgba(186, 230, 253, 0.92), rgba(56, 189, 248, 0.42) 45%, rgba(59, 130, 246, 0.08) 72%, transparent 74%);
-    box-shadow: 0 0 24px rgba(56, 189, 248, 0.18);
+    background: linear-gradient(135deg, #229ED9, #0d7fb5);
+    box-shadow: 0 0 22px rgba(34, 158, 217, 0.5), 0 6px 16px rgba(34, 158, 217, 0.3);
 }
 
 .hero-layout {
@@ -1033,19 +1056,19 @@ html.dark .page-footer-tagline {
 
     0%,
     100% {
-        transform: translate3d(0, 0, 0) scale(1);
+        transform: translate3d(0, 0, 0) scale(1) rotate(var(--particle-rot, 0deg));
     }
 
     25% {
-        transform: translate3d(var(--particle-x, 24px), calc(var(--particle-y, 18px) * -0.35), 0) scale(1.08);
+        transform: translate3d(var(--particle-x, 24px), calc(var(--particle-y, 18px) * -0.35), 0) scale(1.1) rotate(calc(var(--particle-rot, 0deg) + 15deg));
     }
 
     50% {
-        transform: translate3d(calc(var(--particle-x, 24px) * -0.5), var(--particle-y, 18px), 0) scale(0.92);
+        transform: translate3d(calc(var(--particle-x, 24px) * -0.5), var(--particle-y, 18px), 0) scale(0.9) rotate(calc(var(--particle-rot, 0deg) - 10deg));
     }
 
     75% {
-        transform: translate3d(calc(var(--particle-x, 24px) * 0.25), calc(var(--particle-y, 18px) * -0.2), 0) scale(1.02);
+        transform: translate3d(calc(var(--particle-x, 24px) * 0.25), calc(var(--particle-y, 18px) * -0.2), 0) scale(1.04) rotate(calc(var(--particle-rot, 0deg) + 5deg));
     }
 }
 
@@ -1120,6 +1143,10 @@ html.dark .page-footer-tagline {
         max-width: none;
     }
 
+    .hero-highlights {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
     .hero-visual {
         display: grid;
         gap: 1rem;
@@ -1187,6 +1214,50 @@ html.dark .page-footer-tagline {
         transform: none !important;
         filter: none !important;
     }
+}
+
+/* === Performance optimizations for mobile === */
+@media (max-width: 640px) {
+    /* Reduce blur operations on low-end devices */
+    .site-background__glow {
+        filter: blur(48px);
+    }
+    .hero-glow {
+        filter: blur(40px);
+    }
+    /* Reduce orbit animations on mobile */
+    .hero-orbit--two {
+        display: none;
+    }
+    /* Simplify backdrop blur on mobile for perf */
+    .hero-button-secondary {
+        backdrop-filter: none;
+    }
+}
+
+/* === Enhanced glow effects === */
+.hero-button-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.45), 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+    transition: box-shadow 0.3s ease, transform 0.2s ease !important;
+}
+.hero-button-primary:hover {
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.6), 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* === Telegram particle pulse ring === */
+@keyframes tgRing {
+    0% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0.4), 0 4px 12px rgba(34, 158, 217, 0.25); }
+    70% { box-shadow: 0 0 0 8px rgba(34, 158, 217, 0), 0 4px 12px rgba(34, 158, 217, 0.25); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0), 0 4px 12px rgba(34, 158, 217, 0.25); }
+}
+
+/* Large Telegram particles get a subtle pulse */
+.hero-particle--large {
+    animation: heroParticleFloat var(--particle-duration, 16s) ease-in-out infinite,
+               tgRing 3s ease-out infinite;
+    animation-delay: var(--particle-delay, 0s), var(--particle-delay, 0s);
 }
 
 /* Mobile Admin Styles */

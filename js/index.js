@@ -1038,20 +1038,27 @@ function setupHeroScene() {
             return;
         }
 
-        const count = window.innerWidth < 640 ? 12 : window.innerWidth < 1024 ? 18 : 24;
+        // Telegram paper plane SVG path
+        const tgSvgPath = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>`;
+
+        const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth < 1024;
+        const count = isMobile ? 8 : isTablet ? 14 : 20;
 
         for (let i = 0; i < count; i += 1) {
             const particle = document.createElement('span');
-            const size = Math.round(Math.random() * 16 + 8);
+            const size = Math.round(Math.random() * (isMobile ? 18 : 24) + (isMobile ? 14 : 16));
             const left = Math.random() * 100;
             const top = Math.random() * 100;
-            const driftX = Math.round(Math.random() * 120 - 60);
-            const driftY = Math.round(Math.random() * 120 - 60);
+            const driftX = Math.round(Math.random() * 100 - 50);
+            const driftY = Math.round(Math.random() * 100 - 50);
             const duration = (Math.random() * 10 + 14).toFixed(2);
             const delay = (Math.random() * -18).toFixed(2);
-            const opacity = (Math.random() * 0.35 + 0.18).toFixed(2);
+            const opacity = (Math.random() * 0.3 + 0.15).toFixed(2);
+            const rot = Math.round(Math.random() * 40 - 20);
 
-            particle.className = 'hero-particle';
+            particle.className = 'hero-particle' + (size >= 32 ? ' hero-particle--large' : '');
+            particle.innerHTML = tgSvgPath;
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.left = `${left}%`;
@@ -1061,6 +1068,7 @@ function setupHeroScene() {
             particle.style.setProperty('--particle-y', `${driftY}px`);
             particle.style.setProperty('--particle-duration', `${duration}s`);
             particle.style.setProperty('--particle-delay', `${delay}s`);
+            particle.style.setProperty('--particle-rot', `${rot}deg`);
 
             particleContainer.appendChild(particle);
         }
