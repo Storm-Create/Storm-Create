@@ -68,6 +68,8 @@ html.dark .site-body {
     filter: blur(72px);
     opacity: 0.55;
     animation: driftGlow 18s ease-in-out infinite;
+    will-change: transform;
+    contain: layout style;
 }
 
 .site-background__glow--one {
@@ -177,6 +179,8 @@ html.dark .hero-backdrop {
     filter: blur(54px);
     opacity: 0.5;
     animation: driftGlow 16s ease-in-out infinite;
+    will-change: transform;
+    contain: layout style;
 }
 
 .hero-glow--one {
@@ -207,6 +211,7 @@ html.dark .hero-backdrop {
     width: 18rem;
     height: 18rem;
     animation: orbitSpin 18s linear infinite;
+    will-change: transform;
 }
 
 .hero-orbit--two {
@@ -216,11 +221,13 @@ html.dark .hero-backdrop {
     height: 9rem;
     opacity: 0.72;
     animation: orbitSpin 12s linear infinite reverse;
+    will-change: transform;
 }
 
 .hero-particles {
     inset: 0;
     overflow: hidden;
+    contain: layout style;
 }
 
 .hero-particle {
@@ -437,6 +444,7 @@ html.dark .hero-highlight span {
 
 .hero-visual-card--main {
     animation: heroCardLift 8s ease-in-out infinite;
+    will-change: transform;
 }
 
 .hero-visual-top,
@@ -663,12 +671,14 @@ html.dark .hero-float-card span {
     top: -1rem;
     right: -1rem;
     animation: floatCard 8s ease-in-out infinite;
+    will-change: transform;
 }
 
 .hero-float-card--bottom {
     bottom: 1rem;
     left: -1.5rem;
     animation: floatCard 9s ease-in-out infinite reverse;
+    will-change: transform;
 }
 
 .section-shell,
@@ -676,6 +686,7 @@ html.dark .hero-float-card span {
 .site-footer {
     position: relative;
     background: transparent !important;
+    contain: layout style;
 }
 
 #features > div,
@@ -1076,11 +1087,11 @@ html.dark .page-footer-tagline {
 
     0%,
     100% {
-        transform: translateY(0) rotateX(0deg);
+        transform: translateY(0);
     }
 
     50% {
-        transform: translateY(-10px) rotateX(1.5deg);
+        transform: translateY(-10px);
     }
 }
 
@@ -1216,22 +1227,59 @@ html.dark .page-footer-tagline {
     }
 }
 
+/* === Content visibility for lazy section rendering === */
+#reviews,
+#faq,
+#roadmap,
+#partners,
+#news {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 600px;
+}
+
 /* === Performance optimizations for mobile === */
 @media (max-width: 640px) {
     /* Reduce blur operations on low-end devices */
     .site-background__glow {
-        filter: blur(48px);
+        filter: blur(40px);
     }
     .hero-glow {
-        filter: blur(40px);
+        filter: blur(30px);
     }
     /* Reduce orbit animations on mobile */
     .hero-orbit--two {
         display: none;
     }
-    /* Simplify backdrop blur on mobile for perf */
-    .hero-button-secondary {
-        backdrop-filter: none;
+    /* Disable backdrop-filter on mobile - major GPU drain */
+    .hero-button-secondary,
+    .hero-kicker,
+    .hero-highlight,
+    .hero-float-card,
+    .page-hero__kicker,
+    .page-hero__chip,
+    .glass-card,
+    .page-panel,
+    #stats-grid > div {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    /* Simplify backgrounds where backdrop-filter is removed */
+    .hero-highlight {
+        background: rgba(255, 255, 255, 0.82) !important;
+    }
+    html.dark .hero-highlight {
+        background: rgba(15, 23, 42, 0.82) !important;
+    }
+    .hero-float-card {
+        background: rgba(255, 255, 255, 0.96) !important;
+    }
+    html.dark .hero-float-card {
+        background: rgba(15, 23, 42, 0.96) !important;
+    }
+    /* Disable animated glow blobs on mobile entirely */
+    .site-background__glow,
+    .hero-glow {
+        display: none;
     }
 }
 
@@ -1902,6 +1950,26 @@ body.mobile-menu-open {
     .page-panel {
         padding: 1.25rem;
         border-radius: 1.5rem;
+    }
+
+    /* Reduce backdrop-filter intensity on tablets */
+    .site-nav {
+        backdrop-filter: blur(12px) !important;
+    }
+
+    #features .grid > div,
+    #review-form-container,
+    #review-auth-prompt,
+    #latest-posts > a,
+    #reviews-list > div,
+    #faq .faq-item,
+    #roadmap-list > div > div:last-child,
+    #support-chat-panel > div {
+        backdrop-filter: blur(10px);
+    }
+
+    .page-panel {
+        backdrop-filter: blur(12px);
     }
 
     .toast {
