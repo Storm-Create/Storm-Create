@@ -218,6 +218,187 @@
         .sc-toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:99999;display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.97);border:1px solid rgba(148,163,184,.18);border-radius:.6rem;padding:.6rem 1rem;font-size:.81rem;font-weight:600;color:#0f172a;box-shadow:0 16px 48px rgba(15,23,42,.12);backdrop-filter:blur(20px);font-family:'Manrope',sans-serif;animation:tin .25s ease}
         html.dark .sc-toast{background:rgba(7,15,31,.97);border-color:rgba(148,163,184,.1);color:#e2e8f0}
         @keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ══════════════════════════════════════════════
+           MOBILE — полная адаптация для телефонов
+        ══════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+
+            /* Скрываем основной навбар сайта на мобильном — экономим место */
+            .site-nav { display: none !important; }
+
+            /* Редактор занимает весь экран */
+            #editor-wrap {
+                top: 0 !important;
+                bottom: 56px !important; /* место для мобильного таббара */
+            }
+
+            /* Скрываем desktop-only элементы */
+            #ed-activity { display: none !important; }
+            #ed-resize { display: none !important; }
+            #ed-main { margin-left: 0 !important; }
+
+            /* Explorer — слайдер поверх контента */
+            #ed-explorer {
+                position: fixed !important;
+                left: 0; top: 0; bottom: 56px;
+                z-index: 100;
+                width: 280px !important;
+                transform: translateX(-100%);
+                transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s !important;
+                box-shadow: none;
+                border-right: none !important;
+            }
+            #ed-explorer.mob-open {
+                transform: translateX(0) !important;
+                box-shadow: 4px 0 32px rgba(15,23,42,.18) !important;
+            }
+            #ed-explorer.closed { width: 280px !important; transform: translateX(-100%) !important; }
+
+            /* Бэкдроп для explorer */
+            #mob-backdrop {
+                display: none;
+                position: fixed; inset: 0; bottom: 56px;
+                background: rgba(15,23,42,.4);
+                z-index: 99;
+                backdrop-filter: blur(2px);
+            }
+            #mob-backdrop.show { display: block; }
+
+            /* Код и превью — вертикальный стек, переключаемый таббаром */
+            #ed-code-wrap, #ed-preview {
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                flex: none !important;
+                transition: opacity .2s, transform .2s;
+            }
+            #ed-preview { border-left: none !important; }
+
+            /* Активная/неактивная панель */
+            #ed-code-wrap.mob-hidden,
+            #ed-preview.mob-hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(8px);
+            }
+
+            /* Тулбар — горизонтальный скролл, иконки без текста */
+            #ed-toolbar {
+                padding: .2rem .5rem !important;
+                gap: .2rem !important;
+                overflow-x: auto;
+                scrollbar-width: none;
+                flex-wrap: nowrap !important;
+            }
+            #ed-toolbar::-webkit-scrollbar { display: none; }
+            /* Скрываем текстовые лейблы в тулбаре */
+            #ed-toolbar .tb span,
+            #ed-toolbar .tb-sep { display: none !important; }
+            #ed-toolbar .tb { padding: .3rem .5rem !important; font-size: .8rem !important; min-width: 32px; justify-content: center; }
+            #ed-toolbar .tb-sel { font-size: .76rem !important; max-width: 90px; }
+
+            /* Вкладки файлов — компактнее */
+            .ed-tab { padding: 0 .6rem !important; height: 32px !important; font-size: .72rem !important; }
+            .ed-tab .tab-x { opacity: .4 !important; }
+
+            /* Статус бар — только самое важное */
+            #ed-status .sr { display: none; }
+            #sb-cur { display: none; }
+
+            /* Toast снизу выше таббара */
+            .sc-toast { bottom: 4.5rem !important; right: .75rem !important; left: .75rem; font-size: .79rem; }
+            #zip-progress { bottom: 4.5rem !important; }
+
+            /* Превью — убираем device кнопки, они не нужны */
+            .dvb { width: 28px !important; height: 28px !important; }
+
+            /* WYSIWYG тулбар — скролл */
+            .wysiwyg-toolbar {
+                overflow-x: auto !important;
+                scrollbar-width: none !important;
+                flex-wrap: nowrap !important;
+                padding: .25rem .5rem !important;
+            }
+            .wysiwyg-toolbar::-webkit-scrollbar { display: none; }
+
+            /* Инспектор — полная ширина снизу */
+            #wy-inspector {
+                position: fixed !important;
+                left: 0 !important; right: 0 !important;
+                bottom: 56px !important; top: auto !important;
+                width: 100% !important;
+                max-height: 55vh;
+                overflow-y: auto;
+                border-radius: 1rem 1rem 0 0 !important;
+                border-left: none !important;
+                border-right: none !important;
+            }
+        }
+
+        /* ── Мобильный таббар (bottom navigation) ── */
+        #mob-tabbar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 56px;
+            background: rgba(255,255,255,.96);
+            border-top: 1px solid rgba(148,163,184,.15);
+            backdrop-filter: blur(20px);
+            z-index: 200;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 .25rem;
+        }
+        html.dark #mob-tabbar { background: rgba(2,6,23,.96); border-color: rgba(148,163,184,.12); }
+        .mob-tab {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 2px; flex: 1; height: 100%; cursor: pointer;
+            color: #94a3b8; font-size: .6rem; font-weight: 600;
+            border: none; background: transparent; font-family: 'Manrope', sans-serif;
+            transition: color .15s; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mob-tab i { font-size: 1.1rem; transition: transform .15s; }
+        .mob-tab.active { color: #3b82f6; }
+        .mob-tab.active i { transform: scale(1.15); }
+        .mob-tab:active i { transform: scale(.92); }
+
+        /* ── Мобильный хэдер ── */
+        #mob-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; height: 48px;
+            background: rgba(255,255,255,.96);
+            border-bottom: 1px solid rgba(148,163,184,.15);
+            backdrop-filter: blur(20px);
+            z-index: 201;
+            align-items: center;
+            padding: 0 .75rem;
+            gap: .5rem;
+        }
+        html.dark #mob-header { background: rgba(2,6,23,.96); border-color: rgba(148,163,184,.12); }
+        .mob-header-logo {
+            font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem;
+            background: linear-gradient(135deg,#3b82f6,#7c3aed);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            flex: 1;
+        }
+        .mob-header-btn {
+            width: 34px; height: 34px; border-radius: .5rem; border: none;
+            background: transparent; color: #64748b; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: .9rem;
+            transition: all .15s; -webkit-tap-highlight-color: transparent;
+        }
+        html.dark .mob-header-btn { color: #94a3b8; }
+        .mob-header-btn:active { background: rgba(59,130,246,.12); color: #3b82f6; }
+
+        @media (max-width: 768px) {
+            #mob-tabbar { display: flex; }
+            #mob-header { display: flex; }
+            /* Editor wrap учитывает хэдер */
+            #editor-wrap { top: 48px !important; }
+        }
     </style>
 </head>
 
@@ -563,6 +744,81 @@
         <div class="ctx-sep"></div>
         <div class="ctx-i danger" onclick="ED.clearFile()"><span><i class="fas fa-trash mr-2"></i>Очистить файл</span></div>
     </div>
+
+    <!-- ══ МОБИЛЬНЫЙ ХЭДЕР ══ -->
+    <div id="mob-header">
+        <button class="mob-header-btn" onclick="MOB.toggleFiles()" id="mob-files-btn">
+            <i class="fas fa-folder-open"></i>
+        </button>
+        <span class="mob-header-logo">⚡ StormEditor</span>
+        <button class="mob-header-btn" onclick="ED.openUpload()" title="Загрузить">
+            <i class="fas fa-upload"></i>
+        </button>
+        <button class="mob-header-btn" onclick="MOB.showActions()" title="Действия">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+    </div>
+
+    <!-- Бэкдроп для файлов на мобильном -->
+    <div id="mob-backdrop" onclick="MOB.closeFiles()"></div>
+
+    <!-- ══ МОБИЛЬНЫЙ ТАББАР ══ -->
+    <div id="mob-tabbar">
+        <button class="mob-tab active" id="mob-tab-code" onclick="MOB.showPanel('code')">
+            <i class="fas fa-code"></i>
+            <span>Код</span>
+        </button>
+        <button class="mob-tab" id="mob-tab-preview" onclick="MOB.showPanel('preview')">
+            <i class="fas fa-eye"></i>
+            <span>Превью</span>
+        </button>
+        <button class="mob-tab" id="mob-tab-wysiwyg" onclick="MOB.showPanel('wysiwyg')">
+            <i class="fas fa-pen-fancy"></i>
+            <span>WYSIWYG</span>
+        </button>
+        <button class="mob-tab" id="mob-tab-save" onclick="MOB.quickSave()">
+            <i class="fas fa-floppy-disk"></i>
+            <span>Сохранить</span>
+        </button>
+        <button class="mob-tab" id="mob-tab-more" onclick="MOB.showActions()">
+            <i class="fas fa-grid-2"></i>
+            <span>Ещё</span>
+        </button>
+    </div>
+
+    <!-- Мобильное меню действий (bottom sheet) -->
+    <div id="mob-actions" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:rgba(255,255,255,.97);border-radius:1.25rem 1.25rem 0 0;padding:1rem;box-shadow:0 -4px 32px rgba(15,23,42,.14);backdrop-filter:blur(20px)">
+        <div style="width:36px;height:4px;border-radius:2px;background:rgba(148,163,184,.3);margin:0 auto .75rem"></div>
+        <div style="font-weight:800;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:.75rem;padding:0 .25rem">Действия</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem">
+            <button onclick="ED.formatCode();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-wand-magic-sparkles" style="font-size:1.1rem;color:#3b82f6"></i>Форматировать
+            </button>
+            <button onclick="ED.downloadProject();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-download" style="font-size:1.1rem;color:#16a34a"></i>Скачать
+            </button>
+            <button onclick="ED.openInTab();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-external-link-alt" style="font-size:1.1rem;color:#7c3aed"></i>Открыть
+            </button>
+            <button onclick="ED.toggleFullPrev();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-expand" style="font-size:1.1rem;color:#ea580c"></i>Полный экран
+            </button>
+            <button onclick="ED.openUpload();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-upload" style="font-size:1.1rem;color:#0ea5e9"></i>Загрузить
+            </button>
+            <button onclick="ED.toggleWrap();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-align-left" style="font-size:1.1rem;color:#64748b"></i>Перенос
+            </button>
+            <button onclick="ED.findInCode();MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-search" style="font-size:1.1rem;color:#64748b"></i>Поиск
+            </button>
+            <button onclick="document.querySelector('.tb-sel') && (document.querySelector('.tb-sel').focus());MOB.closeActions()" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.65rem .25rem;border-radius:.65rem;border:1px solid rgba(148,163,184,.15);background:rgba(248,250,252,.8);cursor:pointer;font-family:'Manrope',sans-serif;color:#64748b;font-size:.68rem;font-weight:600;-webkit-tap-highlight-color:transparent">
+                <i class="fas fa-layer-group" style="font-size:1.1rem;color:#64748b"></i>Шаблоны
+            </button>
+        </div>
+        <button onclick="MOB.closeActions()" style="width:100%;margin-top:.75rem;padding:.7rem;border:none;border-radius:.65rem;background:rgba(148,163,184,.12);color:#64748b;font-family:'Manrope',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer">Закрыть</button>
+    </div>
+    <div id="mob-actions-bg" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(15,23,42,.35);backdrop-filter:blur(2px)" onclick="MOB.closeActions()"></div>
 
     <script type="module" src="js/ui.js"></script>
 
@@ -1272,7 +1528,100 @@
     document.addEventListener('click',hideCtx);
     function toast(msg){const el=document.createElement('div');el.className='sc-toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)';el.style.transition='all .25s';setTimeout(()=>el.remove(),250);},2500);}
 
-    /* ══ TEMPLATES ══ */
+    /* ══ MOB — мобильное управление ══ */
+    const MOB = {
+        _panel: 'code', // 'code' | 'preview' | 'wysiwyg'
+        _isMobile: () => window.innerWidth <= 768,
+
+        init() {
+            if (!this._isMobile()) return;
+            // Показываем правильные панели
+            this.showPanel('code');
+        },
+
+        showPanel(panel) {
+            if (!this._isMobile()) return;
+            this._panel = panel;
+
+            const codeWrap = document.getElementById('ed-code-wrap');
+            const prevPanel = document.getElementById('ed-preview');
+            const wysOverlay = document.getElementById('wysiwyg-overlay');
+
+            // Сначала всё скрываем
+            codeWrap.classList.add('mob-hidden');
+            prevPanel.classList.add('mob-hidden');
+            if (wysOverlay) wysOverlay.classList.remove('on');
+
+            // Сбрасываем активные табы
+            document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+
+            if (panel === 'code') {
+                codeWrap.classList.remove('mob-hidden');
+                document.getElementById('mob-tab-code')?.classList.add('active');
+                if (ED._editor) setTimeout(() => ED._editor.layout(), 50);
+            } else if (panel === 'preview') {
+                prevPanel.classList.remove('mob-hidden');
+                document.getElementById('mob-tab-preview')?.classList.add('active');
+                ED.refresh();
+            } else if (panel === 'wysiwyg') {
+                codeWrap.classList.remove('mob-hidden');
+                document.getElementById('mob-tab-wysiwyg')?.classList.add('active');
+                // Включаем WYSIWYG если не включён
+                if (!ED._wysOpen) ED.toggleWYSIWYG();
+            }
+        },
+
+        toggleFiles() {
+            const exp = document.getElementById('ed-explorer');
+            const bd  = document.getElementById('mob-backdrop');
+            const isOpen = exp.classList.contains('mob-open');
+            exp.classList.toggle('mob-open', !isOpen);
+            bd.classList.toggle('show', !isOpen);
+            document.getElementById('mob-files-btn').style.color = isOpen ? '' : '#3b82f6';
+        },
+
+        closeFiles() {
+            document.getElementById('ed-explorer').classList.remove('mob-open');
+            document.getElementById('mob-backdrop').classList.remove('show');
+            document.getElementById('mob-files-btn').style.color = '';
+        },
+
+        quickSave() {
+            FS.save();
+            toast('💾 Сохранено');
+            // Animate button
+            const btn = document.getElementById('mob-tab-save');
+            if (btn) { btn.style.color = '#22c55e'; setTimeout(() => btn.style.color = '', 1200); }
+        },
+
+        showActions() {
+            document.getElementById('mob-actions').style.display = 'block';
+            document.getElementById('mob-actions-bg').style.display = 'block';
+            // Animate in
+            const el = document.getElementById('mob-actions');
+            el.style.transform = 'translateY(100%)';
+            requestAnimationFrame(() => { el.style.transition = 'transform .28s cubic-bezier(.4,0,.2,1)'; el.style.transform = 'translateY(0)'; });
+        },
+
+        closeActions() {
+            const el = document.getElementById('mob-actions');
+            el.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                el.style.display = 'none';
+                el.style.transform = '';
+                el.style.transition = '';
+                document.getElementById('mob-actions-bg').style.display = 'none';
+            }, 250);
+        }
+    };
+
+    // Инициализируем мобильное управление после загрузки редактора
+    const _origInit = ED.init.bind(ED);
+    ED.init = function() { _origInit(); setTimeout(() => MOB.init(), 200); };
+
+    // При смене файла на мобильном — закрываем explorer
+    const _origSwitch = ED.switchFile.bind(ED);
+    ED.switchFile = function(name) { _origSwitch(name); if (MOB._isMobile()) MOB.closeFiles(); };
     const TPL={
         default:{
             h:`<!DOCTYPE html>
@@ -1301,7 +1650,7 @@
       <button onclick="this.textContent='🎉 Отлично!'">Начать →</button>
     </section>
   </main>
-  <footer><p>© 2025 MyBrand. Сделано в StormEditor</p></footer>
+  <footer><p>© 2026 MyBrand. Сделано в StormEditor</p></footer>
   <script src="script.js"><\/script>
 </body>
 </html>`,
@@ -1332,9 +1681,9 @@ footer{text-align:center;padding:2rem;background:var(--dark);color:#64748b;font-
 });`
         },
         empty:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Новый сайт</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n\n  <script src="script.js"><\/script>\n</body>\n</html>`,c:`*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: 'Segoe UI', sans-serif; }`,j:`console.log('Hello, World!');`},
-        landing:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Лендинг</title><link rel="stylesheet" href="style.css"></head>\n<body>\n<header><div class="w nav"><span class="logo">⚡ Storm</span><nav><a href="#f">Возможности</a><a href="#p">Цены</a></nav><button class="cta">Попробовать</button></div></header>\n<section class="hero"><div class="w"><div class="badge">🚀 Новый уровень</div><h1>Создавай <em>быстро</em><br>и красиво</h1><p>Профессиональный инструмент с живым превью и шаблонами.</p><div class="btns"><button class="bp">Начать бесплатно</button><button class="bg">Демо ▶</button></div></div></section>\n<section id="f" class="feat"><div class="w"><h2>Возможности</h2><div class="grid"><div class="card"><div class="i">⚡</div><h3>Быстро</h3><p>Оптимизированный код</p></div><div class="card"><div class="i">📱</div><h3>Адаптивно</h3><p>На всех устройствах</p></div><div class="card"><div class="i">🎨</div><h3>Красиво</h3><p>Готовые шаблоны</p></div><div class="card"><div class="i">🔒</div><h3>Надёжно</h3><p>Безопасная платформа</p></div></div></div></section>\n<footer><div class="w"><p>© 2025 Storm</p></div></footer>\n<script src="script.js"><\/script>\n</body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}:root{--p:#3b82f6;--d:#0f172a}body{font-family:'Segoe UI',sans-serif;color:var(--d)}.w{max-width:1100px;margin:0 auto;padding:0 1.5rem}header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid #e2e8f0}.nav{display:flex;align-items:center;padding:1rem 1.5rem;gap:1.5rem}.logo{font-weight:900;font-size:1.25rem;color:var(--p)}nav{display:flex;gap:1.5rem;flex:1;justify-content:center}nav a{text-decoration:none;color:#64748b;font-weight:500;transition:color .2s}nav a:hover{color:var(--p)}.cta{padding:.45rem 1.2rem;background:var(--p);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}.hero{min-height:90vh;display:flex;align-items:center;background:linear-gradient(160deg,#dbeafe,#eff6ff 55%,#f5f3ff);padding:5rem 0}.badge{display:inline-block;background:#dbeafe;color:var(--p);padding:.3rem 1rem;border-radius:50px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem}h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1.05;margin-bottom:1.25rem}em{font-style:normal;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{font-size:1.1rem;color:#64748b;max-width:520px;margin-bottom:2rem}.btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}.bp{padding:.9rem 2rem;background:var(--p);color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(59,130,246,.3)}.bp:hover{transform:translateY(-3px)}.bg{padding:.9rem 2rem;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}.bg:hover{background:var(--p);color:#fff}.feat{padding:6rem 0;background:#fff}.feat h2{font-size:2rem;font-weight:900;margin-bottom:3rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}.card{padding:1.75rem;border:1px solid #e2e8f0;border-radius:16px;transition:all .3s}.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(59,130,246,.08);border-color:var(--p)}.i{font-size:2rem;margin-bottom:.75rem}.card h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}.card p{color:#64748b;font-size:.9rem}footer{padding:2rem 0;background:var(--d);text-align:center;color:#64748b;font-size:.875rem}`,j:`document.addEventListener('DOMContentLoaded',()=>{const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(20px)';c.style.transition='all .5s ease';io.observe(c);});});`},
+        landing:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Лендинг</title><link rel="stylesheet" href="style.css"></head>\n<body>\n<header><div class="w nav"><span class="logo">⚡ Storm</span><nav><a href="#f">Возможности</a><a href="#p">Цены</a></nav><button class="cta">Попробовать</button></div></header>\n<section class="hero"><div class="w"><div class="badge">🚀 Новый уровень</div><h1>Создавай <em>быстро</em><br>и красиво</h1><p>Профессиональный инструмент с живым превью и шаблонами.</p><div class="btns"><button class="bp">Начать бесплатно</button><button class="bg">Демо ▶</button></div></div></section>\n<section id="f" class="feat"><div class="w"><h2>Возможности</h2><div class="grid"><div class="card"><div class="i">⚡</div><h3>Быстро</h3><p>Оптимизированный код</p></div><div class="card"><div class="i">📱</div><h3>Адаптивно</h3><p>На всех устройствах</p></div><div class="card"><div class="i">🎨</div><h3>Красиво</h3><p>Готовые шаблоны</p></div><div class="card"><div class="i">🔒</div><h3>Надёжно</h3><p>Безопасная платформа</p></div></div></div></section>\n<footer><div class="w"><p>© 2026 Storm</p></div></footer>\n<script src="script.js"><\/script>\n</body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}:root{--p:#3b82f6;--d:#0f172a}body{font-family:'Segoe UI',sans-serif;color:var(--d)}.w{max-width:1100px;margin:0 auto;padding:0 1.5rem}header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid #e2e8f0}.nav{display:flex;align-items:center;padding:1rem 1.5rem;gap:1.5rem}.logo{font-weight:900;font-size:1.25rem;color:var(--p)}nav{display:flex;gap:1.5rem;flex:1;justify-content:center}nav a{text-decoration:none;color:#64748b;font-weight:500;transition:color .2s}nav a:hover{color:var(--p)}.cta{padding:.45rem 1.2rem;background:var(--p);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}.hero{min-height:90vh;display:flex;align-items:center;background:linear-gradient(160deg,#dbeafe,#eff6ff 55%,#f5f3ff);padding:5rem 0}.badge{display:inline-block;background:#dbeafe;color:var(--p);padding:.3rem 1rem;border-radius:50px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem}h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1.05;margin-bottom:1.25rem}em{font-style:normal;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{font-size:1.1rem;color:#64748b;max-width:520px;margin-bottom:2rem}.btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}.bp{padding:.9rem 2rem;background:var(--p);color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(59,130,246,.3)}.bp:hover{transform:translateY(-3px)}.bg{padding:.9rem 2rem;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}.bg:hover{background:var(--p);color:#fff}.feat{padding:6rem 0;background:#fff}.feat h2{font-size:2rem;font-weight:900;margin-bottom:3rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}.card{padding:1.75rem;border:1px solid #e2e8f0;border-radius:16px;transition:all .3s}.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(59,130,246,.08);border-color:var(--p)}.i{font-size:2rem;margin-bottom:.75rem}.card h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}.card p{color:#64748b;font-size:.9rem}footer{padding:2rem 0;background:var(--d);text-align:center;color:#64748b;font-size:.875rem}`,j:`document.addEventListener('DOMContentLoaded',()=>{const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(20px)';c.style.transition='all .5s ease';io.observe(c);});});`},
         portfolio:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Портфолио</title><link rel="stylesheet" href="style.css"></head>\n<body>\n  <div class="cur"></div>\n  <header><a class="logo" href="#">АА</a><nav><a href="#work">Работы</a><a href="#about">Обо мне</a></nav></header>\n  <section class="hero"><div class="ht"><span class="sub">Frontend Developer & Designer</span><h1><span class="out">Алексей</span><br>Андреев</h1></div></section>\n  <section id="work" class="work"><div class="lbl">Работы</div><div class="grid">\n    <div class="item" style="--c:#3b82f6"><div class="n">01</div><h3>E-commerce</h3><p>React · Node.js</p></div>\n    <div class="item wide" style="--c:#8b5cf6"><div class="n">02</div><h3>Мобильное приложение</h3><p>Flutter · Firebase</p></div>\n    <div class="item" style="--c:#ec4899"><div class="n">03</div><h3>Брендинг</h3><p>Figma</p></div>\n    <div class="item" style="--c:#14b8a6"><div class="n">04</div><h3>Дашборд</h3><p>Vue · D3.js</p></div>\n  </div></section>\n  <footer id="about"><p class="fp">Готов к сотрудничеству</p><a class="email" href="mailto:hello@alex.dev">hello@alex.dev</a></footer>\n  <script src="script.js"><\/script>\n</body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{background:#060608;color:#f0f0f0;font-family:'Helvetica Neue',Arial,sans-serif;cursor:none;overflow-x:hidden}.cur{width:28px;height:28px;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s;mix-blend-mode:difference}header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 3rem;display:flex;align-items:center;justify-content:space-between}.logo{font-size:1rem;font-weight:900;letter-spacing:.2em;color:#f0f0f0;text-decoration:none}nav{display:flex;gap:2.5rem}nav a{text-decoration:none;color:#888;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;transition:color .2s}nav a:hover{color:#f0f0f0}.hero{height:100vh;display:flex;align-items:flex-end;padding:0 3rem 6rem}.sub{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#555;display:block;margin-bottom:1.5rem}h1{font-size:clamp(4.5rem,12vw,10rem);font-weight:900;line-height:.88;letter-spacing:-.04em;text-transform:uppercase}.out{-webkit-text-stroke:1px rgba(240,240,240,.7);color:transparent}.work{padding:7rem 3rem}.lbl{font-size:.65rem;letter-spacing:.3em;color:#444;text-transform:uppercase;margin-bottom:3rem}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}.item{border-radius:12px;background:var(--c);padding:2.5rem 2rem;cursor:none;transition:transform .4s}.item:hover{transform:scale(1.02)}.item.wide{grid-column:span 2}.n{font-size:3.5rem;font-weight:900;color:rgba(255,255,255,.12);line-height:1;margin-bottom:2.5rem}.item h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}.item p{font-size:.8rem;color:rgba(255,255,255,.6)}footer{padding:5rem 3rem;text-align:center;border-top:1px solid #111}.fp{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#444;margin-bottom:1.5rem}.email{font-size:clamp(1.75rem,5.5vw,4.5rem);font-weight:900;color:#f0f0f0;text-decoration:none;transition:opacity .2s}.email:hover{opacity:.5}`,j:`const c=document.querySelector('.cur');let mx=0,my=0,cx=0,cy=0;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});(function l(){cx+=(mx-cx)*.1;cy+=(my-cy)*.1;c.style.left=cx+'px';c.style.top=cy+'px';requestAnimationFrame(l);})();document.querySelectorAll('a,.item').forEach(el=>{el.addEventListener('mouseenter',()=>{c.style.width='52px';c.style.height='52px';});el.addEventListener('mouseleave',()=>{c.style.width='28px';c.style.height='28px';});});`},
-        blog:{h:`<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Блог</title><link rel="stylesheet" href="style.css"></head>\n<body><header><div class="w"><a class="logo" href="#">✍️ Блог</a><nav><a href="#">Статьи</a><a href="#">Категории</a></nav></div></header>\n<main class="w"><section class="feat"><article><div class="meta"><span class="tag">Технологии</span><time>12 мар 2025</time></div><h1>Будущее веб-разработки</h1><p>AI и новые фреймворки меняют отрасль быстрее, чем мы успеваем изучать...</p><a class="more" href="#">Читать далее →</a></article></section>\n<div class="grid"><article class="card"><span class="tag">Дизайн</span><h2>10 правил UI</h2><p>Что делает интерфейс удобным...</p><a href="#">→</a></article><article class="card"><span class="tag">JavaScript</span><h2>Async/Await</h2><p>Асинхронный код без боли...</p><a href="#">→</a></article><article class="card"><span class="tag">CSS</span><h2>CSS Grid</h2><p>Макеты за 10 минут...</p><a href="#">→</a></article></div></main>\n<footer><div class="w"><p>© 2025 Блог</p></div></footer>\n<script src="script.js"><\/script></body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#fffef9;color:#1a1a1a;line-height:1.7}.w{max-width:880px;margin:0 auto;padding:0 1.5rem}header{border-bottom:1px solid #ede8df;padding:1.25rem 0;margin-bottom:3rem}header .w{display:flex;align-items:center;justify-content:space-between}.logo{font-weight:700;font-size:1.2rem;text-decoration:none;color:#1a1a1a}nav{display:flex;gap:2rem}nav a{text-decoration:none;color:#999;font-size:.875rem;font-family:'Segoe UI',sans-serif;transition:color .2s}nav a:hover{color:#1a1a1a}.feat{margin-bottom:3rem}article{background:#f7f2eb;border-radius:16px;padding:2.5rem 3rem}.meta{display:flex;gap:1rem;align-items:center;margin-bottom:1rem;font-family:'Segoe UI',sans-serif;font-size:.8rem;color:#aaa}.tag{background:#1a1a1a;color:#fff;padding:.18rem .6rem;border-radius:4px;font-size:.7rem;font-weight:700;font-family:'Segoe UI',sans-serif}.feat h1{font-size:1.75rem;line-height:1.3;margin-bottom:.75rem}.feat p{color:#666;margin-bottom:1.5rem}.more{color:#1a1a1a;font-weight:700;text-decoration:none;font-family:'Segoe UI',sans-serif}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-bottom:4rem}.card{padding:1.75rem;border:1px solid #ede8df;border-radius:12px;transition:all .25s;font-family:'Segoe UI',sans-serif}.card:hover{border-color:#1a1a1a;transform:translateY(-4px)}.card .tag{display:inline-block;margin-bottom:.75rem}.card h2{font-size:1rem;margin-bottom:.5rem;font-family:Georgia,serif}.card p{color:#aaa;font-size:.85rem;margin-bottom:.75rem}.card a{color:#1a1a1a;text-decoration:none;font-weight:700}footer{border-top:1px solid #ede8df;padding:2rem 0;text-align:center;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:.82rem}`,j:`const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(16px)';c.style.transition='all .4s ease';io.observe(c);});`},
+        blog:{h:`<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Блог</title><link rel="stylesheet" href="style.css"></head>\n<body><header><div class="w"><a class="logo" href="#">✍️ Блог</a><nav><a href="#">Статьи</a><a href="#">Категории</a></nav></div></header>\n<main class="w"><section class="feat"><article><div class="meta"><span class="tag">Технологии</span><time>12 мар 2025</time></div><h1>Будущее веб-разработки</h1><p>AI и новые фреймворки меняют отрасль быстрее, чем мы успеваем изучать...</p><a class="more" href="#">Читать далее →</a></article></section>\n<div class="grid"><article class="card"><span class="tag">Дизайн</span><h2>10 правил UI</h2><p>Что делает интерфейс удобным...</p><a href="#">→</a></article><article class="card"><span class="tag">JavaScript</span><h2>Async/Await</h2><p>Асинхронный код без боли...</p><a href="#">→</a></article><article class="card"><span class="tag">CSS</span><h2>CSS Grid</h2><p>Макеты за 10 минут...</p><a href="#">→</a></article></div></main>\n<footer><div class="w"><p>© 2026 Блог</p></div></footer>\n<script src="script.js"><\/script></body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#fffef9;color:#1a1a1a;line-height:1.7}.w{max-width:880px;margin:0 auto;padding:0 1.5rem}header{border-bottom:1px solid #ede8df;padding:1.25rem 0;margin-bottom:3rem}header .w{display:flex;align-items:center;justify-content:space-between}.logo{font-weight:700;font-size:1.2rem;text-decoration:none;color:#1a1a1a}nav{display:flex;gap:2rem}nav a{text-decoration:none;color:#999;font-size:.875rem;font-family:'Segoe UI',sans-serif;transition:color .2s}nav a:hover{color:#1a1a1a}.feat{margin-bottom:3rem}article{background:#f7f2eb;border-radius:16px;padding:2.5rem 3rem}.meta{display:flex;gap:1rem;align-items:center;margin-bottom:1rem;font-family:'Segoe UI',sans-serif;font-size:.8rem;color:#aaa}.tag{background:#1a1a1a;color:#fff;padding:.18rem .6rem;border-radius:4px;font-size:.7rem;font-weight:700;font-family:'Segoe UI',sans-serif}.feat h1{font-size:1.75rem;line-height:1.3;margin-bottom:.75rem}.feat p{color:#666;margin-bottom:1.5rem}.more{color:#1a1a1a;font-weight:700;text-decoration:none;font-family:'Segoe UI',sans-serif}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-bottom:4rem}.card{padding:1.75rem;border:1px solid #ede8df;border-radius:12px;transition:all .25s;font-family:'Segoe UI',sans-serif}.card:hover{border-color:#1a1a1a;transform:translateY(-4px)}.card .tag{display:inline-block;margin-bottom:.75rem}.card h2{font-size:1rem;margin-bottom:.5rem;font-family:Georgia,serif}.card p{color:#aaa;font-size:.85rem;margin-bottom:.75rem}.card a{color:#1a1a1a;text-decoration:none;font-weight:700}footer{border-top:1px solid #ede8df;padding:2rem 0;text-align:center;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:.82rem}`,j:`const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(16px)';c.style.transition='all .4s ease';io.observe(c);});`},
         dashboard:{h:`<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Дашборд</title><link rel="stylesheet" href="style.css"></head>\n<body><div class="app">\n<aside><div class="brand">⚡ Аналитика</div><nav><a href="#" class="on">📊 Дашборд</a><a href="#">📈 Статистика</a><a href="#">👥 Пользователи</a><a href="#">💰 Финансы</a><a href="#">⚙️ Настройки</a></nav></aside>\n<main><div class="topbar"><h1>Обзор</h1><div class="pill">👤 Администратор</div></div>\n<div class="kpis"><div class="kpi"><div class="ki" style="background:#dbeafe">📈</div><div><p>Выручка</p><h3>₽1 234 567</h3><span class="up">↑ +12%</span></div></div><div class="kpi"><div class="ki" style="background:#dcfce7">👥</div><div><p>Пользователи</p><h3>8 492</h3><span class="up">↑ +5%</span></div></div><div class="kpi"><div class="ki" style="background:#fce7f3">🛒</div><div><p>Заказы</p><h3>1 234</h3><span class="dn">↓ -2%</span></div></div><div class="kpi"><div class="ki" style="background:#fef3c7">⭐</div><div><p>Рейтинг</p><h3>4.8</h3><span class="up">↑ +0.2</span></div></div></div>\n<div class="panels"><div class="panel"><h2>Последние заказы</h2><table><thead><tr><th>Клиент</th><th>Сумма</th><th>Статус</th></tr></thead><tbody><tr><td>Иван С.</td><td>₽12 500</td><td><span class="b ok">Выполнен</span></td></tr><tr><td>Мария К.</td><td>₽8 300</td><td><span class="b pend">В работе</span></td></tr><tr><td>Пётр В.</td><td>₽21 000</td><td><span class="b ok">Выполнен</span></td></tr></tbody></table></div><div class="panel"><h2>Активность</h2><div id="chart"></div></div></div></main></div>\n<script src="script.js"><\/script></body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;height:100vh;overflow:hidden}.app{display:flex;height:100vh}aside{width:215px;background:#fff;border-right:1px solid #e2e8f0;padding:1.25rem .875rem;flex-shrink:0;display:flex;flex-direction:column;gap:.5rem}.brand{font-weight:900;font-size:1.05rem;color:#3b82f6;padding:.5rem .5rem 1rem}aside nav{display:flex;flex-direction:column;gap:.15rem}aside nav a{padding:.6rem .875rem;border-radius:8px;text-decoration:none;color:#64748b;font-size:.85rem;transition:all .18s}aside nav a:hover,aside nav a.on{background:#eff6ff;color:#3b82f6;font-weight:600}main{flex:1;overflow-y:auto;padding:1.5rem 1.75rem}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}.topbar h1{font-size:1.35rem;font-weight:800}.pill{background:#fff;border:1px solid #e2e8f0;padding:.35rem .85rem;border-radius:50px;font-size:.8rem}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}.kpi{background:#fff;border-radius:12px;padding:1.15rem;display:flex;align-items:center;gap:.875rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}.ki{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}.kpi p{font-size:.72rem;color:#94a3b8;margin-bottom:.15rem}.kpi h3{font-size:1.2rem;font-weight:800;margin-bottom:.15rem}.up{font-size:.72rem;font-weight:700;color:#16a34a}.dn{font-size:.72rem;font-weight:700;color:#dc2626}.panels{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem}.panel{background:#fff;border-radius:12px;padding:1.35rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}.panel h2{font-size:.85rem;font-weight:700;color:#475569;margin-bottom:1rem}table{width:100%;border-collapse:collapse}th{text-align:left;padding:.4rem .35rem;font-size:.72rem;color:#94a3b8;border-bottom:1px solid #f1f5f9}td{padding:.65rem .35rem;font-size:.82rem;border-bottom:1px solid #f8fafc}.b{padding:.18rem .6rem;border-radius:50px;font-size:.7rem;font-weight:600}.b.ok{background:#dcfce7;color:#16a34a}.b.pend{background:#fef3c7;color:#d97706}#chart{display:flex;align-items:flex-end;gap:.35rem;height:120px;padding-top:.35rem}`,j:`const vs=[65,40,80,55,90,45,70,85,60,75,50,95];const ls=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];const cs=['#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f59e0b','#06b6d4','#10b981','#f97316','#ef4444','#84cc16','#a855f7','#0ea5e9'];const c=document.getElementById('chart');vs.forEach((v,i)=>{const w=document.createElement('div');w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end';const b=document.createElement('div');b.style.cssText='width:100%;background:'+cs[i]+';border-radius:3px 3px 0 0;opacity:.85;transition:height .65s ease '+(i*.04)+'s';b.style.height='0';const l=document.createElement('span');l.style.cssText='font-size:.58rem;color:#94a3b8';l.textContent=ls[i];w.appendChild(b);w.appendChild(l);c.appendChild(w);setTimeout(()=>b.style.height=v+'%',80);});`}
     };
     </script>
