@@ -918,7 +918,6 @@
             const f = FS.files[name];
 
             if (f.type === 'image') {
-                // Show image viewer
                 document.getElementById('ed-monaco').style.display='none';
                 document.getElementById('ed-img-view').classList.add('show');
                 const img = document.getElementById('ed-img-el');
@@ -932,13 +931,18 @@
                 if (this._editor) {
                     const m = monaco.editor.createModel(f.content, f.lang);
                     this._editor.setModel(m);
-                    this._editor.onDidChangeModelContent(()=>{FS.files[this._curFile].content=this._editor.getValue();this._updateChars();this._schedSave();this._schedPreview();});
+                    this._editor.onDidChangeModelContent(()=>{
+                        FS.files[this._curFile].content=this._editor.getValue();
+                        this._updateChars(); this._schedSave(); this._schedPreview();
+                    });
                 }
-                document.getElementById('sb-lang').textContent=f.lang.toUpperCase();
+                document.getElementById('sb-lang').textContent = f.lang.toUpperCase();
             }
             this._updateChars();
             this._renderExplorer();
             this._renderTabs();
+            // Always refresh preview when switching files
+            this.refresh();
         },
 
         addFile() {
@@ -979,19 +983,25 @@
         async handleFileUpload(fileList) {
             const files = Array.from(fileList);
             let loaded = 0;
+            let firstHtml = null;
             for (const file of files) {
                 if (file.name.toLowerCase().endsWith('.zip')) {
                     await this._extractZip(file);
                 } else {
                     await this._loadSingleFile(file);
                     loaded++;
+                    // Track first uploaded HTML file
+                    if (!firstHtml && file.name.toLowerCase().endsWith('.html')) {
+                        firstHtml = file.name;
+                    }
                 }
             }
             if (loaded > 0) {
                 this._renderExplorer(); this._renderTabs();
-                toast(`📂 Загружено файлов: ${loaded}`);
-                // Switch to index.html if it was uploaded
-                if (FS.files['index.html']) this.switchFile('index.html');
+                toast(`📂 Загружено: ${loaded} файл(ов)`);
+                // Switch to the uploaded HTML file and refresh preview
+                const target = firstHtml || (FS.files['index.html'] ? 'index.html' : null);
+                if (target) this.switchFile(target);
                 this.refresh();
             }
         },
@@ -1115,37 +1125,46 @@
         },
 
         _buildHTML() {
-            // Start from the uploaded/edited index.html
-            let h = FS.files['index.html']?.content || '';
-            if (!h) return '<p style="font-family:sans-serif;padding:2rem;color:#64748b">Нет содержимого для предпросмотра</p>';
+            // Find the active HTML file — use current file if it's HTML, else find index.html or first HTML
+            let activeHtml = this._curFile;
+            if (!activeHtml.endsWith('.html') && !activeHtml.endsWith('.htm')) {
+                activeHtml = Object.keys(FS.files).find(k => k === 'index.html')
+                          || Object.keys(FS.files).find(k => k.endsWith('.html') || k.endsWith('.htm'))
+                          || null;
+            }
+            if (!activeHtml || !FS.files[activeHtml]) {
+                return '<p style="font-family:sans-serif;padding:2rem;color:#64748b">Откройте HTML файл для предпросмотра</p>';
+            }
 
-            // Replace relative file references with actual content / data URLs
+            let h = FS.files[activeHtml].content;
+            if (!h) return '<p style="font-family:sans-serif;padding:2rem;color:#64748b">HTML файл пустой</p>';
+
+            // Replace all referenced files with inline content / data URLs
             Object.entries(FS.files).forEach(([name, f]) => {
+                // Get just the filename without directory prefix for matching
+                const basename = name.split('/').pop();
+                const escaped  = basename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const escapedFull = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
                 if (f.type === 'image') {
-                    // Replace image src references
-                    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    h = h.replace(new RegExp(`(src=["'])([./]*)(${escaped})(["'])`, 'g'), `$1${f.dataUrl}$4`);
-                    h = h.replace(new RegExp(`(src=["'])(${escaped})(["'])`, 'g'), `$1${f.dataUrl}$3`);
+                    // Match src="images/photo.jpg" or src="photo.jpg" or src="./photo.jpg"
+                    h = h.replace(new RegExp(`(src=["'])([^"']*?${escaped})(["'])`, 'gi'), `$1${f.dataUrl}$3`);
+                    h = h.replace(new RegExp(`(href=["'])([^"']*?${escaped})(["'])`, 'gi'), `$1${f.dataUrl}$3`);
                 } else if (f.type === 'code') {
-                    const ext = name.split('.').pop().toLowerCase();
-                    // Inline CSS files referenced by link tags
+                    const ext = basename.split('.').pop().toLowerCase();
                     if (ext === 'css') {
-                        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const linkRe = new RegExp(`<link[^>]+href=["'][./]*${escaped}["'][^>]*>`, 'gi');
-                        if (linkRe.test(h)) {
-                            h = h.replace(linkRe, `<style>\n${f.content}\n</style>`);
-                        }
+                        // Match <link href="css/style.css"> or <link href="style.css">
+                        const linkRe = new RegExp(`<link([^>]+)href=["'][^"']*${escaped}["']([^>]*)>`, 'gi');
+                        h = h.replace(linkRe, `<style>\n/* ${name} */\n${f.content}\n</style>`);
                     }
-                    // Inline JS files referenced by script tags
                     if (ext === 'js') {
-                        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const scriptRe = new RegExp(`<script[^>]+src=["'][./]*${escaped}["'][^>]*><\\/script>`, 'gi');
-                        if (scriptRe.test(h)) {
-                            h = h.replace(scriptRe, `<script>\n${f.content}\n<\/script>`);
-                        }
+                        // Match <script src="js/main.js"> or <script src="main.js">
+                        const scriptRe = new RegExp(`<script([^>]+)src=["'][^"']*${escaped}["']([^>]*)><\\/script>`, 'gi');
+                        h = h.replace(scriptRe, `<script>\n/* ${name} */\n${f.content}\n<\/script>`);
                     }
                 }
             });
+
             return h;
         },
 
