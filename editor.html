@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор сайтов | Storm Create</title>
+    <title>StormEditor — Редактор сайтов</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,285 +13,373 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-    <style>
-        body { overflow: hidden !important; }
 
-        /* ── AUTH GATE ─────────────────────────────────── */
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { overflow: hidden !important; font-family: 'Manrope', sans-serif; }
+
+        /* ════════════════════════════════════════
+           AUTH GATE
+        ════════════════════════════════════════ */
         #auth-gate {
             position: fixed; inset: 0; z-index: 500;
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem;
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
         }
         .auth-card {
-            background: rgba(255,255,255,0.88);
-            border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 36px 120px rgba(15,23,42,0.16);
-            border-radius: 1.75rem;
-            padding: 2.5rem;
-            max-width: 420px; width: 100%;
-            text-align: center;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 40px 120px rgba(15,23,42,0.18);
+            border-radius: 1.5rem; padding: 2.5rem;
+            max-width: 400px; width: 100%; text-align: center;
         }
-        html.dark .auth-card {
-            background: rgba(7,15,31,0.92);
-            border-color: rgba(148,163,184,0.14);
-        }
-        .auth-badge {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.45rem 1rem; margin-bottom: 1.5rem;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.62);
-            border: 1px solid rgba(255,255,255,0.75);
-            box-shadow: 0 10px 30px rgba(15,23,42,0.07);
-            font-size: 0.78rem; font-weight: 700;
-            letter-spacing: 0.06em; text-transform: uppercase; color: #0f172a;
-        }
-        html.dark .auth-badge { background: rgba(15,23,42,0.56); border-color: rgba(148,163,184,0.14); color: #e2e8f0; }
-        .auth-badge-dot {
-            width: 0.52rem; height: 0.52rem; border-radius: 999px;
-            background: linear-gradient(135deg,#0ea5e9,#22c55e);
-            box-shadow: 0 0 0 5px rgba(14,165,233,0.14);
-        }
-        .auth-title {
+        html.dark .auth-card { background: rgba(7,15,31,0.94); border-color: rgba(148,163,184,0.15); }
+
+        .auth-logo {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem; font-weight: 700;
-            letter-spacing: -0.04em; color: #0f172a; margin-bottom: 0.5rem;
+            font-size: 1.6rem; font-weight: 700;
+            background: linear-gradient(135deg,#3b82f6,#7c3aed);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
         }
-        html.dark .auth-title { color: #f1f5f9; }
-        .auth-sub { color: #64748b; font-size: 0.88rem; margin-bottom: 2rem; line-height: 1.6; }
+        .auth-sub { color: #64748b; font-size: 0.85rem; margin-bottom: 2rem; line-height: 1.5; }
         html.dark .auth-sub { color: #94a3b8; }
 
         .auth-input {
-            width: 100%;
-            background: rgba(255,255,255,0.7);
-            border: 1px solid rgba(148,163,184,0.2);
-            color: #0f172a; border-radius: 0.65rem;
-            padding: 0.7rem 1rem; font-size: 0.88rem;
-            outline: none; font-family: 'Manrope', sans-serif;
-            transition: border-color 0.2s; margin-bottom: 0.75rem;
+            width: 100%; background: rgba(248,250,252,0.8);
+            border: 1.5px solid rgba(148,163,184,0.25); color: #0f172a;
+            border-radius: 0.65rem; padding: 0.75rem 1rem;
+            font-size: 0.88rem; outline: none; font-family: 'Manrope', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 0.65rem; display: block;
         }
-        html.dark .auth-input { background: rgba(15,23,42,0.65); border-color: rgba(148,163,184,0.15); color: #e2e8f0; }
-        .auth-input:focus { border-color: rgba(59,130,246,0.5); }
+        html.dark .auth-input { background: rgba(15,23,42,0.7); border-color: rgba(148,163,184,0.15); color: #e2e8f0; }
+        .auth-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         .auth-input::placeholder { color: #94a3b8; }
 
-        .auth-btn-primary {
-            width: 100%; padding: 0.82rem;
-            background: #3b82f6; color: white; border: none;
-            border-radius: 0.65rem; font-size: 0.9rem; font-weight: 700;
+        .auth-btn {
+            width: 100%; padding: 0.8rem; background: #3b82f6; color: white;
+            border: none; border-radius: 0.65rem; font-size: 0.9rem; font-weight: 700;
             cursor: pointer; font-family: 'Manrope', sans-serif;
             transition: background 0.2s, transform 0.15s;
-            box-shadow: 0 18px 44px rgba(59,130,246,0.26); margin-bottom: 0.75rem;
+            box-shadow: 0 8px 24px rgba(59,130,246,0.3); margin-top: 0.25rem;
         }
-        .auth-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
-        .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .auth-switch {
-            font-size: 0.82rem; color: #64748b; margin-top: 0.5rem;
-        }
+        .auth-btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .auth-err { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #dc2626; border-radius: 0.5rem; padding: 0.6rem 0.85rem; font-size: 0.8rem; margin-bottom: 0.75rem; text-align: left; display: none; }
+        html.dark .auth-err { color: #fca5a5; }
+        .auth-switch { font-size: 0.82rem; color: #64748b; margin-top: 1rem; }
         html.dark .auth-switch { color: #94a3b8; }
-        .auth-switch a { color: #3b82f6; font-weight: 700; cursor: pointer; text-decoration: none; }
-        .auth-switch a:hover { text-decoration: underline; }
+        .auth-switch span { color: #3b82f6; font-weight: 700; cursor: pointer; }
+        .auth-switch span:hover { text-decoration: underline; }
+        .auth-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; color: #94a3b8; font-size: 0.78rem; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: rgba(148,163,184,0.2); }
+        .auth-back { font-size: 0.8rem; color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+        .auth-back:hover { color: #3b82f6; }
 
-        .auth-divider {
-            display: flex; align-items: center; gap: 0.75rem;
-            margin: 1rem 0; color: #94a3b8; font-size: 0.78rem;
-        }
-        .auth-divider::before, .auth-divider::after {
-            content: ''; flex: 1; height: 1px; background: rgba(148,163,184,0.2);
-        }
-        .auth-error {
-            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
-            color: #dc2626; border-radius: 0.5rem; padding: 0.6rem 0.85rem;
-            font-size: 0.8rem; margin-bottom: 0.75rem; text-align: left; display: none;
-        }
-        html.dark .auth-error { color: #fca5a5; background: rgba(239,68,68,0.1); }
+        /* ════════════════════════════════════════
+           LOADING
+        ════════════════════════════════════════ */
+        #auth-loading { position: fixed; inset: 0; z-index: 600; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
+        .spinner { width: 36px; height: 36px; border: 3px solid rgba(59,130,246,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.75s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── EDITOR ─────────────────────────────────────── */
+        /* ════════════════════════════════════════
+           EDITOR LAYOUT
+        ════════════════════════════════════════ */
         #editor-wrap {
-            position: fixed;
-            top: 4rem; left: 0; right: 0; bottom: 0;
+            position: fixed; top: 4rem; left: 0; right: 0; bottom: 0;
             display: flex; flex-direction: column;
         }
-        #ed-topbar {
+
+        /* ── Activity bar (left icons) ── */
+        #ed-activity {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 48px;
+            background: rgba(255,255,255,0.55);
+            border-right: 1px solid rgba(148,163,184,0.15);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 0.5rem 0; gap: 2px; z-index: 10;
+            backdrop-filter: blur(16px);
+        }
+        html.dark #ed-activity { background: rgba(2,6,23,0.65); }
+        .act-btn {
+            width: 36px; height: 36px; border-radius: 0.5rem;
+            border: none; background: transparent; color: #94a3b8;
+            cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s; position: relative;
+        }
+        .act-btn:hover { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .act-btn.active { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .act-btn .act-tooltip {
+            position: absolute; left: calc(100% + 8px); top: 50%;
+            transform: translateY(-50%); background: #0f172a; color: white;
+            font-size: 0.72rem; font-weight: 600; padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem; white-space: nowrap; pointer-events: none;
+            opacity: 0; transition: opacity 0.15s; z-index: 100;
+        }
+        html.dark .act-btn .act-tooltip { background: #1e293b; }
+        .act-btn:hover .act-tooltip { opacity: 1; }
+        .act-sep { width: 24px; height: 1px; background: rgba(148,163,184,0.2); margin: 0.25rem 0; }
+        .act-bottom { margin-top: auto; }
+
+        /* ── Main area (tabs + editor + preview) ── */
+        #ed-main {
+            flex: 1; display: flex; overflow: hidden;
+            margin-left: 48px;
+        }
+
+        /* ── File explorer panel ── */
+        #ed-explorer {
+            width: 0; overflow: hidden; display: flex; flex-direction: column;
+            background: rgba(255,255,255,0.55);
+            border-right: 1px solid rgba(148,163,184,0.15);
+            transition: width 0.25s ease; flex-shrink: 0;
+            backdrop-filter: blur(16px);
+        }
+        html.dark #ed-explorer { background: rgba(2,6,23,0.65); }
+        #ed-explorer.open { width: 200px; }
+        .exp-header {
+            padding: 0.75rem 0.85rem 0.5rem;
+            font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase; color: #94a3b8;
+            border-bottom: 1px solid rgba(148,163,184,0.12); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .exp-add {
+            width: 20px; height: 20px; border-radius: 4px; border: none;
+            background: transparent; color: #94a3b8; cursor: pointer;
+            font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .exp-add:hover { color: #3b82f6; background: rgba(59,130,246,0.1); }
+        #exp-file-list { flex: 1; overflow-y: auto; padding: 0.35rem 0; }
+        .exp-file {
             display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.45rem 1rem;
-            background: rgba(255,255,255,0.62);
-            border-bottom: 1px solid rgba(255,255,255,0.55);
-            box-shadow: 0 4px 16px rgba(15,23,42,0.06);
-            backdrop-filter: blur(22px);
-            flex-shrink: 0; flex-wrap: wrap;
+            padding: 0.38rem 0.85rem; cursor: pointer;
+            font-size: 0.78rem; font-weight: 500; color: #64748b;
+            transition: all 0.15s; border-radius: 0; position: relative;
         }
-        html.dark #ed-topbar {
-            background: rgba(2,6,23,0.72);
-            border-color: rgba(148,163,184,0.12);
+        html.dark .exp-file { color: #94a3b8; }
+        .exp-file:hover { background: rgba(59,130,246,0.06); color: #0f172a; }
+        html.dark .exp-file:hover { color: #e2e8f0; }
+        .exp-file.active { background: rgba(59,130,246,0.1); color: #3b82f6; font-weight: 600; }
+        .exp-file .exp-del { opacity: 0; position: absolute; right: 0.5rem; font-size: 0.7rem; color: #94a3b8; transition: opacity 0.15s; cursor: pointer; padding: 2px 4px; }
+        .exp-file:hover .exp-del { opacity: 1; }
+        .exp-file .exp-del:hover { color: #ef4444; }
+
+        /* ── Editor pane ── */
+        #ed-code-wrap {
+            flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative;
         }
-        #ed-tabs {
-            display: flex; gap: 0.25rem; align-items: center;
-            flex: 1; overflow-x: auto; scrollbar-width: none; min-width: 0;
+
+        /* ── Tab bar ── */
+        #ed-tabbar {
+            display: flex; align-items: center;
+            background: rgba(255,255,255,0.5);
+            border-bottom: 1px solid rgba(148,163,184,0.12);
+            flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+            backdrop-filter: blur(12px);
         }
-        #ed-tabs::-webkit-scrollbar { display: none; }
+        #ed-tabbar::-webkit-scrollbar { display: none; }
+        html.dark #ed-tabbar { background: rgba(2,6,23,0.55); }
         .ed-tab {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            padding: 0.32rem 0.8rem; border-radius: 0.5rem;
-            border: 1px solid rgba(148,163,184,0.18);
-            background: rgba(255,255,255,0.45); color: #64748b;
-            font-size: 0.78rem; font-weight: 600; cursor: pointer;
-            transition: all 0.18s; white-space: nowrap; flex-shrink: 0;
-            font-family: 'Manrope', sans-serif;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0 1rem; height: 36px;
+            border: none; border-right: 1px solid rgba(148,163,184,0.1);
+            background: transparent; color: #94a3b8;
+            font-size: 0.78rem; font-weight: 500; cursor: pointer;
+            transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+            font-family: 'Manrope', sans-serif; position: relative;
         }
-        html.dark .ed-tab { background: rgba(15,23,42,0.45); border-color: rgba(148,163,184,0.1); color: #94a3b8; }
-        .ed-tab:hover { background: rgba(255,255,255,0.82); color: #0f172a; }
-        html.dark .ed-tab:hover { background: rgba(15,23,42,0.82); color: #e2e8f0; }
-        .ed-tab.active { background: white; color: #3b82f6; border-color: rgba(59,130,246,0.35); box-shadow: 0 2px 10px rgba(59,130,246,0.1); }
-        html.dark .ed-tab.active { background: rgba(15,23,42,0.95); color: #60a5fa; border-color: rgba(96,165,250,0.3); }
-        .ed-tab .tab-x { opacity: 0; font-size: 0.62rem; margin-left: 0.15rem; transition: opacity 0.15s; }
-        .ed-tab:hover .tab-x { opacity: 0.45; }
-        .ed-tab .tab-x:hover { opacity: 1; color: #ef4444; }
-        .ed-add-tab {
-            padding: 0.3rem 0.6rem; border-radius: 0.5rem;
-            border: 1px dashed rgba(148,163,184,0.3); background: transparent;
-            color: #94a3b8; font-size: 0.75rem; cursor: pointer;
-            transition: all 0.18s; flex-shrink: 0; font-family: 'Manrope', sans-serif;
+        .ed-tab:hover { color: #0f172a; background: rgba(0,0,0,0.03); }
+        html.dark .ed-tab:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .ed-tab.active {
+            color: #0f172a; background: rgba(255,255,255,0.6);
+            font-weight: 600;
         }
-        .ed-add-tab:hover { color: #3b82f6; border-color: rgba(59,130,246,0.35); }
-        .ed-btn {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            padding: 0.32rem 0.65rem; border-radius: 0.5rem;
-            border: 1px solid rgba(148,163,184,0.18);
-            background: rgba(255,255,255,0.45); color: #64748b;
-            font-size: 0.76rem; font-weight: 600; cursor: pointer;
-            transition: all 0.18s; white-space: nowrap; flex-shrink: 0;
-            font-family: 'Manrope', sans-serif;
+        .ed-tab.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: #3b82f6;
         }
-        html.dark .ed-btn { background: rgba(15,23,42,0.45); border-color: rgba(148,163,184,0.1); color: #94a3b8; }
-        .ed-btn:hover { background: rgba(255,255,255,0.9); color: #0f172a; }
-        html.dark .ed-btn:hover { background: rgba(15,23,42,0.9); color: #e2e8f0; }
-        .ed-btn.blue { background: #3b82f6; border-color: #3b82f6; color: white; }
-        .ed-btn.blue:hover { background: #2563eb; }
-        .ed-btn.green { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); color: #16a34a; }
-        html.dark .ed-btn.green { color: #4ade80; background: rgba(34,197,94,0.08); }
-        .ed-btn.green:hover { background: #16a34a; color: white; border-color: #16a34a; }
-        .ed-btn.ai { background: linear-gradient(135deg,rgba(139,92,246,0.1),rgba(59,130,246,0.1)); border-color: rgba(139,92,246,0.22); color: #7c3aed; }
-        html.dark .ed-btn.ai { color: #a78bfa; border-color: rgba(167,139,250,0.2); }
-        .ed-btn.ai:hover, .ed-btn.ai.on { background: linear-gradient(135deg,#7c3aed,#3b82f6); color: white; border-color: transparent; }
-        .ed-select {
-            padding: 0.32rem 0.65rem; border-radius: 0.5rem;
-            border: 1px solid rgba(148,163,184,0.18);
-            background: rgba(255,255,255,0.45); color: #64748b;
-            font-size: 0.76rem; font-weight: 600; cursor: pointer; outline: none;
-            flex-shrink: 0; font-family: 'Manrope', sans-serif; transition: border-color 0.18s;
+        html.dark .ed-tab.active { color: #e2e8f0; background: rgba(15,23,42,0.6); }
+        .ed-tab .tab-x {
+            opacity: 0; font-size: 0.65rem; margin-left: 0.1rem;
+            width: 16px; height: 16px; border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
         }
-        html.dark .ed-select { background: rgba(15,23,42,0.45); border-color: rgba(148,163,184,0.1); color: #94a3b8; }
-        .ed-sep { width: 1px; height: 18px; background: rgba(148,163,184,0.18); flex-shrink: 0; }
-        #ed-statusbar {
-            display: flex; gap: 1.25rem; align-items: center;
-            padding: 0.16rem 1rem;
-            background: rgba(255,255,255,0.45);
-            border-bottom: 1px solid rgba(148,163,184,0.1);
-            font-size: 0.67rem; color: #94a3b8; flex-shrink: 0; backdrop-filter: blur(12px);
-        }
-        html.dark #ed-statusbar { background: rgba(2,6,23,0.55); }
-        .as-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; display: inline-block; transition: background 0.3s; }
-        #ed-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
-        #ed-code-panel { display: flex; flex-direction: column; width: 50%; min-width: 180px; position: relative; }
+        .ed-tab:hover .tab-x, .ed-tab.active .tab-x { opacity: 0.5; }
+        .ed-tab .tab-x:hover { opacity: 1 !important; color: #ef4444; background: rgba(239,68,68,0.1); }
+
         #ed-monaco { flex: 1; overflow: hidden; }
-        #ed-resize {
-            position: absolute; right: -4px; top: 0; bottom: 0; width: 8px;
-            cursor: col-resize; z-index: 20; transition: background 0.2s;
+
+        /* ── Toolbar ── */
+        #ed-toolbar {
+            display: flex; align-items: center; gap: 0.35rem;
+            padding: 0.3rem 0.75rem;
+            background: rgba(255,255,255,0.5);
+            border-bottom: 1px solid rgba(148,163,184,0.1);
+            flex-shrink: 0; backdrop-filter: blur(12px); flex-wrap: wrap;
         }
-        #ed-resize:hover, #ed-resize.active { background: rgba(59,130,246,0.45); }
-        #ed-prev-panel { flex: 1; display: flex; flex-direction: column; min-width: 180px; border-left: 1px solid rgba(148,163,184,0.12); }
+        html.dark #ed-toolbar { background: rgba(2,6,23,0.55); }
+        .tb {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.28rem 0.6rem; border-radius: 0.4rem;
+            border: 1px solid transparent;
+            background: transparent; color: #64748b;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all 0.15s; white-space: nowrap;
+            font-family: 'Manrope', sans-serif;
+        }
+        html.dark .tb { color: #94a3b8; }
+        .tb:hover { background: rgba(0,0,0,0.05); color: #0f172a; }
+        html.dark .tb:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .tb.active { background: rgba(59,130,246,0.1); color: #3b82f6; border-color: rgba(59,130,246,0.2); }
+        .tb.blue { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .tb.blue:hover { background: #2563eb; }
+        .tb.green { background: rgba(34,197,94,0.1); color: #16a34a; border-color: rgba(34,197,94,0.2); }
+        html.dark .tb.green { color: #4ade80; }
+        .tb.green:hover { background: #16a34a; color: white; border-color: #16a34a; }
+        .tb-sep { width: 1px; height: 16px; background: rgba(148,163,184,0.2); margin: 0 0.1rem; flex-shrink: 0; }
+        .tb-select {
+            padding: 0.28rem 0.6rem; border-radius: 0.4rem;
+            border: 1px solid transparent; background: transparent; color: #64748b;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer; outline: none;
+            font-family: 'Manrope', sans-serif; transition: all 0.15s;
+        }
+        html.dark .tb-select { color: #94a3b8; }
+        .tb-select:hover { background: rgba(0,0,0,0.05); }
+        html.dark .tb-select:hover { background: rgba(255,255,255,0.06); }
+
+        /* ── Status bar ── */
+        #ed-statusbar {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 0.18rem 0.75rem;
+            background: #3b82f6;
+            font-size: 0.67rem; color: rgba(255,255,255,0.85);
+            flex-shrink: 0;
+        }
+        #ed-statusbar .sb-right { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
+        .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: #86efac; display: inline-block; transition: background 0.3s; flex-shrink: 0; }
+        .sb-dot.saving { background: #fbbf24; }
+
+        /* ── Resize handle ── */
+        #ed-resize {
+            width: 5px; background: transparent; cursor: col-resize;
+            flex-shrink: 0; transition: background 0.2s; z-index: 10;
+        }
+        #ed-resize:hover, #ed-resize.dragging { background: rgba(59,130,246,0.4); }
+
+        /* ── Preview ── */
+        #ed-preview { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         #ed-prev-bar {
-            display: flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.75rem;
-            background: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(148,163,184,0.1);
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.3rem 0.75rem;
+            background: rgba(255,255,255,0.5);
+            border-bottom: 1px solid rgba(148,163,184,0.1);
             flex-shrink: 0; backdrop-filter: blur(12px);
         }
         html.dark #ed-prev-bar { background: rgba(2,6,23,0.55); }
-        .prev-lbl { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #94a3b8; }
-        #ed-urlbar { flex: 1; background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.12); border-radius: 999px; padding: 0.15rem 0.8rem; }
-        html.dark #ed-urlbar { background: rgba(15,23,42,0.45); }
-        #ed-urlbar span { font-size: 0.68rem; color: #94a3b8; }
-        .dv-btn {
-            width: 24px; height: 24px; border-radius: 0.35rem;
-            border: 1px solid rgba(148,163,184,0.18); background: transparent;
-            color: #94a3b8; cursor: pointer; font-size: 0.68rem;
-            display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0;
+        .prev-tag { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8; flex-shrink: 0; }
+        #ed-urlbar {
+            flex: 1; background: rgba(148,163,184,0.08);
+            border: 1.5px solid rgba(148,163,184,0.15);
+            border-radius: 999px; padding: 0.18rem 0.85rem;
+            display: flex; align-items: center; gap: 0.4rem;
         }
-        .dv-btn:hover, .dv-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
-        #ed-ref-btn { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.78rem; padding: 0.2rem; transition: transform 0.3s, color 0.2s; }
-        #ed-ref-btn:hover { color: #3b82f6; transform: rotate(180deg); }
-        #ed-prev-wrap { flex: 1; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; background: #dde4ef; padding: 5px; }
+        html.dark #ed-urlbar { background: rgba(15,23,42,0.4); }
+        #ed-urlbar i { font-size: 0.62rem; color: #22c55e; }
+        #ed-urlbar span { font-size: 0.7rem; color: #94a3b8; }
+        .dvb {
+            width: 26px; height: 26px; border-radius: 0.4rem;
+            border: 1.5px solid rgba(148,163,184,0.15); background: transparent;
+            color: #94a3b8; cursor: pointer; font-size: 0.72rem;
+            display: flex; align-items: center; justify-content: center; transition: all 0.18s;
+        }
+        .dvb:hover, .dvb.on { background: #3b82f6; border-color: #3b82f6; color: white; }
+        #prev-refresh {
+            width: 26px; height: 26px; border-radius: 0.4rem; border: none;
+            background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.78rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s, color 0.2s;
+        }
+        #prev-refresh:hover { color: #3b82f6; transform: rotate(180deg); }
+        #ed-prev-wrap {
+            flex: 1; overflow: hidden; display: flex; justify-content: center;
+            align-items: flex-start; background: #e8ecf4; padding: 6px;
+        }
         html.dark #ed-prev-wrap { background: #020c1b; }
-        #ed-frame { width: 100%; height: 100%; border: none; background: white; border-radius: 0.5rem; transition: width 0.3s, max-width 0.3s; box-shadow: 0 4px 24px rgba(15,23,42,0.14); }
-        #ed-ai {
-            width: 0; overflow: hidden; display: flex; flex-direction: column;
-            border-left: 1px solid rgba(148,163,184,0.12);
-            background: rgba(255,255,255,0.62); backdrop-filter: blur(22px);
-            transition: width 0.3s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0;
+        #ed-frame {
+            width: 100%; height: 100%; border: none; background: white;
+            border-radius: 6px; transition: width 0.3s, max-width 0.3s;
+            box-shadow: 0 2px 20px rgba(15,23,42,0.12);
         }
-        html.dark #ed-ai { background: rgba(2,6,23,0.72); }
-        #ed-ai.open { width: 310px; }
-        .ai-hd { padding: 0.9rem 1rem 0.75rem; border-bottom: 1px solid rgba(148,163,184,0.1); flex-shrink: 0; }
-        .ai-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; }
-        .ai-icon { width: 26px; height: 26px; border-radius: 0.45rem; background: linear-gradient(135deg,#7c3aed,#3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.72rem; flex-shrink: 0; }
-        .ai-ttl { font-size: 0.88rem; font-weight: 800; background: linear-gradient(135deg,#7c3aed,#3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .ai-sub { font-size: 0.68rem; color: #94a3b8; }
-        #ed-ai-msgs { flex: 1; overflow-y: auto; padding: 0.7rem; display: flex; flex-direction: column; gap: 0.55rem; scrollbar-width: thin; }
-        .ai-msg { padding: 0.55rem 0.7rem; border-radius: 0.65rem; font-size: 0.76rem; line-height: 1.55; word-break: break-word; max-width: 95%; }
-        .ai-msg code { background: rgba(148,163,184,0.12); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.72rem; font-family: monospace; }
-        html.dark .ai-msg code { background: rgba(15,23,42,0.6); }
-        .ai-msg.user { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.18); color: #1d4ed8; margin-left: auto; border-bottom-right-radius: 3px; }
-        html.dark .ai-msg.user { color: #93c5fd; background: rgba(59,130,246,0.1); }
-        .ai-msg.bot { background: rgba(255,255,255,0.65); border: 1px solid rgba(148,163,184,0.15); color: #334155; border-bottom-left-radius: 3px; }
-        html.dark .ai-msg.bot { background: rgba(15,23,42,0.65); color: #cbd5e1; border-color: rgba(148,163,184,0.1); }
-        .ai-msg.thinking { color: #94a3b8; font-style: italic; animation: pu 1.5s infinite; }
-        @keyframes pu { 0%,100%{opacity:.5} 50%{opacity:1} }
-        .ai-ft { padding: 0.7rem; border-top: 1px solid rgba(148,163,184,0.1); flex-shrink: 0; }
-        #ed-ai-inp { width: 100%; background: rgba(255,255,255,0.65); border: 1px solid rgba(148,163,184,0.18); color: #0f172a; border-radius: 0.6rem; padding: 0.5rem 0.7rem; font-size: 0.77rem; resize: none; height: 66px; outline: none; font-family: 'Manrope', sans-serif; transition: border-color 0.2s; }
-        html.dark #ed-ai-inp { background: rgba(15,23,42,0.65); border-color: rgba(148,163,184,0.12); color: #e2e8f0; }
-        #ed-ai-inp:focus { border-color: rgba(59,130,246,0.4); }
-        #ed-ai-inp::placeholder { color: #94a3b8; }
-        #ed-ai-send { width: 100%; margin-top: 0.45rem; background: linear-gradient(135deg,#3b82f6,#7c3aed); color: white; border: none; border-radius: 0.6rem; padding: 0.5rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: 'Manrope', sans-serif; transition: opacity 0.2s, transform 0.15s; box-shadow: 0 8px 20px rgba(59,130,246,0.22); }
-        #ed-ai-send:hover { opacity: 0.88; transform: translateY(-1px); }
-        .ai-qs { display: flex; gap: 0.28rem; margin-top: 0.45rem; flex-wrap: wrap; }
-        .ai-q { background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.16); color: #64748b; padding: 0.2rem 0.52rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.68rem; font-weight: 600; transition: all 0.18s; font-family: 'Manrope', sans-serif; }
-        html.dark .ai-q { color: #94a3b8; }
-        .ai-q:hover { border-color: rgba(59,130,246,0.35); color: #3b82f6; background: rgba(59,130,246,0.07); }
-        #ed-fs { display: none; position: fixed; inset: 0; z-index: 9999; flex-direction: column; background: rgba(248,251,255,0.97); backdrop-filter: blur(24px); }
-        html.dark #ed-fs { background: rgba(2,6,23,0.97); }
-        #ed-fs.show { display: flex; }
-        .fp-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 1rem; background: rgba(255,255,255,0.68); border-bottom: 1px solid rgba(148,163,184,0.12); backdrop-filter: blur(22px); flex-shrink: 0; }
-        html.dark .fp-bar { background: rgba(2,6,23,0.8); }
-        .fp-brand { font-weight: 800; font-size: 0.92rem; background: linear-gradient(135deg,#3b82f6,#7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
-        .fp-url { flex: 1; background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.12); border-radius: 999px; padding: 0.2rem 0.85rem; max-width: 400px; }
-        .fp-url span { font-size: 0.7rem; color: #94a3b8; }
-        .fp-body { flex: 1; display: flex; justify-content: center; align-items: flex-start; background: #dde4ef; padding: 0.75rem; overflow: auto; }
-        html.dark .fp-body { background: #020c1b; }
-        #fp-frm { border: none; background: white; border-radius: 0.75rem; box-shadow: 0 24px 80px rgba(15,23,42,0.15); width: 100%; height: calc(100vh - 60px); transition: all 0.3s; }
-        #ed-ctx { position: fixed; z-index: 10000; background: rgba(255,255,255,0.96); border: 1px solid rgba(148,163,184,0.18); border-radius: 0.75rem; padding: 0.32rem 0; box-shadow: 0 24px 80px rgba(15,23,42,0.14); min-width: 155px; display: none; backdrop-filter: blur(20px); }
-        html.dark #ed-ctx { background: rgba(7,15,31,0.96); border-color: rgba(148,163,184,0.1); }
-        .ctx-item { padding: 0.42rem 0.95rem; font-size: 0.78rem; cursor: pointer; color: #64748b; transition: all 0.15s; display: flex; align-items: center; gap: 0.55rem; font-family: 'Manrope', sans-serif; }
-        html.dark .ctx-item { color: #94a3b8; }
-        .ctx-item:hover { background: rgba(59,130,246,0.07); color: #3b82f6; }
-        .ctx-sep { height: 1px; background: rgba(148,163,184,0.12); margin: 0.28rem 0; }
-        .sc-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99999; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.96); border: 1px solid rgba(148,163,184,0.18); border-radius: 0.75rem; padding: 0.65rem 1.1rem; font-size: 0.82rem; font-weight: 600; color: #0f172a; box-shadow: 0 24px 60px rgba(15,23,42,0.12); backdrop-filter: blur(20px); animation: tin 0.3s ease; font-family: 'Manrope', sans-serif; }
-        html.dark .sc-toast { background: rgba(7,15,31,0.96); border-color: rgba(148,163,184,0.1); color: #e2e8f0; }
-        @keyframes tin  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes tout { from{opacity:1} to{opacity:0;transform:translateY(8px)} }
 
-        /* Loading spinner */
-        #auth-loading { position: fixed; inset: 0; z-index: 600; display: flex; align-items: center; justify-content: center; }
-        .spinner { width: 40px; height: 40px; border: 3px solid rgba(59,130,246,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* ── Full preview ── */
+        #ed-fullprev {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            flex-direction: column; background: #f1f5f9;
+        }
+        html.dark #ed-fullprev { background: #020617; }
+        #ed-fullprev.on { display: flex; }
+        .fp-nav {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.9);
+            border-bottom: 1px solid rgba(148,163,184,0.15);
+            backdrop-filter: blur(20px); flex-shrink: 0;
+        }
+        html.dark .fp-nav { background: rgba(7,15,31,0.95); }
+        .fp-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; background: linear-gradient(135deg,#3b82f6,#7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .fp-url { flex: 1; background: rgba(148,163,184,0.08); border: 1.5px solid rgba(148,163,184,0.15); border-radius: 999px; padding: 0.22rem 0.9rem; max-width: 440px; font-size: 0.72rem; color: #94a3b8; }
+        #fp-frame { border: none; background: white; transition: all 0.3s; width: 100%; height: calc(100vh - 52px); }
+        .fp-body { flex: 1; display: flex; justify-content: center; background: #e8ecf4; padding: 0; overflow: auto; }
+        html.dark .fp-body { background: #020c1b; }
+
+        /* ── Context menu ── */
+        #ed-ctx {
+            position: fixed; z-index: 10000;
+            background: rgba(255,255,255,0.97);
+            border: 1px solid rgba(148,163,184,0.18);
+            border-radius: 0.6rem; padding: 0.3rem 0;
+            box-shadow: 0 16px 48px rgba(15,23,42,0.14);
+            min-width: 165px; display: none;
+            backdrop-filter: blur(20px);
+        }
+        html.dark #ed-ctx { background: rgba(7,15,31,0.97); border-color: rgba(148,163,184,0.12); }
+        .ctx-i { padding: 0.42rem 0.9rem; font-size: 0.78rem; cursor: pointer; color: #64748b; transition: all 0.12s; display: flex; align-items: center; gap: 0.55rem; font-family: 'Manrope', sans-serif; }
+        html.dark .ctx-i { color: #94a3b8; }
+        .ctx-i:hover { background: rgba(59,130,246,0.07); color: #3b82f6; }
+        .ctx-i.danger:hover { background: rgba(239,68,68,0.07); color: #ef4444; }
+        .ctx-sep { height: 1px; background: rgba(148,163,184,0.12); margin: 0.25rem 0; }
+        .ctx-label { padding: 0.3rem 0.9rem 0.15rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; }
+
+        /* ── Toast ── */
+        .sc-toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99999;
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.97);
+            border: 1px solid rgba(148,163,184,0.18);
+            border-radius: 0.6rem; padding: 0.65rem 1rem;
+            font-size: 0.82rem; font-weight: 600; color: #0f172a;
+            box-shadow: 0 16px 48px rgba(15,23,42,0.12);
+            backdrop-filter: blur(20px); font-family: 'Manrope', sans-serif;
+            animation: tin 0.25s ease;
+        }
+        html.dark .sc-toast { background: rgba(7,15,31,0.97); border-color: rgba(148,163,184,0.1); color: #e2e8f0; }
+        @keyframes tin { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+        /* ── Keyboard shortcut hints ── */
+        .kbd { background: rgba(148,163,184,0.12); border: 1px solid rgba(148,163,184,0.2); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; color: #64748b; }
+        html.dark .kbd { color: #94a3b8; }
     </style>
 </head>
 
 <body class="site-body text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-    <!-- Site background -->
     <div class="site-background" aria-hidden="true">
         <div class="site-background__mesh"></div>
         <div class="site-background__glow site-background__glow--one"></div>
@@ -299,7 +387,7 @@
         <div class="site-background__noise"></div>
     </div>
 
-    <!-- ── NAV ──────────────────────────────────────── -->
+    <!-- ════════ NAV ════════ -->
     <nav class="site-nav fixed w-full z-50 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -309,23 +397,17 @@
                     <a href="blog.html" class="hover:text-primary transition">Блог</a>
                     <a href="tariffs.html" class="hover:text-primary transition">Тарифы</a>
                     <a href="docs.html" class="hover:text-primary transition">Документация</a>
-                    <a href="editor.html" class="text-primary font-semibold transition flex items-center gap-1.5">
-                        <i class="fas fa-code text-xs"></i> Редактор
-                    </a>
+                    <a href="editor.html" class="text-primary font-semibold transition flex items-center gap-1.5"><i class="fas fa-code text-xs"></i> Редактор</a>
                     <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                        <i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:block"></i>
                     </button>
                     <div id="nav-auth-section" class="flex items-center gap-4"></div>
                 </div>
                 <div class="md:hidden flex items-center gap-2">
                     <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
+                        <i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:block"></i>
                     </button>
-                    <button id="mobile-menu-btn" class="p-2 text-gray-600 dark:text-gray-300">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
+                    <button id="mobile-menu-btn" class="p-2 text-gray-600 dark:text-gray-300"><i class="fas fa-bars text-xl"></i></button>
                 </div>
             </div>
         </div>
@@ -335,482 +417,801 @@
                 <a href="blog.html" class="block px-3 py-2 hover:text-primary">Блог</a>
                 <a href="tariffs.html" class="block px-3 py-2 hover:text-primary">Тарифы</a>
                 <a href="docs.html" class="block px-3 py-2 hover:text-primary">Документация</a>
-                <a href="editor.html" class="block px-3 py-2 text-primary font-semibold"><i class="fas fa-code text-xs mr-1"></i> Редактор</a>
+                <a href="editor.html" class="block px-3 py-2 text-primary font-semibold">⚡ Редактор</a>
                 <div id="mobile-auth-section" class="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2"></div>
             </div>
         </div>
     </nav>
 
-    <!-- ── LOADING ───────────────────────────────────── -->
+    <!-- ════════ LOADING ════════ -->
     <div id="auth-loading">
         <div class="spinner"></div>
+        <span style="font-size:0.8rem;color:#94a3b8;font-weight:500;">Загрузка...</span>
     </div>
 
-    <!-- ── AUTH GATE (shown when not logged in) ──────── -->
+    <!-- ════════ AUTH GATE ════════ -->
     <div id="auth-gate" style="display:none;">
         <div class="auth-card">
-            <div class="auth-badge"><div class="auth-badge-dot"></div> Доступ только для участников</div>
-            <div class="auth-title">⚡ StormEditor</div>
-            <p class="auth-sub">Войдите в аккаунт или зарегистрируйтесь — редактор сайтов доступен всем зарегистрированным пользователям бесплатно.</p>
-
-            <div id="auth-error" class="auth-error"></div>
-
-            <!-- Name field (only for register) -->
+            <div class="auth-logo">⚡ StormEditor</div>
+            <p class="auth-sub">Войдите в аккаунт — редактор доступен всем зарегистрированным пользователям бесплатно</p>
+            <div id="auth-err" class="auth-err"></div>
             <input type="text" id="gate-name" class="auth-input" placeholder="Ваше имя" style="display:none;">
-            <input type="email" id="gate-email" class="auth-input" placeholder="Email">
+            <input type="email" id="gate-email" class="auth-input" placeholder="Email адрес">
             <input type="password" id="gate-password" class="auth-input" placeholder="Пароль">
-
-            <button id="gate-submit" class="auth-btn-primary" onclick="gateSubmit()">
-                <i class="fas fa-sign-in-alt mr-1"></i> Войти
-            </button>
-
-            <div class="auth-switch" id="gate-switch">
-                Нет аккаунта? <a onclick="gateToggle()">Зарегистрироваться</a>
-            </div>
-
+            <button id="gate-btn" class="auth-btn" onclick="gateSubmit()"><i class="fas fa-sign-in-alt mr-1.5"></i> Войти</button>
+            <p class="auth-switch" id="gate-switch">Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span></p>
             <div class="auth-divider">или</div>
-
-            <a href="index.html" style="font-size:0.82rem; color:#94a3b8; text-decoration:none;">
-                ← Вернуться на главную
-            </a>
+            <a href="index.html" class="auth-back">← Вернуться на главную</a>
         </div>
     </div>
 
-    <!-- ── EDITOR (shown when logged in) ─────────────── -->
+    <!-- ════════ EDITOR ════════ -->
     <div id="editor-wrap" style="display:none;">
 
-        <!-- Toolbar -->
-        <div id="ed-topbar">
-            <div class="flex items-center gap-1.5 mr-1.5 flex-shrink-0">
-                <div class="w-2.5 h-2.5 rounded-full bg-red-400/80"></div>
-                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400/80"></div>
-                <div class="w-2.5 h-2.5 rounded-full bg-green-400/80"></div>
+        <!-- Activity bar -->
+        <div id="ed-activity">
+            <button class="act-btn active" id="act-files" onclick="ED.toggleExplorer()" title="">
+                <i class="fas fa-folder"></i>
+                <span class="act-tooltip">Файлы</span>
+            </button>
+            <button class="act-btn" onclick="ED.formatCode()" title="">
+                <i class="fas fa-magic-wand-sparkles" style="font-size:.85rem"></i>
+                <span class="act-tooltip">Форматировать <kbd class="kbd">Alt+Shift+F</kbd></span>
+            </button>
+            <button class="act-btn" id="act-wrap" onclick="ED.toggleWrap()" title="">
+                <i class="fas fa-align-left" style="font-size:.85rem"></i>
+                <span class="act-tooltip">Перенос строк</span>
+            </button>
+            <div class="act-sep"></div>
+            <button class="act-btn" onclick="ED.toggleFullPrev()" title="">
+                <i class="fas fa-expand" style="font-size:.85rem"></i>
+                <span class="act-tooltip">Полный экран <kbd class="kbd">Ctrl+Shift+P</kbd></span>
+            </button>
+            <button class="act-btn" onclick="ED.openInTab()" title="">
+                <i class="fas fa-external-link-alt" style="font-size:.82rem"></i>
+                <span class="act-tooltip">Открыть в новой вкладке</span>
+            </button>
+            <div class="act-sep"></div>
+            <div class="act-bottom">
+                <!-- user avatar -->
+                <div id="act-user" style="width:36px;height:36px;border-radius:50%;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:white;background:linear-gradient(135deg,#3b82f6,#7c3aed);"></div>
             </div>
-            <div id="ed-tabs">
-                <button class="ed-tab active" data-file="index.html" onclick="ED.switchFile('index.html')">
-                    <i class="fab fa-html5" style="color:#e34c26;font-size:.85em"></i> index.html
-                </button>
-                <button class="ed-tab" data-file="style.css" onclick="ED.switchFile('style.css')">
-                    <i class="fab fa-css3-alt" style="color:#264de4;font-size:.85em"></i> style.css
-                </button>
-                <button class="ed-tab" data-file="script.js" onclick="ED.switchFile('script.js')">
-                    <i class="fab fa-js-square" style="color:#ca8a04;font-size:.85em"></i> script.js
-                </button>
-                <button class="ed-add-tab" onclick="ED.addFile()">+ файл</button>
-            </div>
-            <div class="ed-sep"></div>
-            <button class="ed-btn" onclick="ED.formatCode()" title="Форматировать"><i class="fas fa-indent"></i></button>
-            <button class="ed-btn" id="ed-wrap-btn" onclick="ED.toggleWrap()" title="Перенос строк"><i class="fas fa-align-left"></i></button>
-            <div class="ed-sep"></div>
-            <select class="ed-select" onchange="ED.loadTemplate(this.value)">
-                <option value="">📁 Шаблоны</option>
-                <option value="landing">🚀 Лендинг</option>
-                <option value="portfolio">🎨 Портфолио</option>
-                <option value="blog">📝 Блог</option>
-                <option value="dashboard">📊 Дашборд</option>
-                <option value="empty">⬜ Пустой</option>
-            </select>
-            <div class="ed-sep"></div>
-            <button class="ed-btn blue" onclick="ED.toggleFullPreview()"><i class="fas fa-expand"></i> Просмотр</button>
-            <button class="ed-btn" onclick="ED.openInNewTab()" title="Открыть в новой вкладке"><i class="fas fa-external-link-alt"></i></button>
-            <button class="ed-btn green" onclick="ED.downloadProject()"><i class="fas fa-download"></i> Скачать</button>
-            <button class="ed-btn ai" id="ai-btn" onclick="ED.toggleAI()"><i class="fas fa-robot"></i> AI</button>
-            <!-- User info pill -->
-            <div class="ed-sep"></div>
-            <div id="ed-user-pill" style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:#64748b;font-family:'Manrope',sans-serif;flex-shrink:0;"></div>
         </div>
 
-        <!-- Status bar -->
-        <div id="ed-statusbar">
-            <span id="sb-cur"><i class="fas fa-crosshairs" style="font-size:.58rem"></i> Стр 1, Кол 1</span>
-            <span id="sb-lang">HTML</span>
-            <span id="sb-ch">0 симв</span>
-            <span style="margin-left:auto;display:flex;align-items:center;gap:.4rem;">
-                <span class="as-dot" id="as-dot"></span>
-                <span id="sb-save">Сохранено</span>
-            </span>
-        </div>
+        <!-- Main content -->
+        <div id="ed-main">
 
-        <!-- Workspace -->
-        <div id="ed-workspace">
-            <div id="ed-code-panel">
+            <!-- File explorer -->
+            <div id="ed-explorer" class="open">
+                <div class="exp-header">
+                    Файлы
+                    <button class="exp-add" onclick="ED.addFile()" title="Новый файл"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="exp-file-list">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+
+            <!-- Code editor -->
+            <div id="ed-code-wrap">
+                <!-- Tab bar -->
+                <div id="ed-tabbar">
+                    <!-- tabs populated by JS -->
+                    <div style="flex:1"></div>
+                </div>
+                <!-- Toolbar -->
+                <div id="ed-toolbar">
+                    <select class="tb-select" onchange="ED.loadTemplate(this.value)" id="tpl-select">
+                        <option value="">📁 Шаблоны</option>
+                        <option value="landing">🚀 Лендинг</option>
+                        <option value="portfolio">🎨 Портфолио</option>
+                        <option value="blog">📝 Блог</option>
+                        <option value="dashboard">📊 Дашборд</option>
+                        <option value="empty">⬜ Пустой</option>
+                    </select>
+                    <div class="tb-sep"></div>
+                    <button class="tb" onclick="ED.undo()"><i class="fas fa-undo"></i> <span class="hidden sm:inline">Отменить</span></button>
+                    <button class="tb" onclick="ED.redo()"><i class="fas fa-redo"></i> <span class="hidden sm:inline">Повторить</span></button>
+                    <div class="tb-sep"></div>
+                    <button class="tb" onclick="ED.copyAll()"><i class="fas fa-copy"></i> <span class="hidden sm:inline">Копировать</span></button>
+                    <button class="tb" onclick="ED.findInCode()"><i class="fas fa-search"></i> <span class="hidden sm:inline">Поиск</span></button>
+                    <div class="tb-sep"></div>
+                    <button class="tb green" onclick="ED.downloadProject()"><i class="fas fa-download"></i> Скачать</button>
+                    <button class="tb blue" onclick="ED.toggleFullPrev()"><i class="fas fa-eye"></i> Просмотр</button>
+                </div>
+                <!-- Monaco -->
                 <div id="ed-monaco"></div>
-                <div id="ed-resize" onmousedown="ED.startResize(event)"></div>
+                <!-- Status bar -->
+                <div id="ed-statusbar">
+                    <span id="sb-lang">HTML</span>
+                    <span>·</span>
+                    <span id="sb-cur">Стр 1, Кол 1</span>
+                    <span>·</span>
+                    <span id="sb-chars">0 символов</span>
+                    <div class="sb-right">
+                        <span style="display:flex;align-items:center;gap:.35rem;">
+                            <span class="sb-dot" id="sb-dot"></span>
+                            <span id="sb-save">Сохранено</span>
+                        </span>
+                        <span>UTF-8</span>
+                    </div>
+                </div>
             </div>
-            <div id="ed-prev-panel">
+
+            <!-- Resize handle -->
+            <div id="ed-resize" onmousedown="ED.startResize(event)"></div>
+
+            <!-- Preview -->
+            <div id="ed-preview">
                 <div id="ed-prev-bar">
-                    <span class="prev-lbl">Превью</span>
-                    <div id="ed-urlbar"><span>localhost › preview</span></div>
-                    <button class="dv-btn active" data-mode="desktop" onclick="ED.setDevice('desktop')"><i class="fas fa-desktop"></i></button>
-                    <button class="dv-btn" data-mode="tablet" onclick="ED.setDevice('tablet')"><i class="fas fa-tablet-alt"></i></button>
-                    <button class="dv-btn" data-mode="mobile" onclick="ED.setDevice('mobile')"><i class="fas fa-mobile-alt"></i></button>
-                    <button id="ed-ref-btn" onclick="ED.refresh()"><i class="fas fa-sync-alt"></i></button>
+                    <span class="prev-tag">Превью</span>
+                    <div id="ed-urlbar">
+                        <i class="fas fa-lock"></i>
+                        <span>localhost › preview</span>
+                    </div>
+                    <button class="dvb on" data-mode="desktop" onclick="ED.setDevice('desktop')" title="Десктоп"><i class="fas fa-desktop"></i></button>
+                    <button class="dvb" data-mode="tablet" onclick="ED.setDevice('tablet')" title="Планшет"><i class="fas fa-tablet-alt"></i></button>
+                    <button class="dvb" data-mode="mobile" onclick="ED.setDevice('mobile')" title="Телефон"><i class="fas fa-mobile-alt"></i></button>
+                    <button id="prev-refresh" onclick="ED.refresh()" title="Обновить"><i class="fas fa-sync-alt"></i></button>
                 </div>
                 <div id="ed-prev-wrap">
                     <iframe id="ed-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
-                </div>
-            </div>
-            <div id="ed-ai">
-                <div class="ai-hd">
-                    <div class="ai-title-row">
-                        <div class="ai-icon"><i class="fas fa-robot" style="-webkit-text-fill-color:white"></i></div>
-                        <span class="ai-ttl">AI-ассистент</span>
-                    </div>
-                    <div class="ai-sub">Ctrl+Enter · Ctrl+K для открытия</div>
-                </div>
-                <div id="ed-ai-msgs"></div>
-                <div class="ai-ft">
-                    <textarea id="ed-ai-inp" placeholder="Например: добавь анимацию появления..."></textarea>
-                    <button id="ed-ai-send" onclick="ED.sendAI()"><i class="fas fa-paper-plane"></i> Отправить</button>
-                    <div class="ai-qs">
-                        <button class="ai-q" onclick="ED.quickAI('Добавь красивую анимацию появления')">✨ Анимация</button>
-                        <button class="ai-q" onclick="ED.quickAI('Сделай адаптивным для мобильных')">📱 Адаптив</button>
-                        <button class="ai-q" onclick="ED.quickAI('Улучши дизайн, сделай современнее')">🎨 Дизайн</button>
-                        <button class="ai-q" onclick="ED.quickAI('Добавь тёмную тему с переключателем')">🌙 Тёмная тема</button>
-                        <button class="ai-q" onclick="ED.quickAI('Оптимизируй и почисти код')">🧹 Очистить</button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Full preview -->
-    <div id="ed-fs">
-        <div class="fp-bar">
-            <span class="fp-brand"><i class="fas fa-bolt"></i> StormEditor</span>
-            <div class="fp-url"><span>preview.stormcreate.local</span></div>
-            <button class="dv-btn" data-fmode="desktop" onclick="ED.setFPD('desktop')"><i class="fas fa-desktop"></i></button>
-            <button class="dv-btn" data-fmode="tablet" onclick="ED.setFPD('tablet')"><i class="fas fa-tablet-alt"></i></button>
-            <button class="dv-btn" data-fmode="mobile" onclick="ED.setFPD('mobile')"><i class="fas fa-mobile-alt"></i></button>
-            <button class="ed-btn" style="margin-left:auto" onclick="ED.toggleFullPreview()"><i class="fas fa-times"></i> Закрыть</button>
+    <div id="ed-fullprev">
+        <div class="fp-nav">
+            <span class="fp-brand">⚡ StormEditor</span>
+            <div class="fp-url">preview.stormcreate.local</div>
+            <button class="dvb" data-fmode="desktop" onclick="ED.setFPDevice('desktop')"><i class="fas fa-desktop"></i></button>
+            <button class="dvb" data-fmode="tablet" onclick="ED.setFPDevice('tablet')"><i class="fas fa-tablet-alt"></i></button>
+            <button class="dvb" data-fmode="mobile" onclick="ED.setFPDevice('mobile')"><i class="fas fa-mobile-alt"></i></button>
+            <button class="tb" style="margin-left:auto" onclick="ED.toggleFullPrev()"><i class="fas fa-times mr-1"></i> Закрыть</button>
         </div>
         <div class="fp-body">
-            <iframe id="fp-frm" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+            <iframe id="fp-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
         </div>
     </div>
 
     <!-- Context menu -->
     <div id="ed-ctx">
-        <div class="ctx-item" onclick="ED.formatCode()"><i class="fas fa-indent w-4"></i> Форматировать</div>
-        <div class="ctx-item" onclick="ED.copyAll()"><i class="fas fa-copy w-4"></i> Скопировать всё</div>
+        <div class="ctx-label">Редактор</div>
+        <div class="ctx-i" onclick="ED.formatCode()"><i class="fas fa-magic-wand-sparkles w-4"></i> Форматировать <span style="margin-left:auto" class="kbd">Alt+Shift+F</span></div>
+        <div class="ctx-i" onclick="ED.findInCode()"><i class="fas fa-search w-4"></i> Найти / Заменить <span style="margin-left:auto" class="kbd">Ctrl+H</span></div>
+        <div class="ctx-i" onclick="ED.copyAll()"><i class="fas fa-copy w-4"></i> Скопировать всё</div>
         <div class="ctx-sep"></div>
-        <div class="ctx-item" onclick="ED.clearFile()"><i class="fas fa-trash w-4 text-red-400"></i> Очистить файл</div>
+        <div class="ctx-i" onclick="ED.toggleWrap()"><i class="fas fa-align-left w-4"></i> Перенос строк</div>
+        <div class="ctx-i" onclick="ED.toggleMinimap()"><i class="fas fa-map w-4"></i> Мини-карта</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-i danger" onclick="ED.clearFile()"><i class="fas fa-trash w-4"></i> Очистить файл</div>
     </div>
 
     <script type="module" src="js/ui.js"></script>
 
-    <!-- ── FIREBASE AUTH CHECK ───────────────────────── -->
+    <!-- ════════ FIREBASE AUTH ════════ -->
     <script type="module">
         import { auth } from './js/firebase.js';
         import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-        let gateMode = 'login'; // 'login' | 'register'
-        let authReady = false;
+        let mode = 'login';
 
-        // ── Auth state listener ──────────────────────
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, user => {
             document.getElementById('auth-loading').style.display = 'none';
-
             if (user) {
-                // Logged in — show editor
                 document.getElementById('auth-gate').style.display = 'none';
                 document.getElementById('editor-wrap').style.display = 'flex';
-
-                // Show user pill in toolbar
-                const pill = document.getElementById('ed-user-pill');
-                if (pill) {
-                    const avatar = user.photoURL
-                        ? `<img src="${user.photoURL}" class="w-6 h-6 rounded-full border border-primary object-cover">`
-                        : `<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-size:.65rem;font-weight:800;">${(user.displayName||user.email||'U')[0].toUpperCase()}</div>`;
-                    pill.innerHTML = `${avatar} <span class="hidden sm:inline">${user.displayName || user.email.split('@')[0]}</span>`;
+                // User avatar in activity bar
+                const av = document.getElementById('act-user');
+                if (user.photoURL) {
+                    av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    av.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
                 }
-
-                // Init editor
-                if (typeof ED !== 'undefined') ED.init('default');
+                av.title = user.displayName || user.email;
+                if (typeof ED !== 'undefined') ED.init();
             } else {
-                // Not logged in — show auth gate
                 document.getElementById('auth-gate').style.display = 'flex';
                 document.getElementById('editor-wrap').style.display = 'none';
             }
         });
 
-        // ── Gate form logic ──────────────────────────
         window.gateToggle = () => {
-            gateMode = gateMode === 'login' ? 'register' : 'login';
-            const nameField = document.getElementById('gate-name');
-            const submitBtn = document.getElementById('gate-submit');
-            const switchEl  = document.getElementById('gate-switch');
-            document.getElementById('auth-error').style.display = 'none';
-
-            if (gateMode === 'register') {
-                nameField.style.display = 'block';
-                submitBtn.innerHTML = '<i class="fas fa-user-plus mr-1"></i> Зарегистрироваться';
-                switchEl.innerHTML = 'Уже есть аккаунт? <a onclick="gateToggle()">Войти</a>';
+            mode = mode === 'login' ? 'register' : 'login';
+            document.getElementById('auth-err').style.display = 'none';
+            const nameEl = document.getElementById('gate-name');
+            const btn    = document.getElementById('gate-btn');
+            const sw     = document.getElementById('gate-switch');
+            if (mode === 'register') {
+                nameEl.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-user-plus mr-1.5"></i> Зарегистрироваться';
+                sw.innerHTML = 'Уже есть аккаунт? <span onclick="gateToggle()">Войти</span>';
             } else {
-                nameField.style.display = 'none';
-                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i> Войти';
-                switchEl.innerHTML = 'Нет аккаунта? <a onclick="gateToggle()">Зарегистрироваться</a>';
+                nameEl.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1.5"></i> Войти';
+                sw.innerHTML = 'Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span>';
             }
         };
 
         window.gateSubmit = async () => {
-            const email    = document.getElementById('gate-email').value.trim();
-            const password = document.getElementById('gate-password').value;
-            const name     = document.getElementById('gate-name').value.trim();
-            const btn      = document.getElementById('gate-submit');
-            const errEl    = document.getElementById('auth-error');
-
-            errEl.style.display = 'none';
-            if (!email || !password) { showGateError('Заполните все поля'); return; }
-
+            const email = document.getElementById('gate-email').value.trim();
+            const pass  = document.getElementById('gate-password').value;
+            const name  = document.getElementById('gate-name').value.trim();
+            const btn   = document.getElementById('gate-btn');
+            const err   = document.getElementById('auth-err');
+            err.style.display = 'none';
+            if (!email || !pass) { showErr('Заполните все поля'); return; }
+            const orig = btn.innerHTML;
             btn.disabled = true;
-            const origText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Загрузка...';
-
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Загрузка...';
             try {
-                if (gateMode === 'login') {
-                    await signInWithEmailAndPassword(auth, email, password);
+                if (mode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
                 } else {
-                    if (!name) { showGateError('Введите ваше имя'); btn.disabled=false; btn.innerHTML=origText; return; }
-                    const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    await updateProfile(cred.user, { displayName: name });
+                    if (!name) { showErr('Введите ваше имя'); btn.disabled=false; btn.innerHTML=orig; return; }
+                    const c = await createUserWithEmailAndPassword(auth, email, pass);
+                    await updateProfile(c.user, { displayName: name });
                 }
-                // onAuthStateChanged will handle the rest
-            } catch (err) {
-                const msgs = {
-                    'auth/user-not-found': 'Пользователь не найден',
-                    'auth/wrong-password': 'Неверный пароль',
-                    'auth/invalid-credential': 'Неверный email или пароль',
-                    'auth/email-already-in-use': 'Email уже используется',
-                    'auth/weak-password': 'Пароль слишком короткий (минимум 6 символов)',
-                    'auth/invalid-email': 'Неверный формат email',
-                    'auth/too-many-requests': 'Слишком много попыток. Подождите немного',
-                };
-                showGateError(msgs[err.code] || err.message);
-                btn.disabled = false;
-                btn.innerHTML = origText;
+            } catch(e) {
+                const m = { 'auth/user-not-found':'Пользователь не найден','auth/wrong-password':'Неверный пароль','auth/invalid-credential':'Неверный email или пароль','auth/email-already-in-use':'Email уже используется','auth/weak-password':'Пароль слишком короткий (мин. 6 символов)','auth/invalid-email':'Неверный email','auth/too-many-requests':'Слишком много попыток' };
+                showErr(m[e.code] || e.message);
+                btn.disabled = false; btn.innerHTML = orig;
             }
         };
 
-        function showGateError(msg) {
-            const el = document.getElementById('auth-error');
-            el.textContent = '⚠️ ' + msg;
-            el.style.display = 'block';
+        function showErr(msg) {
+            const el = document.getElementById('auth-err');
+            el.textContent = '⚠️ ' + msg; el.style.display = 'block';
         }
     </script>
 
-    <!-- ── EDITOR CORE ───────────────────────────────── -->
+    <!-- ════════ EDITOR CORE ════════ -->
     <script>
     const ED = (() => {
-        let editor = null, cur = 'index.html';
-        let wrap = false, aiOpen = false;
+        let editor = null;
+        let curFile = 'index.html';
+        let wordWrap = false;
+        let minimap = true;
+        let explorerOpen = true;
         let resizing = false, rsX = 0, rsW = 0;
-        let prevTmr = null, saveTmr = null;
+        let prevTimer = null, saveTimer = null;
 
-        const F = {
-            'index.html': { lang:'html',       content:'' },
-            'style.css' : { lang:'css',         content:'' },
-            'script.js' : { lang:'javascript',  content:'' }
+        const FILES = {
+            'index.html': { lang: 'html',       content: '' },
+            'style.css':  { lang: 'css',         content: '' },
+            'script.js':  { lang: 'javascript',  content: '' },
         };
 
-        function init(tpl = 'default') {
-            applyTpl(tpl);
+        // ── Init ─────────────────────────────────────
+        function init() {
             loadLS();
-            if (typeof require === 'undefined') { setTimeout(()=>init(tpl), 400); return; }
+            renderExplorer();
+            renderTabs();
 
-            require.config({ paths:{ vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+            if (typeof require === 'undefined') { setTimeout(init, 300); return; }
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
             require(['vs/editor/editor.main'], () => {
                 const dark = document.documentElement.classList.contains('dark');
 
-                monaco.editor.defineTheme('sc-light',{base:'vs',inherit:true,rules:[],colors:{'editor.background':'#f8fbff','editor.lineHighlightBackground':'#eef4ff','editorLineNumber.foreground':'#c8d5e8','editorLineNumber.activeForeground':'#3b82f6','editor.selectionBackground':'#bfdbfe','editorCursor.foreground':'#3b82f6','editorGutter.background':'#f0f6ff'}});
-                monaco.editor.defineTheme('sc-dark',{base:'vs-dark',inherit:true,rules:[],colors:{'editor.background':'#020617','editor.lineHighlightBackground':'#071126','editorLineNumber.foreground':'#1e3a5f','editorLineNumber.activeForeground':'#3b82f6','editor.selectionBackground':'#1e3a5f','editorCursor.foreground':'#60a5fa','minimap.background':'#020617','editorGutter.background':'#020c1b','scrollbarSlider.background':'#0f172a'}});
-
-                editor = monaco.editor.create(document.getElementById('ed-monaco'),{
-                    value:F['index.html'].content, language:'html',
-                    theme: dark?'sc-dark':'sc-light',
-                    fontSize:14, fontFamily:"'JetBrains Mono','Fira Code',monospace",
-                    fontLigatures:true, minimap:{enabled:true}, scrollBeyondLastLine:false,
-                    wordWrap:'off', automaticLayout:true, tabSize:2, formatOnPaste:true,
-                    lineNumbers:'on', folding:true, renderLineHighlight:'all',
-                    cursorBlinking:'smooth', smoothScrolling:true, padding:{top:10,bottom:10},
-                    bracketPairColorization:{enabled:true}
+                monaco.editor.defineTheme('sc-light', {
+                    base: 'vs', inherit: true, rules: [],
+                    colors: {
+                        'editor.background': '#f8fafc',
+                        'editor.lineHighlightBackground': '#f1f5f9',
+                        'editorLineNumber.foreground': '#cbd5e1',
+                        'editorLineNumber.activeForeground': '#3b82f6',
+                        'editor.selectionBackground': '#bfdbfe',
+                        'editorCursor.foreground': '#3b82f6',
+                        'editorGutter.background': '#f1f5f9',
+                        'minimap.background': '#f1f5f9',
+                    }
+                });
+                monaco.editor.defineTheme('sc-dark', {
+                    base: 'vs-dark', inherit: true, rules: [],
+                    colors: {
+                        'editor.background': '#020617',
+                        'editor.lineHighlightBackground': '#0f172a',
+                        'editorLineNumber.foreground': '#1e3a5f',
+                        'editorLineNumber.activeForeground': '#60a5fa',
+                        'editor.selectionBackground': '#1e3a5f',
+                        'editorCursor.foreground': '#60a5fa',
+                        'editorGutter.background': '#020c1b',
+                        'minimap.background': '#020617',
+                        'scrollbarSlider.background': '#0f172a80',
+                        'scrollbarSlider.hoverBackground': '#1e293b',
+                    }
                 });
 
-                new MutationObserver(()=>{
-                    monaco.editor.setTheme(document.documentElement.classList.contains('dark')?'sc-dark':'sc-light');
-                }).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
-
-                editor.onDidChangeCursorPosition(e=>{
-                    const{lineNumber:l,column:c}=e.position;
-                    document.getElementById('sb-cur').innerHTML=`<i class="fas fa-crosshairs" style="font-size:.58rem"></i> Стр ${l}, Кол ${c}`;
+                editor = monaco.editor.create(document.getElementById('ed-monaco'), {
+                    value: FILES[curFile].content,
+                    language: FILES[curFile].lang,
+                    theme: dark ? 'sc-dark' : 'sc-light',
+                    fontSize: 14,
+                    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+                    fontLigatures: true,
+                    minimap: { enabled: true },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'off',
+                    automaticLayout: true,
+                    tabSize: 2,
+                    formatOnPaste: true,
+                    formatOnType: false,
+                    lineNumbers: 'on',
+                    folding: true,
+                    foldingHighlight: true,
+                    renderLineHighlight: 'line',
+                    cursorBlinking: 'smooth',
+                    cursorSmoothCaretAnimation: 'on',
+                    smoothScrolling: true,
+                    padding: { top: 12, bottom: 12 },
+                    bracketPairColorization: { enabled: true },
+                    guides: { bracketPairs: true, indentation: true },
+                    suggestOnTriggerCharacters: true,
+                    quickSuggestions: true,
+                    renderWhitespace: 'selection',
+                    colorDecorators: true,
                 });
-                editor.onDidChangeModelContent(()=>{F[cur].content=editor.getValue();updateCh();sched();schedSave();});
-                editor.onContextMenu(e=>{e.event.preventDefault();showCtx(e.event.browserEvent.clientX,e.event.browserEvent.clientY);});
 
-                updateCh(); refresh();
+                // Sync theme
+                new MutationObserver(() => {
+                    monaco.editor.setTheme(document.documentElement.classList.contains('dark') ? 'sc-dark' : 'sc-light');
+                }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+                editor.onDidChangeCursorPosition(e => {
+                    const { lineNumber: l, column: c } = e.position;
+                    document.getElementById('sb-cur').textContent = `Стр ${l}, Кол ${c}`;
+                });
+                editor.onDidChangeModelContent(() => {
+                    FILES[curFile].content = editor.getValue();
+                    updateChars();
+                    schedSave();
+                    schedPreview();
+                });
+                editor.onContextMenu(e => {
+                    e.event.preventDefault();
+                    showCtx(e.event.browserEvent.clientX, e.event.browserEvent.clientY);
+                });
+
+                updateChars();
+                refresh();
             });
 
-            document.addEventListener('keydown',e=>{
-                if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveLS();toast('💾 Сохранено');}
-                if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();toggleAI();}
-                if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==='P'){e.preventDefault();toggleFullPreview();}
-                if(e.key==='Escape'){document.getElementById('ed-fs').classList.remove('show');hideCtx();}
+            // Keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); saveLS(); toast('💾 Сохранено'); }
+                if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key === 'P') { e.preventDefault(); toggleFullPrev(); }
+                if (e.key === 'Escape') {
+                    document.getElementById('ed-fullprev').classList.remove('on');
+                    hideCtx();
+                }
             });
-            document.addEventListener('click',hideCtx);
-            document.addEventListener('mousemove',onMM);
-            document.addEventListener('mouseup',()=>{resizing=false;document.getElementById('ed-resize').classList.remove('active');});
-            document.getElementById('ed-ai-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendAI();}});
+            document.addEventListener('click', hideCtx);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', () => {
+                resizing = false;
+                document.getElementById('ed-resize').classList.remove('dragging');
+            });
         }
 
-        function switchFile(name){
-            if(!F[name])return;
-            if(editor)F[cur].content=editor.getValue();
-            cur=name;
-            if(editor){editor.setModel(monaco.editor.createModel(F[name].content,F[name].lang));editor.onDidChangeModelContent(()=>{F[cur].content=editor.getValue();updateCh();sched();schedSave();});}
-            document.querySelectorAll('.ed-tab').forEach(t=>t.classList.toggle('active',t.dataset.file===name));
-            document.getElementById('sb-lang').textContent=F[name].lang.toUpperCase();
-            updateCh();
+        // ── Files ─────────────────────────────────────
+        function renderExplorer() {
+            const list = document.getElementById('exp-file-list');
+            list.innerHTML = Object.keys(FILES).map(name => {
+                const icons = { html: `<i class="fab fa-html5" style="color:#e34c26;font-size:.9em"></i>`, css: `<i class="fab fa-css3-alt" style="color:#264de4;font-size:.9em"></i>`, javascript: `<i class="fab fa-js-square" style="color:#ca8a04;font-size:.9em"></i>` };
+                const lang = FILES[name].lang;
+                const ico  = icons[lang] || `<i class="fas fa-file-code" style="color:#94a3b8;font-size:.9em"></i>`;
+                const canDel = !['index.html','style.css','script.js'].includes(name);
+                return `<div class="exp-file ${name===curFile?'active':''}" onclick="ED.switchFile('${name}')">
+                    ${ico} <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
+                    ${canDel ? `<span class="exp-del" onclick="ED.closeFile('${name}',event)" title="Удалить">✕</span>` : ''}
+                </div>`;
+            }).join('');
         }
-        function addFile(){
-            const n=prompt('Название файла:')?.trim();if(!n)return;
-            if(F[n]){toast('⚠️ Уже существует');return;}
-            const ext=n.split('.').pop().toLowerCase();
-            const lang=ext==='html'?'html':ext==='css'?'css':ext==='js'?'javascript':'plaintext';
-            F[n]={lang,content:''};
-            const icons={html:`<i class="fab fa-html5" style="color:#e34c26;font-size:.85em"></i>`,css:`<i class="fab fa-css3-alt" style="color:#264de4;font-size:.85em"></i>`,javascript:`<i class="fab fa-js-square" style="color:#ca8a04;font-size:.85em"></i>`};
-            const tab=document.createElement('button');tab.className='ed-tab';tab.dataset.file=n;tab.onclick=()=>switchFile(n);
-            tab.innerHTML=`${icons[lang]||'<i class="fas fa-file-code"></i>'} ${n} <span class="tab-x" onclick="ED.closeFile('${n}',event)">✕</span>`;
-            document.getElementById('ed-tabs').insertBefore(tab,document.querySelector('.ed-add-tab'));
-            switchFile(n);
+
+        function renderTabs() {
+            const bar = document.getElementById('ed-tabbar');
+            const icons = { html: `<i class="fab fa-html5" style="color:#e34c26;font-size:.85em"></i>`, css: `<i class="fab fa-css3-alt" style="color:#264de4;font-size:.85em"></i>`, javascript: `<i class="fab fa-js-square" style="color:#ca8a04;font-size:.85em"></i>` };
+            const spacer = bar.querySelector('div[style]');
+            // Remove old tabs
+            bar.querySelectorAll('.ed-tab').forEach(t => t.remove());
+            Object.keys(FILES).forEach(name => {
+                const lang = FILES[name].lang;
+                const ico  = icons[lang] || `<i class="fas fa-file-code" style="color:#94a3b8;font-size:.85em"></i>`;
+                const canDel = !['index.html','style.css','script.js'].includes(name);
+                const tab = document.createElement('button');
+                tab.className = `ed-tab ${name===curFile?'active':''}`;
+                tab.dataset.file = name;
+                tab.onclick = () => switchFile(name);
+                tab.innerHTML = `${ico} ${name} ${canDel ? `<span class="tab-x" onclick="ED.closeFile('${name}',event)">✕</span>` : ''}`;
+                bar.insertBefore(tab, spacer);
+            });
         }
-        function closeFile(name,evt){
-            evt.stopPropagation();
-            if(['index.html','style.css','script.js'].includes(name)){toast('⚠️ Нельзя удалить основной файл');return;}
-            if(!confirm(`Удалить ${name}?`))return;
-            delete F[name];document.querySelector(`.ed-tab[data-file="${name}"]`)?.remove();
-            if(cur===name)switchFile('index.html');
+
+        function switchFile(name) {
+            if (!FILES[name]) return;
+            if (editor) FILES[curFile].content = editor.getValue();
+            curFile = name;
+            if (editor) {
+                const model = monaco.editor.createModel(FILES[name].content, FILES[name].lang);
+                editor.setModel(model);
+                editor.onDidChangeModelContent(() => {
+                    FILES[curFile].content = editor.getValue();
+                    updateChars(); schedSave(); schedPreview();
+                });
+            }
+            document.getElementById('sb-lang').textContent = FILES[name].lang.toUpperCase();
+            updateChars();
+            renderExplorer();
+            renderTabs();
         }
-        function sched(){clearTimeout(prevTmr);prevTmr=setTimeout(refresh,500);}
-        function refresh(){const f=document.getElementById('ed-frame');if(f)f.srcdoc=build();}
-        function build(){
-            let h=F['index.html'].content;
-            const c=F['style.css'].content,j=F['script.js'].content;
-            if(c)h=h.replace('</head>',`<style>\n${c}\n</style>\n</head>`);
-            if(j)h=h.replace('</body>',`<script>\n${j}\n<\/script>\n</body>`);
+
+        function addFile() {
+            const name = prompt('Название файла (например: about.html, theme.css):')?.trim();
+            if (!name) return;
+            if (FILES[name]) { toast('⚠️ Файл уже существует'); return; }
+            const ext  = name.split('.').pop().toLowerCase();
+            const lang = ext==='html'?'html':ext==='css'?'css':ext==='js'?'javascript':'plaintext';
+            FILES[name] = { lang, content: '' };
+            renderExplorer();
+            renderTabs();
+            switchFile(name);
+            toast(`📄 Файл "${name}" создан`);
+        }
+
+        function closeFile(name, e) {
+            e.stopPropagation();
+            if (['index.html','style.css','script.js'].includes(name)) { toast('⚠️ Нельзя удалить основной файл'); return; }
+            if (!confirm(`Удалить файл "${name}"?`)) return;
+            delete FILES[name];
+            if (curFile === name) { curFile = 'index.html'; if (editor) editor.setValue(FILES['index.html'].content); }
+            renderExplorer();
+            renderTabs();
+        }
+
+        function toggleExplorer() {
+            explorerOpen = !explorerOpen;
+            const el = document.getElementById('ed-explorer');
+            el.classList.toggle('open', explorerOpen);
+            document.getElementById('act-files').classList.toggle('active', explorerOpen);
+        }
+
+        // ── Preview ─────────────────────────────────
+        function schedPreview() { clearTimeout(prevTimer); prevTimer = setTimeout(refresh, 600); }
+
+        function refresh() {
+            const f = document.getElementById('ed-frame');
+            if (f) f.srcdoc = buildHTML();
+        }
+
+        function buildHTML() {
+            let h = FILES['index.html'].content;
+            const c = FILES['style.css'].content;
+            const j = FILES['script.js'].content;
+            if (c) h = h.replace('</head>', `<style>\n${c}\n</style>\n</head>`);
+            if (j) h = h.replace('</body>', `<script>\n${j}\n<\/script>\n</body>`);
             return h;
         }
-        function setDevice(m){
-            document.querySelectorAll('.dv-btn[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
-            const s={desktop:'100%',tablet:'768px',mobile:'390px'};
-            const f=document.getElementById('ed-frame');f.style.width=s[m];f.style.maxWidth=s[m];
-        }
-        function setFPD(m){
-            document.querySelectorAll('.dv-btn[data-fmode]').forEach(b=>b.classList.toggle('active',b.dataset.fmode===m));
-            const s={desktop:'100%',tablet:'768px',mobile:'390px'};
-            const f=document.getElementById('fp-frm');f.style.width=s[m];f.style.maxWidth=s[m];
-        }
-        function toggleFullPreview(){
-            const o=document.getElementById('ed-fs');o.classList.toggle('show');
-            if(o.classList.contains('show'))document.getElementById('fp-frm').srcdoc=build();
-        }
-        function openInNewTab(){
-            const url=URL.createObjectURL(new Blob([build()],{type:'text/html'}));
-            window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),8000);
-        }
-        function formatCode(){editor?.getAction('editor.action.formatDocument')?.run().then(()=>toast('✅ Отформатировано'));}
-        function toggleWrap(){wrap=!wrap;editor?.updateOptions({wordWrap:wrap?'on':'off'});document.getElementById('ed-wrap-btn').style.color=wrap?'#3b82f6':'';}
-        function copyAll(){navigator.clipboard.writeText(editor?.getValue()||'').then(()=>toast('📋 Скопировано'));hideCtx();}
-        function clearFile(){if(!confirm('Очистить?'))return;editor?.setValue('');hideCtx();}
-        function updateCh(){document.getElementById('sb-ch').textContent=(editor?.getValue()||'').length.toLocaleString('ru')+' симв';}
-        function downloadProject(){
-            const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([build()],{type:'text/html'}));
-            a.download='stormcreate-site.html';a.click();URL.revokeObjectURL(a.href);toast('📦 Файл скачан!');
-        }
-        function schedSave(){
-            const dot=document.getElementById('as-dot'),txt=document.getElementById('sb-save');
-            dot.style.background='#f59e0b';txt.textContent='Сохранение...';
-            clearTimeout(saveTmr);saveTmr=setTimeout(()=>{saveLS();dot.style.background='#22c55e';txt.textContent='Сохранено';},1500);
-        }
-        function saveLS(){try{localStorage.setItem('sc_ed_v3',JSON.stringify(F));}catch(e){}}
-        function loadLS(){try{const s=localStorage.getItem('sc_ed_v3');if(s)Object.assign(F,JSON.parse(s));}catch(e){}}
-        function loadTemplate(tpl){
-            if(!tpl)return;
-            if(!confirm('Загрузить шаблон? Текущий код будет заменён.')){document.querySelector('.ed-select').value='';return;}
-            applyTpl(tpl);if(editor)editor.setValue(F[cur].content);refresh();document.querySelector('.ed-select').value='';toast('🚀 Шаблон загружен');
-        }
-        function applyTpl(tpl){const t=TPL[tpl]||TPL.default;F['index.html'].content=t.h;F['style.css'].content=t.c;F['script.js'].content=t.j;}
-        function startResize(e){resizing=true;rsX=e.clientX;rsW=document.getElementById('ed-code-panel').offsetWidth;document.getElementById('ed-resize').classList.add('active');e.preventDefault();}
-        function onMM(e){
-            if(!resizing)return;
-            const tot=document.getElementById('ed-workspace').offsetWidth-(aiOpen?310:0);
-            document.getElementById('ed-code-panel').style.width=Math.min(Math.max(rsW+(e.clientX-rsX),180),tot-180)+'px';
-        }
-        function showCtx(x,y){
-            const m=document.getElementById('ed-ctx');m.style.cssText=`display:block;left:${x}px;top:${y}px`;
-            const r=m.getBoundingClientRect();
-            if(r.right>window.innerWidth)m.style.left=(x-r.width)+'px';
-            if(r.bottom>window.innerHeight)m.style.top=(y-r.height)+'px';
-        }
-        function hideCtx(){document.getElementById('ed-ctx').style.display='none';}
-        function toast(msg){
-            const el=document.createElement('div');el.className='sc-toast';el.textContent=msg;document.body.appendChild(el);
-            setTimeout(()=>{el.style.animation='tout 0.3s ease forwards';setTimeout(()=>el.remove(),300);},2500);
-        }
-        function toggleAI(){
-            aiOpen=!aiOpen;
-            document.getElementById('ed-ai').classList.toggle('open',aiOpen);
-            document.getElementById('ai-btn').classList.toggle('on',aiOpen);
-            if(aiOpen&&!document.getElementById('ed-ai-msgs').children.length)
-                addMsg('bot','👋 Привет! Я AI-ассистент StormEditor. Опиши задачу — изменю код. Используй быстрые кнопки ниже или напиши своё.');
-        }
-        async function sendAI(){
-            const inp=document.getElementById('ed-ai-inp');
-            const text=inp.value.trim();if(!text)return;inp.value='';
-            addMsg('user',text);const th=addMsg('bot','⏳ Генерирую...',true);
-            try{
-                const res=await fetch('https://api.anthropic.com/v1/messages',{
-                    method:'POST',headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,
-                        system:`Ты веб-разработчик в StormEditor. Помогаешь с HTML/CSS/JS. При изменении кода — возвращай ТОЛЬКО изменённый код в блоке \`\`\`язык\n...\n\`\`\`. Код делай современным. Отвечай по-русски.`,
-                        messages:[{role:'user',content:`Файл: ${cur}\n\`\`\`${F[cur].lang}\n${F[cur].content}\n\`\`\`\n\nЗадача: ${text}`}]})
-                });
-                const data=await res.json();const reply=data.content?.[0]?.text||'Ошибка';
-                th.remove();addMsg('bot',reply);
-                let ok=false;const re=/```(html|css|javascript|js)?\n([\s\S]*?)```/g;let m;
-                while((m=re.exec(reply))!==null){
-                    const lang=m[1]||'',code=m[2].trim();
-                    const tf=lang==='html'?'index.html':lang==='css'?'style.css':(lang==='js'||lang==='javascript')?'script.js':null;
-                    if(tf){F[tf].content=code;if(cur===tf&&editor)editor.setValue(code);ok=true;}
-                }
-                if(ok){refresh();toast('✅ AI применил изменения!');}
-            }catch(err){th.remove();addMsg('bot',`❌ Ошибка: ${err.message}`);}
-        }
-        function quickAI(text){document.getElementById('ed-ai-inp').value=text;if(!aiOpen)toggleAI();sendAI();}
-        function addMsg(role,text,think=false){
-            const c=document.getElementById('ed-ai-msgs');
-            const el=document.createElement('div');
-            el.className=`ai-msg ${role}${think?' thinking':''}`;
-            el.innerHTML=text.replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-            c.appendChild(el);c.scrollTop=c.scrollHeight;return el;
+
+        function setDevice(mode) {
+            document.querySelectorAll('.dvb[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+            const f = document.getElementById('ed-frame');
+            const s = { desktop: '100%', tablet: '768px', mobile: '390px' };
+            f.style.width = s[mode]; f.style.maxWidth = s[mode];
         }
 
-        return{init,switchFile,addFile,closeFile,formatCode,toggleWrap,setDevice,setFPD,
-               refresh,toggleFullPreview,openInNewTab,downloadProject,loadTemplate,
-               startResize,toggleAI,sendAI,quickAI,copyAll,clearFile};
+        function setFPDevice(mode) {
+            document.querySelectorAll('.dvb[data-fmode]').forEach(b => b.classList.toggle('on', b.dataset.fmode === mode));
+            const f = document.getElementById('fp-frame');
+            const s = { desktop: '100%', tablet: '768px', mobile: '390px' };
+            f.style.width = s[mode]; f.style.maxWidth = s[mode];
+            document.getElementById('fp-frame').parentElement.style.alignItems = mode === 'desktop' ? 'stretch' : 'flex-start';
+        }
+
+        function toggleFullPrev() {
+            const o = document.getElementById('ed-fullprev');
+            o.classList.toggle('on');
+            if (o.classList.contains('on')) document.getElementById('fp-frame').srcdoc = buildHTML();
+        }
+
+        function openInTab() {
+            const url = URL.createObjectURL(new Blob([buildHTML()], { type: 'text/html' }));
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 8000);
+        }
+
+        // ── Editor utils ───────────────────────────
+        function formatCode() {
+            editor?.getAction('editor.action.formatDocument')?.run().then(() => toast('✅ Код отформатирован'));
+            hideCtx();
+        }
+        function toggleWrap() {
+            wordWrap = !wordWrap;
+            editor?.updateOptions({ wordWrap: wordWrap ? 'on' : 'off' });
+            document.getElementById('act-wrap').classList.toggle('active', wordWrap);
+            toast(wordWrap ? '↩ Перенос строк: вкл' : '→ Перенос строк: выкл');
+            hideCtx();
+        }
+        function toggleMinimap() {
+            minimap = !minimap;
+            editor?.updateOptions({ minimap: { enabled: minimap } });
+            toast(minimap ? '🗺 Мини-карта: вкл' : '🗺 Мини-карта: выкл');
+            hideCtx();
+        }
+        function undo() { editor?.trigger('', 'undo', null); }
+        function redo() { editor?.trigger('', 'redo', null); }
+        function copyAll() {
+            navigator.clipboard.writeText(editor?.getValue() || '').then(() => toast('📋 Скопировано'));
+            hideCtx();
+        }
+        function clearFile() {
+            if (!confirm(`Очистить файл "${curFile}"?`)) return;
+            editor?.setValue('');
+            hideCtx();
+        }
+        function findInCode() {
+            editor?.getAction('editor.action.startFindReplaceAction')?.run();
+            hideCtx();
+        }
+        function updateChars() {
+            const n = (editor?.getValue() || '').length;
+            document.getElementById('sb-chars').textContent = `${n.toLocaleString('ru')} символов`;
+        }
+
+        // ── Download ────────────────────────────────
+        function downloadProject() {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([buildHTML()], { type: 'text/html' }));
+            a.download = 'stormcreate-site.html';
+            a.click(); URL.revokeObjectURL(a.href);
+            toast('📦 Файл скачан!');
+        }
+
+        // ── LocalStorage ────────────────────────────
+        function schedSave() {
+            const dot = document.getElementById('sb-dot');
+            const txt = document.getElementById('sb-save');
+            dot.classList.add('saving'); txt.textContent = 'Сохранение...';
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                saveLS();
+                dot.classList.remove('saving'); txt.textContent = 'Сохранено';
+            }, 1500);
+        }
+        function saveLS() { try { localStorage.setItem('sc_ed_v4', JSON.stringify(FILES)); } catch(e) {} }
+        function loadLS() { try { const s = localStorage.getItem('sc_ed_v4'); if (s) Object.assign(FILES, JSON.parse(s)); } catch(e) {} }
+
+        // ── Templates ───────────────────────────────
+        function loadTemplate(tpl) {
+            if (!tpl) return;
+            if (!confirm('Загрузить шаблон? Текущий код будет заменён.')) {
+                document.getElementById('tpl-select').value = ''; return;
+            }
+            applyTpl(tpl);
+            if (editor) editor.setValue(FILES[curFile].content);
+            refresh();
+            document.getElementById('tpl-select').value = '';
+            toast('🚀 Шаблон загружен');
+        }
+        function applyTpl(tpl) {
+            const t = TEMPLATES[tpl] || TEMPLATES.default;
+            FILES['index.html'].content = t.h;
+            FILES['style.css'].content  = t.c;
+            FILES['script.js'].content  = t.j;
+        }
+
+        // ── Resize ──────────────────────────────────
+        function startResize(e) {
+            resizing = true; rsX = e.clientX;
+            rsW = document.getElementById('ed-code-wrap').offsetWidth;
+            document.getElementById('ed-resize').classList.add('dragging');
+            e.preventDefault();
+        }
+        function onMouseMove(e) {
+            if (!resizing) return;
+            const main = document.getElementById('ed-main');
+            const expW = explorerOpen ? 200 : 0;
+            const total = main.offsetWidth - expW - 48 - 5;
+            const newW = Math.min(Math.max(rsW + (e.clientX - rsX) - expW - 48, 200), total - 200);
+            document.getElementById('ed-code-wrap').style.flex = 'none';
+            document.getElementById('ed-code-wrap').style.width = newW + 'px';
+        }
+
+        // ── Context menu ────────────────────────────
+        function showCtx(x, y) {
+            const m = document.getElementById('ed-ctx');
+            m.style.cssText = `display:block;left:${x}px;top:${y}px`;
+            const r = m.getBoundingClientRect();
+            if (r.right > window.innerWidth)  m.style.left = (x - r.width) + 'px';
+            if (r.bottom > window.innerHeight) m.style.top  = (y - r.height) + 'px';
+        }
+        function hideCtx() { document.getElementById('ed-ctx').style.display = 'none'; }
+
+        // ── Toast ────────────────────────────────────
+        function toast(msg) {
+            const el = document.createElement('div');
+            el.className = 'sc-toast'; el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => { el.style.animation = 'none'; el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; el.style.transition = 'all 0.25s'; setTimeout(() => el.remove(), 250); }, 2500);
+        }
+
+        return {
+            init, switchFile, addFile, closeFile, toggleExplorer,
+            formatCode, toggleWrap, toggleMinimap, undo, redo,
+            copyAll, clearFile, findInCode, updateChars, downloadProject,
+            setDevice, setFPDevice, refresh, toggleFullPrev, openInTab,
+            loadTemplate, startResize,
+        };
     })();
 
-    /* ── TEMPLATES ─────────────────────────────────── */
-    const TPL={
-        default:{
-            h:`<!DOCTYPE html>\n<html lang="ru">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Мой сайт</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <header>\n    <nav>\n      <a class="logo" href="#">⚡ MyBrand</a>\n      <ul>\n        <li><a href="#about">О нас</a></li>\n        <li><a href="#services">Услуги</a></li>\n      </ul>\n    </nav>\n  </header>\n  <main>\n    <section class="hero">\n      <h1>Создайте что-то<br><span>удивительное</span></h1>\n      <p>Редактируй код слева или попроси AI-помощника</p>\n      <button onclick="this.textContent=\'🎉 Отлично!\'">Начать →</button>\n    </section>\n  </main>\n  <footer><p>© 2025 MyBrand. Сделано с ❤️ в StormEditor</p></footer>\n  <script src="script.js"><\/script>\n</body>\n</html>`,
-            c:`*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}\n:root{--p:#3b82f6;--dark:#0f172a;--light:#f8fafc}\nbody{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);color:var(--dark)}\nheader{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;border-bottom:1px solid #e2e8f0}\nnav{max-width:1100px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}\n.logo{font-weight:900;font-size:1.3rem;color:var(--p);text-decoration:none}\nnav ul{display:flex;gap:2rem;list-style:none}\nnav a{text-decoration:none;color:#475569;font-weight:500;transition:color .2s}\nnav a:hover{color:var(--p)}\n.hero{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 1.5rem;background:linear-gradient(160deg,#dbeafe 0%,#eff6ff 60%,#f5f3ff 100%)}\n.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:1.25rem}\n.hero span{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}\n.hero p{font-size:1.1rem;color:#64748b;margin-bottom:2.5rem}\n.hero button{padding:.9rem 2.5rem;background:var(--p);color:white;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 10px 30px rgba(59,130,246,.3)}\n.hero button:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(59,130,246,.4)}\nfooter{text-align:center;padding:2rem;background:var(--dark);color:#64748b;font-size:.85rem}`,
-            j:`document.addEventListener('DOMContentLoaded', () => {\n  document.querySelectorAll('a[href^="#"]').forEach(a => {\n    a.addEventListener('click', e => {\n      e.preventDefault();\n      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });\n    });\n  });\n});`
+    /* ════════════════════════════════════════════════
+       TEMPLATES
+    ════════════════════════════════════════════════ */
+    const TEMPLATES = {
+        default: {
+            h: `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мой сайт</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a class="logo" href="#">⚡ MyBrand</a>
+      <ul>
+        <li><a href="#about">О нас</a></li>
+        <li><a href="#services">Услуги</a></li>
+        <li><a href="#contact">Контакт</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Создайте что-то <span>удивительное</span></h1>
+      <p>Добро пожаловать в StormEditor — начни редактировать код слева</p>
+      <button onclick="this.textContent='🎉 Отлично!'">Начать →</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 MyBrand. Сделано в StormEditor</p>
+  </footer>
+
+  <script src="script.js"><\/script>
+</body>
+</html>`,
+            c: `/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Variables ── */
+:root {
+  --primary: #3b82f6;
+  --dark: #0f172a;
+  --light: #f8fafc;
+  --text: #334155;
+  --muted: #94a3b8;
+  --radius: 12px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── Nav ── */
+header {
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky; top: 0; z-index: 100;
+}
+nav {
+  max-width: 1100px; margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-weight: 900; font-size: 1.25rem;
+  color: var(--primary); text-decoration: none;
+}
+nav ul { display: flex; gap: 2rem; list-style: none; }
+nav a {
+  text-decoration: none; color: #64748b;
+  font-weight: 500; transition: color .2s;
+}
+nav a:hover { color: var(--primary); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 90vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 4rem 1.5rem;
+  background: linear-gradient(160deg, #dbeafe 0%, #eff6ff 55%, #f5f3ff 100%);
+}
+.hero h1 {
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  font-weight: 900; line-height: 1.1;
+  color: var(--dark); margin-bottom: 1.25rem;
+}
+.hero span {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  font-size: 1.1rem; color: #64748b;
+  max-width: 520px; margin-bottom: 2.5rem;
+}
+.hero button {
+  padding: .9rem 2.5rem;
+  background: var(--primary); color: white;
+  border: none; border-radius: 50px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 8px 24px rgba(59,130,246,.3);
+}
+.hero button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(59,130,246,.4);
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 2rem;
+  background: var(--dark); color: #64748b;
+  font-size: .85rem;
+}`,
+            j: `document.addEventListener('DOMContentLoaded', () => {
+  // Плавная прокрутка
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))
+        ?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  console.log('✅ Сайт загружен!');
+});`
         },
-        empty:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head>\n  <meta charset="UTF-8">\n  <title>Новый сайт</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n\n  <script src="script.js"><\/script>\n</body>\n</html>`,c:`*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:sans-serif}`,j:`console.log('👋 StormEditor');`},
-        landing:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Лендинг</title><link rel="stylesheet" href="style.css"></head>\n<body>\n  <header><div class="container nav"><span class="logo">⚡ Storm</span><nav><a href="#f">Возможности</a><a href="#p">Цены</a></nav><button class="cta-s">Попробовать</button></div></header>\n  <section class="hero"><div class="container"><div class="badge">🚀 Новый уровень</div><h1>Создавай сайты<br><em>быстро и красиво</em></h1><p>AI, живой превью и шаблоны.</p><div class="btns"><button class="btn-p">Начать бесплатно</button><button class="btn-g">Демо ▶</button></div></div></section>\n  <section id="f" class="features"><div class="container"><h2>Почему выбирают нас</h2><div class="grid"><div class="card"><div class="icon">⚡</div><h3>Быстро</h3><p>Оптимизированный код</p></div><div class="card"><div class="icon">🤖</div><h3>AI</h3><p>Генерация кода ИИ</p></div><div class="card"><div class="icon">📱</div><h3>Адаптивно</h3><p>На всех устройствах</p></div><div class="card"><div class="icon">🎨</div><h3>Дизайн</h3><p>Готовые шаблоны</p></div></div></div></section>\n  <footer><div class="container"><p>© 2025 Storm</p></div></footer>\n  <script src="script.js"><\/script>\n</body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}:root{--p:#3b82f6;--dark:#0f172a}body{font-family:'Segoe UI',sans-serif;color:var(--dark)}.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0}.nav{display:flex;align-items:center;padding:1rem 1.5rem;gap:1.5rem}.logo{font-weight:900;font-size:1.3rem;color:var(--p)}nav{display:flex;gap:1.5rem;flex:1;justify-content:center}nav a{text-decoration:none;color:#475569;font-weight:500;transition:color .2s}nav a:hover{color:var(--p)}.cta-s{padding:.45rem 1.25rem;background:var(--p);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}.hero{min-height:92vh;display:flex;align-items:center;background:linear-gradient(160deg,#dbeafe 0%,#eff6ff 60%,#f5f3ff 100%);padding:5rem 0}.hero .container{text-align:center}.badge{display:inline-block;background:#dbeafe;color:var(--p);padding:.3rem 1rem;border-radius:50px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem}h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1.1;margin-bottom:1.25rem}em{font-style:normal;background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{font-size:1.15rem;color:#64748b;max-width:560px;margin:0 auto 2rem}.btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}.btn-p{padding:.9rem 2rem;background:var(--p);color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}.btn-p:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(59,130,246,.4)}.btn-g{padding:.9rem 2rem;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}.btn-g:hover{background:var(--p);color:#fff}.features{padding:6rem 0;background:#fff}.features h2{text-align:center;font-size:2.25rem;font-weight:900;margin-bottom:3rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}.card{padding:1.75rem;border:1px solid #e2e8f0;border-radius:16px;transition:all .3s}.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(59,130,246,.1);border-color:var(--p)}.icon{font-size:2.25rem;margin-bottom:.75rem}.card h3{font-size:1.1rem;font-weight:700;margin-bottom:.4rem}.card p{color:#64748b;line-height:1.6;font-size:.9rem}footer{padding:2rem;background:var(--dark);text-align:center;color:#64748b;font-size:.875rem}`,j:`document.addEventListener('DOMContentLoaded',()=>{const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(24px)';c.style.transition='all .5s ease';io.observe(c);});});`},
-        portfolio:{h:`<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Портфолио</title><link rel="stylesheet" href="style.css"></head>\n<body>\n  <div class="cursor"></div><div class="cursor-dot"></div>\n  <header><a class="logo" href="#">АА</a><nav><a href="#work">Работы</a><a href="#about">Обо мне</a></nav></header>\n  <section class="hero"><div class="hero-text"><span class="sub">Frontend Developer</span><h1><span class="outline">Алексей</span><br>Андреев</h1></div><div class="scroll-ind">↓</div></section>\n  <section id="work" class="work"><div class="section-label">РАБОТЫ</div><div class="work-grid">\n    <div class="wi" style="--c:#3b82f6"><div class="wi-num">01</div><h3>E-commerce</h3><span>React · Node.js</span></div>\n    <div class="wi large" style="--c:#8b5cf6"><div class="wi-num">02</div><h3>Мобильное приложение</h3><span>Flutter · Firebase</span></div>\n    <div class="wi" style="--c:#ec4899"><div class="wi-num">03</div><h3>Брендинг</h3><span>Figma</span></div>\n    <div class="wi" style="--c:#14b8a6"><div class="wi-num">04</div><h3>Дашборд</h3><span>Vue · D3.js</span></div>\n  </div></section>\n  <footer id="about"><p class="fp">Готов к сотрудничеству</p><a class="email" href="mailto:hello@alex.dev">hello@alex.dev</a></footer>\n  <script src="script.js"><\/script>\n</body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{background:#050508;color:#f0f0f0;font-family:'Helvetica Neue',Arial,sans-serif;cursor:none;overflow-x:hidden}.cursor{width:32px;height:32px;border:1.5px solid rgba(255,255,255,.6);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s,height .3s;mix-blend-mode:difference}.cursor-dot{width:6px;height:6px;background:#fff;border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 3rem;display:flex;align-items:center;justify-content:space-between}.logo{font-size:1.1rem;font-weight:900;letter-spacing:.2em;color:#f0f0f0;text-decoration:none}nav{display:flex;gap:2.5rem}nav a{text-decoration:none;color:#888;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;transition:color .2s}nav a:hover{color:#f0f0f0}.hero{height:100vh;display:flex;align-items:flex-end;padding:0 3rem 6rem}.sub{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:#555;display:block;margin-bottom:1.5rem}h1{font-size:clamp(5rem,13vw,11rem);font-weight:900;line-height:.88;letter-spacing:-.04em;text-transform:uppercase}.outline{-webkit-text-stroke:1px #f0f0f0;color:transparent}.scroll-ind{position:absolute;bottom:2rem;right:3rem;font-size:.75rem;letter-spacing:.15em;color:#333;text-transform:uppercase;writing-mode:vertical-rl;animation:float 3s ease infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}.work{padding:8rem 3rem}.section-label{font-size:.7rem;letter-spacing:.3em;color:#444;text-transform:uppercase;margin-bottom:3rem}.work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}.wi{border-radius:12px;background:var(--c,#333);padding:2.5rem 2rem;cursor:none;transition:transform .4s}.wi:hover{transform:scale(1.02)}.wi.large{grid-column:span 2}.wi-num{font-size:4rem;font-weight:900;color:rgba(255,255,255,.1);line-height:1;margin-bottom:3rem}.wi h3{font-size:1.1rem;font-weight:700;margin-bottom:.4rem}.wi span{font-size:.8rem;color:rgba(255,255,255,.6)}footer{padding:6rem 3rem;text-align:center;border-top:1px solid #111}.fp{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:#444;margin-bottom:1.5rem}.email{font-size:clamp(2rem,6vw,5rem);font-weight:900;color:#f0f0f0;text-decoration:none;transition:opacity .2s}.email:hover{opacity:.5}`,j:`const cur=document.querySelector('.cursor');const dot=document.querySelector('.cursor-dot');let mx=0,my=0,cx=0,cy=0;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});(function a(){cx+=(mx-cx)*.12;cy+=(my-cy)*.12;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(a);})();document.querySelectorAll('a,.wi').forEach(el=>{el.addEventListener('mouseenter',()=>cur.style.width='60px');el.addEventListener('mouseleave',()=>cur.style.width='32px');});`},
-        blog:{h:`<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Блог</title><link rel="stylesheet" href="style.css"></head>\n<body><header><div class="wrap"><a class="logo" href="#">✍️ Блог</a><nav><a href="#">Статьи</a><a href="#">Категории</a></nav></div></header>\n<div class="wrap main">\n  <div class="featured"><article><div class="meta"><span class="cat">Технологии</span><time>12 мар 2025</time></div><h1>Будущее веб-разработки</h1><p>AI и новые фреймворки меняют отрасль...</p><a class="more" href="#">Читать далее →</a></article></div>\n  <div class="grid"><article class="card"><span class="cat">Дизайн</span><h2>10 правил UI</h2><p>Что делает интерфейс удобным...</p><a href="#">→</a></article><article class="card"><span class="cat">JS</span><h2>Async/Await</h2><p>Асинхронный код без боли...</p><a href="#">→</a></article><article class="card"><span class="cat">CSS</span><h2>CSS Grid</h2><p>Макеты за 10 минут...</p><a href="#">→</a></article></div>\n</div>\n<footer><div class="wrap"><p>© 2025 Блог</p></div></footer>\n<script src="script.js"><\/script></body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#fffef9;color:#1a1a1a;line-height:1.7}.wrap{max-width:900px;margin:0 auto;padding:0 1.5rem}header{border-bottom:1px solid #e8e3d8;padding:1.25rem 0;margin-bottom:3rem}header .wrap{display:flex;align-items:center;justify-content:space-between}.logo{font-weight:700;font-size:1.25rem;text-decoration:none;color:#1a1a1a}nav{display:flex;gap:2rem}nav a{text-decoration:none;color:#888;font-size:.9rem;font-family:'Segoe UI',sans-serif;transition:color .2s}nav a:hover{color:#1a1a1a}.main{padding-bottom:4rem}.featured{margin-bottom:3rem}.featured article{background:#f5f0e8;border-radius:16px;padding:2.5rem}.meta{display:flex;gap:1rem;align-items:center;margin-bottom:1rem;font-family:'Segoe UI',sans-serif;font-size:.82rem;color:#999}.cat{background:#1a1a1a;color:#fff;padding:.2rem .65rem;border-radius:4px;font-size:.72rem;font-weight:700;font-family:'Segoe UI',sans-serif}.featured h1{font-size:1.9rem;line-height:1.3;margin-bottom:.75rem}.featured p{color:#666;margin-bottom:1.5rem}.more{color:#1a1a1a;font-weight:700;text-decoration:none;font-family:'Segoe UI',sans-serif}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem}.card{padding:1.75rem;border:1px solid #e8e3d8;border-radius:12px;transition:all .25s}.card:hover{border-color:#1a1a1a;transform:translateY(-4px)}.card .cat{display:inline-block;margin-bottom:.75rem}.card h2{font-size:1.05rem;margin-bottom:.5rem}.card p{color:#999;font-size:.88rem;margin-bottom:.75rem}.card a{color:#1a1a1a;text-decoration:none;font-weight:700;font-family:'Segoe UI',sans-serif}footer{border-top:1px solid #e8e3d8;padding:2rem 0;text-align:center;color:#bbb;font-family:'Segoe UI',sans-serif;font-size:.85rem}`,j:`const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(16px)';c.style.transition='all .4s ease';io.observe(c);});`},
-        dashboard:{h:`<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Дашборд</title><link rel="stylesheet" href="style.css"></head>\n<body><div class="app">\n<aside><div class="s-logo">⚡ Аналитика</div><nav><a href="#" class="active">📊 Дашборд</a><a href="#">📈 Статистика</a><a href="#">👥 Пользователи</a><a href="#">⚙️ Настройки</a></nav></aside>\n<main><div class="topbar"><h1>Обзор</h1><span class="userpill">👤 Администратор</span></div>\n  <div class="kpis"><div class="kpi"><div class="kpi-i" style="background:#dbeafe">📈</div><div><p>Выручка</p><h3>₽1 234 567</h3><em class="up">+12%</em></div></div><div class="kpi"><div class="kpi-i" style="background:#dcfce7">👥</div><div><p>Пользователи</p><h3>8 492</h3><em class="up">+5%</em></div></div><div class="kpi"><div class="kpi-i" style="background:#fce7f3">🛒</div><div><p>Заказы</p><h3>1 234</h3><em class="dn">-2%</em></div></div><div class="kpi"><div class="kpi-i" style="background:#fef3c7">⭐</div><div><p>Рейтинг</p><h3>4.8</h3><em class="up">+0.2</em></div></div></div>\n  <div class="panels"><div class="panel"><h2>Последние заказы</h2><table><thead><tr><th>Клиент</th><th>Сумма</th><th>Статус</th></tr></thead><tbody><tr><td>Иван С.</td><td>₽12 500</td><td><span class="badge ok">Выполнен</span></td></tr><tr><td>Мария К.</td><td>₽8 300</td><td><span class="badge pend">В работе</span></td></tr><tr><td>Пётр В.</td><td>₽21 000</td><td><span class="badge ok">Выполнен</span></td></tr></tbody></table></div><div class="panel"><h2>Активность</h2><div id="bars"></div></div></div>\n</main></div>\n<script src="script.js"><\/script></body></html>`,c:`*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;height:100vh;overflow:hidden}.app{display:flex;height:100vh}aside{width:210px;background:#fff;border-right:1px solid #e2e8f0;padding:1.5rem 1rem;flex-shrink:0;display:flex;flex-direction:column;gap:.75rem}.s-logo{font-weight:900;font-size:1.1rem;color:#3b82f6;padding:.5rem}aside nav{display:flex;flex-direction:column;gap:.2rem}aside nav a{padding:.65rem 1rem;border-radius:8px;text-decoration:none;color:#64748b;font-size:.875rem;transition:all .2s}aside nav a:hover,aside nav a.active{background:#dbeafe;color:#3b82f6;font-weight:600}main{flex:1;overflow-y:auto;padding:1.5rem 2rem}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}.topbar h1{font-size:1.4rem;font-weight:800}.userpill{background:#fff;border:1px solid #e2e8f0;padding:.35rem .9rem;border-radius:50px;font-size:.82rem}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}.kpi{background:#fff;border-radius:12px;padding:1.2rem;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}.kpi-i{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}.kpi p{font-size:.75rem;color:#94a3b8;margin-bottom:.15rem}.kpi h3{font-size:1.25rem;font-weight:800;margin-bottom:.2rem}em{font-style:normal;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px}.up{background:#dcfce7;color:#16a34a}.dn{background:#fee2e2;color:#dc2626}.panels{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem}.panel{background:#fff;border-radius:12px;padding:1.4rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}.panel h2{font-size:.9rem;font-weight:700;color:#475569;margin-bottom:1rem}table{width:100%;border-collapse:collapse}th{text-align:left;padding:.4rem;font-size:.75rem;color:#94a3b8;border-bottom:1px solid #f1f5f9}td{padding:.7rem .4rem;font-size:.85rem;border-bottom:1px solid #f8fafc}.badge{padding:.2rem .65rem;border-radius:50px;font-size:.72rem;font-weight:600}.badge.ok{background:#dcfce7;color:#16a34a}.badge.pend{background:#fef3c7;color:#d97706}#bars{display:flex;align-items:flex-end;gap:.4rem;height:130px;padding-top:.5rem}`,j:`const data=[65,40,80,55,90,45,70,85,60,75,50,95];const labels=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];const colors=['#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f59e0b','#06b6d4','#10b981','#f97316','#ef4444','#84cc16','#a855f7','#0ea5e9'];const bars=document.getElementById('bars');data.forEach((v,i)=>{const w=document.createElement('div');w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;height:100%;justify-content:flex-end';const b=document.createElement('div');b.style.cssText='width:100%;background:'+colors[i]+';border-radius:4px 4px 0 0;opacity:.85;transition:height .7s ease '+(i*.04)+'s';b.style.height='0';b.title=labels[i]+': '+v+'%';const l=document.createElement('span');l.style.cssText='font-size:.6rem;color:#94a3b8;font-family:Segoe UI,sans-serif';l.textContent=labels[i];w.appendChild(b);w.appendChild(l);bars.appendChild(w);setTimeout(()=>b.style.height=v+'%',100);});`}
+
+        empty: {
+            h: `<!DOCTYPE html>\n<html lang="ru">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Новый сайт</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n\n  <script src="script.js"><\/script>\n</body>\n</html>`,
+            c: `*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }\nbody { font-family: 'Segoe UI', sans-serif; }`,
+            j: `console.log('Hello, World!');`
+        },
+
+        landing: {
+            h: `<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Лендинг</title><link rel="stylesheet" href="style.css"></head>\n<body>\n<header><div class="wrap nav"><span class="logo">⚡ Storm</span><nav><a href="#f">Возможности</a><a href="#p">Цены</a></nav><button class="cta-btn">Попробовать</button></div></header>\n<section class="hero"><div class="wrap"><div class="badge">🚀 Новый уровень</div><h1>Создавай <em>быстро</em><br>и красиво</h1><p>Профессиональный инструмент с живым превью и готовыми шаблонами.</p><div class="btns"><button class="btn-p">Начать бесплатно</button><button class="btn-g">Демо ▶</button></div><div class="stats"><div><b>10K+</b><span>Пользователей</span></div><div><b>50K+</b><span>Проектов</span></div><div><b>4.9★</b><span>Рейтинг</span></div></div></div></section>\n<section id="f" class="features"><div class="wrap"><h2>Почему выбирают нас</h2><div class="grid"><div class="card"><div class="icon">⚡</div><h3>Быстро</h3><p>Оптимизированный код</p></div><div class="card"><div class="icon">📱</div><h3>Адаптивно</h3><p>На всех устройствах</p></div><div class="card"><div class="icon">🎨</div><h3>Красиво</h3><p>Готовые шаблоны</p></div><div class="card"><div class="icon">🔒</div><h3>Надёжно</h3><p>Безопасная платформа</p></div></div></div></section>\n<section class="cta-s"><div class="wrap"><h2>Готовы начать?</h2><p>Присоединяйтесь к тысячам разработчиков</p><button class="btn-p lg">Создать аккаунт бесплатно</button></div></section>\n<footer><div class="wrap"><p>© 2025 Storm. Сделано с ❤️</p></div></footer>\n<script src="script.js"><\/script>\n</body></html>`,
+            c: `*{margin:0;padding:0;box-sizing:border-box}:root{--p:#3b82f6;--dark:#0f172a}body{font-family:'Segoe UI',sans-serif;color:var(--dark)}.wrap{max-width:1100px;margin:0 auto;padding:0 1.5rem}header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid #e2e8f0}.nav{display:flex;align-items:center;padding:1rem 1.5rem;gap:1.5rem}.logo{font-weight:900;font-size:1.25rem;color:var(--p)}nav{display:flex;gap:1.5rem;flex:1;justify-content:center}nav a{text-decoration:none;color:#64748b;font-weight:500;transition:color .2s}nav a:hover{color:var(--p)}.cta-btn{padding:.45rem 1.2rem;background:var(--p);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}.hero{min-height:92vh;display:flex;align-items:center;background:linear-gradient(160deg,#dbeafe,#eff6ff 55%,#f5f3ff);padding:5rem 0}.badge{display:inline-block;background:#dbeafe;color:var(--p);padding:.3rem 1rem;border-radius:50px;font-size:.85rem;font-weight:600;margin-bottom:1.5rem}h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1.05;margin-bottom:1.25rem;color:var(--dark)}em{font-style:normal;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{font-size:1.1rem;color:#64748b;max-width:520px;margin-bottom:2rem}.btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}.btn-p{padding:.9rem 2rem;background:var(--p);color:#fff;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(59,130,246,.3)}.btn-p:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(59,130,246,.4)}.btn-p.lg{padding:1.1rem 3rem}.btn-g{padding:.9rem 2rem;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}.btn-g:hover{background:var(--p);color:#fff}.stats{display:flex;gap:2.5rem;font-size:.9rem;color:#64748b}.stats b{display:block;font-size:1.75rem;font-weight:900;color:var(--dark)}.features{padding:6rem 0;background:#fff}.features h2{font-size:2rem;font-weight:900;margin-bottom:3rem;color:var(--dark)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem}.card{padding:1.75rem;border:1px solid #e2e8f0;border-radius:16px;transition:all .3s}.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(59,130,246,.08);border-color:var(--p)}.icon{font-size:2rem;margin-bottom:.75rem}.card h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}.card p{color:#64748b;font-size:.9rem}.cta-s{padding:6rem 0;background:linear-gradient(135deg,#3b82f6,#7c3aed);text-align:center;color:#fff}.cta-s h2{font-size:2rem;font-weight:900;margin-bottom:.75rem}.cta-s p{opacity:.85;margin-bottom:2rem}footer{padding:2rem 0;background:var(--dark);text-align:center;color:#64748b;font-size:.875rem}`,
+            j: `document.addEventListener('DOMContentLoaded',()=>{const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(20px)';c.style.transition='all .5s ease';io.observe(c);});});`
+        },
+
+        portfolio: {
+            h: `<!DOCTYPE html>\n<html lang="ru">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Портфолио</title><link rel="stylesheet" href="style.css"></head>\n<body>\n  <div class="cursor"></div>\n  <header><a class="logo" href="#">АА</a><nav><a href="#work">Работы</a><a href="#about">Обо мне</a><a href="#contact">Контакт</a></nav></header>\n  <section class="hero"><div class="hero-inner"><span class="sub">Frontend Developer & UI Designer</span><h1><span class="out">Алексей</span><br>Андреев</h1></div></section>\n  <section id="work" class="work"><div class="label">Избранные работы</div><div class="grid">\n    <div class="item" style="--c:#3b82f6"><div class="num">01</div><h3>E-commerce</h3><p>React · Node.js</p></div>\n    <div class="item wide" style="--c:#8b5cf6"><div class="num">02</div><h3>Мобильное приложение</h3><p>Flutter · Firebase</p></div>\n    <div class="item" style="--c:#ec4899"><div class="num">03</div><h3>Брендинг</h3><p>Figma · Illustrator</p></div>\n    <div class="item" style="--c:#14b8a6"><div class="num">04</div><h3>Дашборд</h3><p>Vue · D3.js</p></div>\n  </div></section>\n  <section id="about" class="about"><h2>Обо мне</h2><p>5 лет создаю цифровые продукты. Специализируюсь на React, Vue и современных CSS-техниках.</p><div class="skills"><span>React</span><span>Vue</span><span>Node.js</span><span>Figma</span><span>TypeScript</span></div></section>\n  <footer id="contact"><p class="fp-p">Готов к сотрудничеству</p><a class="email" href="mailto:hello@alex.dev">hello@alex.dev</a></footer>\n  <script src="script.js"><\/script>\n</body></html>`,
+            c: `*{margin:0;padding:0;box-sizing:border-box}body{background:#060608;color:#f0f0f0;font-family:'Helvetica Neue',Arial,sans-serif;cursor:none;overflow-x:hidden}.cursor{width:28px;height:28px;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s;mix-blend-mode:difference}header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 3rem;display:flex;align-items:center;justify-content:space-between}.logo{font-size:1rem;font-weight:900;letter-spacing:.2em;color:#f0f0f0;text-decoration:none}nav{display:flex;gap:2.5rem}nav a{text-decoration:none;color:#888;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;transition:color .2s}nav a:hover{color:#f0f0f0}.hero{height:100vh;display:flex;align-items:flex-end;padding:0 3rem 6rem;background:radial-gradient(ellipse 60% 50% at 80% 50%,rgba(59,130,246,.06),transparent)}.sub{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#555;display:block;margin-bottom:1.5rem}h1{font-size:clamp(4.5rem,12vw,10rem);font-weight:900;line-height:.88;letter-spacing:-.04em;text-transform:uppercase}.out{-webkit-text-stroke:1px rgba(240,240,240,.7);color:transparent}.work{padding:7rem 3rem}.label{font-size:.65rem;letter-spacing:.3em;color:#444;text-transform:uppercase;margin-bottom:3rem}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}.item{border-radius:12px;background:var(--c);padding:2.5rem 2rem;cursor:none;transition:transform .4s}.item:hover{transform:scale(1.02)}.item.wide{grid-column:span 2}.num{font-size:3.5rem;font-weight:900;color:rgba(255,255,255,.12);line-height:1;margin-bottom:2.5rem}.item h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}.item p{font-size:.8rem;color:rgba(255,255,255,.6)}.about{padding:7rem 3rem;max-width:680px}.about h2{font-size:2.25rem;font-weight:900;margin-bottom:1.5rem}.about p{color:#aaa;line-height:1.8;font-size:1rem;margin-bottom:2rem}.skills{display:flex;flex-wrap:wrap;gap:.5rem}.skills span{padding:.3rem .85rem;border:1px solid #222;border-radius:50px;font-size:.78rem;color:#666;transition:border-color .2s}.skills span:hover{border-color:#555;color:#aaa}footer{padding:5rem 3rem;text-align:center;border-top:1px solid #111}.fp-p{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#444;margin-bottom:1.5rem}.email{font-size:clamp(1.75rem,5.5vw,4.5rem);font-weight:900;color:#f0f0f0;text-decoration:none;transition:opacity .2s}.email:hover{opacity:.5}`,
+            j: `const cur=document.querySelector('.cursor');let mx=0,my=0,cx=0,cy=0;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});(function loop(){cx+=(mx-cx)*.1;cy+=(my-cy)*.1;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(loop);})();document.querySelectorAll('a,.item').forEach(el=>{el.addEventListener('mouseenter',()=>{cur.style.width='52px';cur.style.height='52px';cur.style.borderColor='rgba(255,255,255,.35)';});el.addEventListener('mouseleave',()=>{cur.style.width='28px';cur.style.height='28px';cur.style.borderColor='rgba(255,255,255,.55)';});});`
+        },
+
+        blog: {
+            h: `<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Блог</title><link rel="stylesheet" href="style.css"></head>\n<body>\n<header><div class="wrap"><a class="logo" href="#">✍️ Блог</a><nav><a href="#">Статьи</a><a href="#">Категории</a><a href="#">Обо мне</a></nav></div></header>\n<main class="wrap">\n  <section class="featured"><article><div class="meta"><span class="tag">Технологии</span><time>12 мар 2025</time></div><h1>Будущее веб-разработки: что нас ждёт в 2025</h1><p>AI, WebAssembly и новые фреймворки меняют отрасль быстрее, чем мы успеваем их изучать...</p><a class="more" href="#">Читать далее →</a></article></section>\n  <div class="articles">\n    <article class="card"><span class="tag">Дизайн</span><h2>10 правил хорошего UI</h2><p>Что делает интерфейс удобным и красивым...</p><a href="#">→</a></article>\n    <article class="card"><span class="tag">JavaScript</span><h2>Async/Await на практике</h2><p>Асинхронный код без боли и страданий...</p><a href="#">→</a></article>\n    <article class="card"><span class="tag">CSS</span><h2>CSS Grid за 10 минут</h2><p>Всё что нужно для современных макетов...</p><a href="#">→</a></article>\n  </div>\n</main>\n<footer><div class="wrap"><p>© 2025 Блог. Все права защищены.</p></div></footer>\n<script src="script.js"><\/script></body></html>`,
+            c: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;background:#fffef9;color:#1a1a1a;line-height:1.7}.wrap{max-width:880px;margin:0 auto;padding:0 1.5rem}header{border-bottom:1px solid #ede8df;padding:1.25rem 0;margin-bottom:3rem}header .wrap{display:flex;align-items:center;justify-content:space-between}.logo{font-weight:700;font-size:1.2rem;text-decoration:none;color:#1a1a1a}nav{display:flex;gap:2rem}nav a{text-decoration:none;color:#999;font-size:.875rem;font-family:'Segoe UI',sans-serif;transition:color .2s}nav a:hover{color:#1a1a1a}.featured{margin-bottom:3rem}article{background:#f7f2eb;border-radius:16px;padding:2.5rem 3rem}.meta{display:flex;gap:1rem;align-items:center;margin-bottom:1rem;font-family:'Segoe UI',sans-serif;font-size:.8rem;color:#aaa}.tag{background:#1a1a1a;color:#fff;padding:.18rem .6rem;border-radius:4px;font-size:.7rem;font-weight:700;font-family:'Segoe UI',sans-serif;letter-spacing:.04em}.featured h1{font-size:1.75rem;line-height:1.3;margin-bottom:.75rem;color:#1a1a1a}.featured p{color:#666;margin-bottom:1.5rem}.more{color:#1a1a1a;font-weight:700;text-decoration:none;font-family:'Segoe UI',sans-serif;font-size:.9rem}.articles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-bottom:4rem}.card{padding:1.75rem;border:1px solid #ede8df;border-radius:12px;transition:all .25s;font-family:'Segoe UI',sans-serif}.card:hover{border-color:#1a1a1a;transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.07)}.card .tag{display:inline-block;margin-bottom:.75rem}.card h2{font-size:1rem;margin-bottom:.5rem;line-height:1.4;font-family:Georgia,serif}.card p{color:#aaa;font-size:.85rem;margin-bottom:.75rem}.card a{color:#1a1a1a;text-decoration:none;font-weight:700}footer{border-top:1px solid #ede8df;padding:2rem 0;text-align:center;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:.82rem}`,
+            j: `const cards=document.querySelectorAll('.card');const io=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.style.opacity=1;en.target.style.transform='translateY(0)';}});},{threshold:.1});cards.forEach(c=>{c.style.opacity=0;c.style.transform='translateY(16px)';c.style.transition='all .4s ease';io.observe(c);});`
+        },
+
+        dashboard: {
+            h: `<!DOCTYPE html>\n<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Дашборд</title><link rel="stylesheet" href="style.css"></head>\n<body><div class="app">\n<aside><div class="brand">⚡ Аналитика</div><nav>\n  <a href="#" class="on">📊 Дашборд</a>\n  <a href="#">📈 Статистика</a>\n  <a href="#">👥 Пользователи</a>\n  <a href="#">💰 Финансы</a>\n  <a href="#">⚙️ Настройки</a>\n</nav></aside>\n<main>\n  <div class="topbar"><h1>Обзор</h1><div class="user-pill">👤 Администратор</div></div>\n  <div class="kpis">\n    <div class="kpi"><div class="kpi-icon" style="background:#dbeafe">📈</div><div><p>Выручка</p><h3>₽1 234 567</h3><span class="up">↑ +12%</span></div></div>\n    <div class="kpi"><div class="kpi-icon" style="background:#dcfce7">👥</div><div><p>Пользователи</p><h3>8 492</h3><span class="up">↑ +5%</span></div></div>\n    <div class="kpi"><div class="kpi-icon" style="background:#fce7f3">🛒</div><div><p>Заказы</p><h3>1 234</h3><span class="dn">↓ -2%</span></div></div>\n    <div class="kpi"><div class="kpi-icon" style="background:#fef3c7">⭐</div><div><p>Рейтинг</p><h3>4.8</h3><span class="up">↑ +0.2</span></div></div>\n  </div>\n  <div class="panels">\n    <div class="panel"><h2>Последние заказы</h2><table><thead><tr><th>Клиент</th><th>Сумма</th><th>Статус</th></tr></thead><tbody>\n      <tr><td>Иван С.</td><td>₽12 500</td><td><span class="badge ok">Выполнен</span></td></tr>\n      <tr><td>Мария К.</td><td>₽8 300</td><td><span class="badge pend">В работе</span></td></tr>\n      <tr><td>Пётр В.</td><td>₽21 000</td><td><span class="badge ok">Выполнен</span></td></tr>\n      <tr><td>Анна М.</td><td>₽5 600</td><td><span class="badge cancel">Отменён</span></td></tr>\n    </tbody></table></div>\n    <div class="panel"><h2>Активность</h2><div id="chart"></div></div>\n  </div>\n</main></div>\n<script src="script.js"><\/script></body></html>`,
+            c: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;height:100vh;overflow:hidden}.app{display:flex;height:100vh}aside{width:215px;background:#fff;border-right:1px solid #e2e8f0;padding:1.25rem 0.875rem;flex-shrink:0;display:flex;flex-direction:column;gap:.5rem}.brand{font-weight:900;font-size:1.05rem;color:#3b82f6;padding:.5rem .5rem 1rem}aside nav{display:flex;flex-direction:column;gap:.15rem}aside nav a{padding:.6rem .875rem;border-radius:8px;text-decoration:none;color:#64748b;font-size:.85rem;transition:all .18s}aside nav a:hover,aside nav a.on{background:#eff6ff;color:#3b82f6;font-weight:600}main{flex:1;overflow-y:auto;padding:1.5rem 1.75rem}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}.topbar h1{font-size:1.35rem;font-weight:800}.user-pill{background:#fff;border:1px solid #e2e8f0;padding:.35rem .85rem;border-radius:50px;font-size:.8rem}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}.kpi{background:#fff;border-radius:12px;padding:1.15rem;display:flex;align-items:center;gap:.875rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}.kpi-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}.kpi p{font-size:.72rem;color:#94a3b8;margin-bottom:.15rem}.kpi h3{font-size:1.2rem;font-weight:800;margin-bottom:.15rem}.up{font-size:.72rem;font-weight:700;color:#16a34a}.dn{font-size:.72rem;font-weight:700;color:#dc2626}.panels{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem}.panel{background:#fff;border-radius:12px;padding:1.35rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}.panel h2{font-size:.85rem;font-weight:700;color:#475569;margin-bottom:1rem}table{width:100%;border-collapse:collapse}th{text-align:left;padding:.4rem .35rem;font-size:.72rem;color:#94a3b8;border-bottom:1px solid #f1f5f9}td{padding:.65rem .35rem;font-size:.82rem;border-bottom:1px solid #f8fafc}.badge{padding:.18rem .6rem;border-radius:50px;font-size:.7rem;font-weight:600}.badge.ok{background:#dcfce7;color:#16a34a}.badge.pend{background:#fef3c7;color:#d97706}.badge.cancel{background:#fee2e2;color:#dc2626}#chart{display:flex;align-items:flex-end;gap:.35rem;height:120px;padding-top:.35rem}`,
+            j: `const vals=[65,40,80,55,90,45,70,85,60,75,50,95];const labels=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];const colors=['#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f59e0b','#06b6d4','#10b981','#f97316','#ef4444','#84cc16','#a855f7','#0ea5e9'];const c=document.getElementById('chart');vals.forEach((v,i)=>{const w=document.createElement('div');w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end';const b=document.createElement('div');b.style.cssText='width:100%;background:'+colors[i]+';border-radius:3px 3px 0 0;opacity:.85;transition:height .65s ease '+(i*.04)+'s';b.style.height='0';const l=document.createElement('span');l.style.cssText='font-size:.58rem;color:#94a3b8';l.textContent=labels[i];w.appendChild(b);w.appendChild(l);c.appendChild(w);setTimeout(()=>b.style.height=v+'%',80);});`
+        }
     };
     </script>
 </body>
