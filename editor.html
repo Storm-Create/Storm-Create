@@ -19,34 +19,215 @@
         *,*::before,*::after{box-sizing:border-box}
         body{overflow:hidden!important;font-family:'Manrope',sans-serif}
 
-        /* ══ AUTH ══════════════════════════════════════ */
-        #auth-gate{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem}
-        .auth-card{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.8);box-shadow:0 40px 120px rgba(15,23,42,.18);border-radius:1.5rem;padding:2.5rem;max-width:400px;width:100%;text-align:center}
-        html.dark .auth-card{background:rgba(7,15,31,.94);border-color:rgba(148,163,184,.15)}
-        .auth-logo{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,#3b82f6,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.25rem}
-        .auth-sub{color:#64748b;font-size:.85rem;margin-bottom:2rem;line-height:1.5}
-        html.dark .auth-sub{color:#94a3b8}
-        .auth-input{width:100%;background:rgba(248,250,252,.8);border:1.5px solid rgba(148,163,184,.25);color:#0f172a;border-radius:.65rem;padding:.75rem 1rem;font-size:.88rem;outline:none;font-family:'Manrope',sans-serif;transition:border-color .2s,box-shadow .2s;margin-bottom:.65rem;display:block}
-        html.dark .auth-input{background:rgba(15,23,42,.7);border-color:rgba(148,163,184,.15);color:#e2e8f0}
-        .auth-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-        .auth-input::placeholder{color:#94a3b8}
-        .auth-btn{width:100%;padding:.8rem;background:#3b82f6;color:white;border:none;border-radius:.65rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;transition:background .2s,transform .15s;box-shadow:0 8px 24px rgba(59,130,246,.3);margin-top:.25rem}
-        .auth-btn:hover{background:#2563eb;transform:translateY(-1px)}
-        .auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-        .auth-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#dc2626;border-radius:.5rem;padding:.6rem .85rem;font-size:.8rem;margin-bottom:.75rem;text-align:left;display:none}
-        html.dark .auth-err{color:#fca5a5}
-        .auth-switch{font-size:.82rem;color:#64748b;margin-top:1rem}
-        html.dark .auth-switch{color:#94a3b8}
-        .auth-switch span{color:#3b82f6;font-weight:700;cursor:pointer}
-        .auth-divider{display:flex;align-items:center;gap:.75rem;margin:1rem 0;color:#94a3b8;font-size:.78rem}
-        .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(148,163,184,.2)}
-        .auth-back{font-size:.8rem;color:#94a3b8;text-decoration:none;transition:color .2s}
-        .auth-back:hover{color:#3b82f6}
+        /* ══ AUTH GATE — полноэкранная страница ══════════ */
+        #auth-gate {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        /* Фоновые glows как на главной */
+        .ag-bg {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .ag-glow {
+            position: absolute; border-radius: 50%; filter: blur(80px);
+            animation: agDrift 12s ease-in-out infinite;
+        }
+        .ag-glow-1 {
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(59,130,246,.28), transparent 70%);
+            top: -100px; left: -80px;
+        }
+        .ag-glow-2 {
+            width: 380px; height: 380px;
+            background: radial-gradient(circle, rgba(124,58,237,.22), transparent 70%);
+            bottom: -80px; right: -60px;
+            animation-delay: -6s;
+        }
+        .ag-glow-3 {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(14,165,233,.18), transparent 70%);
+            top: 40%; left: 60%;
+            animation-delay: -3s;
+        }
+        .ag-mesh {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        @keyframes agDrift {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33%      { transform: translate(30px,-20px) scale(1.05); }
+            66%      { transform: translate(-20px,15px) scale(.97); }
+        }
+
+        /* Карточка */
+        .auth-card {
+            position: relative; z-index: 1;
+            background: rgba(255,255,255,.88);
+            border: 1px solid rgba(255,255,255,.8);
+            box-shadow: 0 32px 100px rgba(15,23,42,.16), 0 0 0 1px rgba(255,255,255,.5) inset;
+            border-radius: 1.75rem;
+            padding: 2.5rem 2rem;
+            max-width: 420px; width: 100%;
+            text-align: center;
+            backdrop-filter: blur(24px);
+            animation: cardIn .45s cubic-bezier(.22,.68,0,1.2) both;
+        }
+        html.dark .auth-card {
+            background: rgba(7,15,31,.92);
+            border-color: rgba(148,163,184,.14);
+            box-shadow: 0 32px 100px rgba(0,0,0,.4), 0 0 0 1px rgba(148,163,184,.08) inset;
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Верхний бейдж */
+        .auth-badge {
+            display: inline-flex; align-items: center; gap: .5rem;
+            background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.75);
+            border-radius: 999px; padding: .38rem .95rem;
+            font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; color: #0f172a;
+            box-shadow: 0 4px 16px rgba(15,23,42,.06);
+            margin-bottom: 1.2rem; backdrop-filter: blur(8px);
+        }
+        html.dark .auth-badge { background: rgba(15,23,42,.56); border-color: rgba(148,163,184,.14); color: #e2e8f0; }
+        .auth-badge-dot {
+            width: .5rem; height: .5rem; border-radius: 50%;
+            background: linear-gradient(135deg,#0ea5e9,#22c55e);
+            box-shadow: 0 0 0 4px rgba(14,165,233,.15);
+            flex-shrink: 0;
+        }
+
+        /* Логотип */
+        .auth-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.85rem; font-weight: 700; letter-spacing: -.04em;
+            background: linear-gradient(135deg,#3b82f6,#7c3aed);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: .35rem; line-height: 1;
+        }
+        .auth-sub {
+            color: #64748b; font-size: .85rem; margin-bottom: 1.75rem; line-height: 1.55;
+        }
+        html.dark .auth-sub { color: #94a3b8; }
+
+        /* Поля ввода */
+        .auth-field {
+            position: relative; margin-bottom: .6rem;
+        }
+        .auth-field-icon {
+            position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+            color: #94a3b8; font-size: .85rem; pointer-events: none;
+        }
+        .auth-input {
+            width: 100%;
+            background: rgba(248,250,252,.85);
+            border: 1.5px solid rgba(148,163,184,.22);
+            color: #0f172a; border-radius: .75rem;
+            padding: .8rem 1rem .8rem 2.5rem;
+            font-size: .88rem; outline: none;
+            font-family: 'Manrope', sans-serif;
+            transition: border-color .2s, box-shadow .2s;
+            display: block;
+        }
+        html.dark .auth-input {
+            background: rgba(15,23,42,.75);
+            border-color: rgba(148,163,184,.15); color: #e2e8f0;
+        }
+        .auth-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+        }
+        .auth-input::placeholder { color: #94a3b8; }
+
+        /* Кнопка входа */
+        .auth-btn {
+            width: 100%; padding: .85rem; margin-top: .25rem;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; border: none; border-radius: .75rem;
+            font-size: .92rem; font-weight: 700; cursor: pointer;
+            font-family: 'Manrope', sans-serif;
+            transition: opacity .2s, transform .15s;
+            box-shadow: 0 10px 28px rgba(59,130,246,.32);
+            position: relative; overflow: hidden;
+        }
+        .auth-btn::before {
+            content: ''; position: absolute; inset: -80% auto auto -10%;
+            width: 40%; height: 300%; transform: rotate(16deg);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+            transition: transform .7s ease;
+        }
+        .auth-btn:hover::before { transform: rotate(16deg) translateX(380%); }
+        .auth-btn:hover { opacity: .92; transform: translateY(-1px); }
+        .auth-btn:disabled { opacity: .58; cursor: not-allowed; transform: none; }
+
+        /* Telegram кнопка */
+        #tg-login-container {
+            display: flex; justify-content: center;
+            align-items: center; min-height: 44px;
+        }
+        .tg-btn-custom {
+            display: inline-flex; align-items: center; gap: .65rem;
+            padding: .72rem 1.5rem; border-radius: .75rem;
+            background: #229ED9; color: white; border: none;
+            font-size: .88rem; font-weight: 700; cursor: pointer;
+            font-family: 'Manrope', sans-serif;
+            transition: background .2s, transform .15s;
+            box-shadow: 0 8px 24px rgba(34,158,217,.3);
+            width: 100%;
+            justify-content: center;
+        }
+        .tg-btn-custom:hover { background: #1a8bbf; transform: translateY(-1px); }
+        .tg-btn-custom i { font-size: 1.1rem; }
+
+        /* Ошибка */
+        .auth-err {
+            background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+            color: #dc2626; border-radius: .6rem; padding: .65rem .85rem;
+            font-size: .8rem; margin-bottom: .75rem; text-align: left;
+            display: none; animation: cardIn .25s ease;
+        }
+        html.dark .auth-err { color: #fca5a5; }
+
+        /* Переключатель / доп. ссылки */
+        .auth-switch { font-size: .82rem; color: #64748b; margin-top: 1rem; }
+        html.dark .auth-switch { color: #94a3b8; }
+        .auth-switch span { color: #3b82f6; font-weight: 700; cursor: pointer; }
+        .auth-switch span:hover { text-decoration: underline; }
+
+        .auth-divider {
+            display: flex; align-items: center; gap: .7rem;
+            margin: 1.1rem 0; color: #94a3b8; font-size: .76rem;
+        }
+        .auth-divider::before,.auth-divider::after {
+            content: ''; flex: 1; height: 1px; background: rgba(148,163,184,.2);
+        }
+        .auth-back {
+            display: inline-flex; align-items: center; gap: .35rem;
+            font-size: .8rem; color: #94a3b8; text-decoration: none;
+            transition: color .2s;
+        }
+        .auth-back:hover { color: #3b82f6; }
 
         /* ══ LOADING ════════════════════════════════════ */
-        #auth-loading{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
-        .spinner{width:36px;height:36px;border:3px solid rgba(59,130,246,.15);border-top-color:#3b82f6;border-radius:50%;animation:spin .75s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
+        #auth-loading {
+            position: fixed; inset: 0; z-index: 600;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid rgba(59,130,246,.15);
+            border-top-color: #3b82f6;
+            border-radius: 50%; animation: spin .75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ══ EDITOR LAYOUT ══════════════════════════════ */
         #editor-wrap{position:fixed;top:4rem;left:0;right:0;bottom:0;display:flex;flex-direction:column}
@@ -447,20 +628,66 @@
 
     <!-- ══ AUTH GATE ══ -->
     <div id="auth-gate" style="display:none">
+        <!-- Background effects -->
+        <div class="ag-bg">
+            <div class="ag-mesh"></div>
+            <div class="ag-glow ag-glow-1"></div>
+            <div class="ag-glow ag-glow-2"></div>
+            <div class="ag-glow ag-glow-3"></div>
+        </div>
+
         <div class="auth-card">
+            <!-- Badge -->
+            <div class="auth-badge">
+                <div class="auth-badge-dot"></div>
+                Бесплатно для всех
+            </div>
+
+            <!-- Logo -->
             <div class="auth-logo">⚡ StormEditor</div>
-            <p class="auth-sub">Войдите в аккаунт — редактор доступен всем зарегистрированным пользователям бесплатно</p>
+            <p class="auth-sub">Онлайн редактор сайтов с живым превью,<br>WYSIWYG и поддержкой ZIP файлов</p>
+
+            <!-- Error -->
             <div id="auth-err" class="auth-err"></div>
-            <input type="text" id="gate-name" class="auth-input" placeholder="Ваше имя" style="display:none">
-            <input type="email" id="gate-email" class="auth-input" placeholder="Email адрес">
-            <input type="password" id="gate-pass" class="auth-input" placeholder="Пароль">
-            <button id="gate-btn" class="auth-btn" onclick="gateSubmit()"><i class="fas fa-sign-in-alt mr-1.5"></i> Войти</button>
-            <p class="auth-switch" id="gate-sw">Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span></p>
-            <div class="auth-divider">или войдите через</div>
-            <!-- Telegram widget -->
-            <div id="tg-login-container" style="display:flex;justify-content:center;min-height:40px;align-items:center;margin-bottom:.5rem"></div>
-            <div class="auth-divider"></div>
-            <a href="index.html" class="auth-back">← Вернуться на главную</a>
+
+            <!-- Name (register only) -->
+            <div class="auth-field" id="gate-name-wrap" style="display:none">
+                <i class="fas fa-user auth-field-icon"></i>
+                <input type="text" id="gate-name" class="auth-input" placeholder="Ваше имя">
+            </div>
+
+            <!-- Email -->
+            <div class="auth-field">
+                <i class="fas fa-envelope auth-field-icon"></i>
+                <input type="email" id="gate-email" class="auth-input" placeholder="Email адрес">
+            </div>
+
+            <!-- Password -->
+            <div class="auth-field">
+                <i class="fas fa-lock auth-field-icon"></i>
+                <input type="password" id="gate-pass" class="auth-input" placeholder="Пароль">
+            </div>
+
+            <!-- Submit -->
+            <button id="gate-btn" class="auth-btn" onclick="gateSubmit()">
+                <i class="fas fa-sign-in-alt" style="margin-right:.4rem"></i> Войти
+            </button>
+
+            <p class="auth-switch" id="gate-sw">
+                Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span>
+            </p>
+
+            <!-- Divider -->
+            <div class="auth-divider">или войти через</div>
+
+            <!-- Telegram -->
+            <div id="tg-login-container"></div>
+
+            <div class="auth-divider" style="margin-top:1.1rem"></div>
+
+            <a href="index.html" class="auth-back">
+                <i class="fas fa-arrow-left" style="font-size:.7rem"></i> Вернуться на главную
+            </a>
         </div>
     </div>
 
@@ -875,16 +1102,34 @@
             const c = document.getElementById('tg-login-container');
             if (!c || c.dataset.rendered) return;
             c.dataset.rendered = '1';
+            // Красивая кнопка, которая открывает официальный Telegram OAuth
+            c.innerHTML = `
+                <button class="tg-btn-custom" onclick="startTgAuth()">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.267l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.958.292z"/>
+                    </svg>
+                    Войти через Telegram
+                </button>`;
+        }
+
+        window.startTgAuth = () => {
+            // Показываем официальный виджет Telegram в том же контейнере
+            const c = document.getElementById('tg-login-container');
+            c.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.8rem;color:#94a3b8;padding:.35rem 0"><i class="fas fa-spinner fa-spin"></i> Загрузка Telegram...</div>';
             const s = document.createElement('script');
             s.async = true;
             s.src = 'https://telegram.org/js/telegram-widget.js?22';
             s.setAttribute('data-telegram-login', 'StormCreateBot');
-            s.setAttribute('data-size', 'medium');
+            s.setAttribute('data-size', 'large');
             s.setAttribute('data-onauth', 'onTelegramAuthEditor(user)');
             s.setAttribute('data-request-access', 'write');
             s.setAttribute('data-radius', '8');
+            s.onload = () => {
+                // Виджет загружен — убираем спиннер (виджет сам покажет кнопку)
+                c.querySelector('div')?.remove();
+            };
             c.appendChild(s);
-        }
+        };
 
         window.onTelegramAuthEditor = async (tgUser) => {
             document.getElementById('auth-err').style.display = 'none';
@@ -913,16 +1158,16 @@
         window.gateToggle = () => {
             mode = mode === 'login' ? 'register' : 'login';
             document.getElementById('auth-err').style.display = 'none';
-            const nameEl = document.getElementById('gate-name');
-            const btn    = document.getElementById('gate-btn');
-            const sw     = document.getElementById('gate-sw');
+            const nameWrap = document.getElementById('gate-name-wrap');
+            const btn = document.getElementById('gate-btn');
+            const sw  = document.getElementById('gate-sw');
             if (mode === 'register') {
-                nameEl.style.display = 'block';
-                btn.innerHTML = '<i class="fas fa-user-plus mr-1.5"></i> Зарегистрироваться';
+                nameWrap.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-user-plus" style="margin-right:.4rem"></i> Зарегистрироваться';
                 sw.innerHTML  = 'Уже есть аккаунт? <span onclick="gateToggle()">Войти</span>';
             } else {
-                nameEl.style.display = 'none';
-                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1.5"></i> Войти';
+                nameWrap.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:.4rem"></i> Войти';
                 sw.innerHTML  = 'Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span>';
             }
         };
