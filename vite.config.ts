@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
           post: path.resolve(__dirname, 'post.html'),
           tariffs: path.resolve(__dirname, 'tariffs.html'),
           docs: path.resolve(__dirname, 'docs.html'),
+          editor: path.resolve(__dirname, 'editor.html'),
         },
       },
     },
