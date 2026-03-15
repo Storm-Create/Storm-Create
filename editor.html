@@ -180,6 +180,10 @@
         .wt-color{width:26px;height:26px;border-radius:.35rem;border:1.5px solid rgba(148,163,184,.2);cursor:pointer;padding:0}
         .wt-font-size{width:52px;padding:.22rem .4rem;border-radius:.35rem;border:1px solid rgba(148,163,184,.2);background:transparent;color:#64748b;font-size:.72rem;outline:none;font-family:'Manrope',sans-serif}
         html.dark .wt-font-size{color:#94a3b8}
+        html.dark #wy-inspector{background:rgba(7,15,31,.97)!important;border-color:rgba(148,163,184,.12)!important}
+        html.dark #wy-inspector input[type=text],html.dark #wy-inspector input[type=range]{background:rgba(15,23,42,.7)!important;border-color:rgba(148,163,184,.15)!important;color:#e2e8f0!important}
+        html.dark #wy-inspector label{color:#94a3b8!important}
+        html.dark #wy-inspector button{color:#94a3b8!important}
 
         /* ── Full preview ── */
         #ed-fp{display:none;position:fixed;inset:0;z-index:9999;flex-direction:column;background:#f1f5f9}
@@ -363,7 +367,8 @@
                     <button class="tb orange" onclick="ED.toggleWYSIWYG()" id="tb-wysiwyg"><i class="fas fa-pen-fancy"></i> WYSIWYG</button>
                     <div class="tb-sep"></div>
                     <button class="tb green" onclick="ED.downloadProject()"><i class="fas fa-download"></i> Скачать</button>
-                    <button class="tb blue" onclick="ED.toggleFullPrev()"><i class="fas fa-eye"></i> Просмотр</button>
+                    <button class="tb blue" id="tb-prev-toggle" onclick="ED.togglePreview()"><i class="fas fa-eye"></i> Превью</button>
+                    <button class="tb blue" onclick="ED.toggleFullPrev()"><i class="fas fa-expand"></i> На весь экран</button>
                 </div>
 
                 <!-- Monaco / Image viewer -->
@@ -380,18 +385,18 @@
                     </div>
                 </div>
 
-                <!-- WYSIWYG overlay -->
                 <div id="wysiwyg-overlay">
                     <div id="wysiwyg-iframe-wrap">
-                        <div class="wysiwyg-toolbar">
-                            <button class="wt-btn" onclick="WY.cmd('bold')" title="Жирный"><i class="fas fa-bold"></i></button>
-                            <button class="wt-btn" onclick="WY.cmd('italic')" title="Курсив"><i class="fas fa-italic"></i></button>
+                        <div class="wysiwyg-toolbar" id="wy-toolbar">
+                            <!-- Text formatting -->
+                            <button class="wt-btn" onclick="WY.cmd('bold')" title="Жирный (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                            <button class="wt-btn" onclick="WY.cmd('italic')" title="Курсив (Ctrl+I)"><i class="fas fa-italic"></i></button>
                             <button class="wt-btn" onclick="WY.cmd('underline')" title="Подчёркнутый"><i class="fas fa-underline"></i></button>
-                            <button class="wt-btn" onclick="WY.cmd('strikeThrough')" title="Зачёркнутый"><i class="fas fa-strikethrough"></i></button>
+                            <button class="wt-btn" onclick="WY.cmd('strikeThrough')"><i class="fas fa-strikethrough"></i></button>
                             <div class="wt-sep"></div>
-                            <button class="wt-btn" onclick="WY.heading('h1')">H1</button>
-                            <button class="wt-btn" onclick="WY.heading('h2')">H2</button>
-                            <button class="wt-btn" onclick="WY.heading('h3')">H3</button>
+                            <button class="wt-btn" onclick="WY.heading('h1')"><b>H1</b></button>
+                            <button class="wt-btn" onclick="WY.heading('h2')"><b>H2</b></button>
+                            <button class="wt-btn" onclick="WY.heading('h3')"><b>H3</b></button>
                             <button class="wt-btn" onclick="WY.heading('p')">¶</button>
                             <div class="wt-sep"></div>
                             <button class="wt-btn" onclick="WY.cmd('justifyLeft')"><i class="fas fa-align-left"></i></button>
@@ -403,24 +408,89 @@
                             <div class="wt-sep"></div>
                             <button class="wt-btn" onclick="WY.insertLink()"><i class="fas fa-link"></i></button>
                             <div class="wt-sep"></div>
-                            <label title="Цвет текста" style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.72rem;color:#64748b;font-weight:600;font-family:'Manrope',sans-serif">
-                                <i class="fas fa-font" style="font-size:.75rem"></i>
-                                <input type="color" class="wt-color" id="wt-color" value="#0f172a" onchange="WY.cmd('foreColor',this.value)" title="Цвет текста">
+                            <!-- Text color -->
+                            <label style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.72rem;color:#64748b;font-weight:600;font-family:'Manrope',sans-serif" title="Цвет текста">
+                                <i class="fas fa-font" style="font-size:.72rem"></i>
+                                <input type="color" class="wt-color" id="wt-color" value="#0f172a" onchange="WY.cmd('foreColor',this.value)">
                             </label>
-                            <label title="Размер шрифта" style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.72rem;color:#64748b;font-weight:600;font-family:'Manrope',sans-serif">
-                                <i class="fas fa-text-height" style="font-size:.72rem"></i>
-                                <select class="wt-font-size" onchange="WY.setFontSize(this.value)">
-                                    <option>12px</option><option>14px</option><option selected>16px</option>
-                                    <option>18px</option><option>20px</option><option>24px</option>
-                                    <option>28px</option><option>32px</option><option>40px</option><option>48px</option>
-                                </select>
+                            <!-- Font size -->
+                            <select class="wt-font-size" onchange="WY.setFontSize(this.value)" title="Размер шрифта">
+                                <option>12px</option><option>14px</option><option selected>16px</option>
+                                <option>18px</option><option>20px</option><option>24px</option>
+                                <option>28px</option><option>32px</option><option>40px</option><option>48px</option>
+                            </select>
+                            <div class="wt-sep"></div>
+                            <!-- Background color of element -->
+                            <label style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.72rem;color:#64748b;font-weight:600;font-family:'Manrope',sans-serif" title="Цвет фона выделенного текста/элемента">
+                                <i class="fas fa-fill-drip" style="font-size:.72rem"></i>
+                                <input type="color" class="wt-color" id="wt-bgcolor" value="#ffffff" onchange="WY.cmd('hiliteColor',this.value)">
+                            </label>
+                            <!-- Page background -->
+                            <label style="display:flex;align-items:center;gap:.25rem;cursor:pointer;font-size:.72rem;color:#64748b;font-weight:600;font-family:'Manrope',sans-serif" title="Фон страницы (body)">
+                                <i class="fas fa-paint-roller" style="font-size:.72rem"></i>
+                                <input type="color" class="wt-color" id="wt-pagebg" value="#ffffff" onchange="WY.setPageBg(this.value)">
                             </label>
                             <div class="wt-sep"></div>
+                            <!-- Element inspector popup trigger -->
+                            <button class="wt-btn" onclick="WY.toggleInspector()" id="wy-inspect-btn" title="Инспектор элемента — отступы, рамка, тень"><i class="fas fa-sliders-h"></i> Стили</button>
+                            <div class="wt-sep"></div>
                             <button class="wt-btn" onclick="WY.cmd('removeFormat')" title="Убрать форматирование"><i class="fas fa-remove-format"></i></button>
-                            <div class="wt-sep" style="margin-left:auto"></div>
-                            <button class="wt-btn" onclick="WY.applyToCode()" style="background:rgba(59,130,246,.12);color:#3b82f6;border-color:rgba(59,130,246,.25)"><i class="fas fa-code"></i> Применить в код</button>
+                            <button class="wt-btn" onclick="WY.undo()" title="Отменить"><i class="fas fa-undo"></i></button>
+                            <button class="wt-btn" onclick="WY.redo()" title="Повторить"><i class="fas fa-redo"></i></button>
+                            <div style="flex:1"></div>
+                            <button class="wt-btn" onclick="WY.applyToCode()" style="background:rgba(59,130,246,.12);color:#3b82f6;border-color:rgba(59,130,246,.25)"><i class="fas fa-code"></i> Применить</button>
                             <button class="wt-btn" onclick="ED.toggleWYSIWYG()" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.2)"><i class="fas fa-times"></i> Закрыть</button>
                         </div>
+
+                        <!-- Element inspector panel -->
+                        <div id="wy-inspector" style="display:none;position:absolute;top:46px;right:0;width:260px;background:rgba(255,255,255,.97);border-left:1px solid rgba(148,163,184,.2);border-bottom:1px solid rgba(148,163,184,.2);padding:.75rem;z-index:30;font-family:'Manrope',sans-serif;font-size:.77rem;backdrop-filter:blur(16px)">
+                            <div style="font-weight:800;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.6rem">Инспектор выбранного элемента</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Отступ внутри (padding)
+                                    <input type="text" id="wy-padding" placeholder="0px / 8px 16px" oninput="WY.setStyle('padding',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Отступ снаружи (margin)
+                                    <input type="text" id="wy-margin" placeholder="0px / 8px auto" oninput="WY.setStyle('margin',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Ширина
+                                    <input type="text" id="wy-width" placeholder="auto / 100% / 300px" oninput="WY.setStyle('width',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Скругление углов
+                                    <input type="text" id="wy-radius" placeholder="0 / 8px / 50%" oninput="WY.setStyle('borderRadius',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Рамка (border)
+                                    <input type="text" id="wy-border" placeholder="1px solid #ccc" oninput="WY.setStyle('border',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Тень (box-shadow)
+                                    <input type="text" id="wy-shadow" placeholder="0 4px 12px rgba(0,0,0,.1)" oninput="WY.setStyle('boxShadow',this.value)" style="border:1px solid rgba(148,163,184,.25);border-radius:.4rem;padding:.3rem .5rem;font-size:.76rem;outline:none;font-family:inherit;background:rgba(248,250,252,.8)">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    Прозрачность
+                                    <input type="range" id="wy-opacity" min="0" max="100" value="100" oninput="WY.setStyle('opacity',this.value/100);document.getElementById('wy-opacity-val').textContent=this.value+'%'" style="accent-color:#3b82f6">
+                                </label>
+                                <label style="display:flex;flex-direction:column;gap:.2rem;color:#64748b">
+                                    <span>Значение: <span id="wy-opacity-val">100%</span></span>
+                                    <button onclick="WY.deleteElement()" style="padding:.3rem .5rem;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);border-radius:.4rem;cursor:pointer;font-family:inherit;font-size:.74rem;font-weight:600"><i class="fas fa-trash mr-1"></i>Удалить элемент</button>
+                                </label>
+                            </div>
+                            <div style="margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(148,163,184,.15)">
+                                <div style="font-weight:700;color:#64748b;margin-bottom:.4rem">Фон элемента</div>
+                                <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+                                    <label style="display:flex;align-items:center;gap:.25rem;font-size:.76rem;color:#64748b;cursor:pointer">
+                                        Цвет <input type="color" id="wy-el-bg" value="#ffffff" onchange="WY.setStyle('backgroundColor',this.value)" style="width:28px;height:22px;border:1.5px solid rgba(148,163,184,.25);border-radius:4px;cursor:pointer;padding:0">
+                                    </label>
+                                    <button onclick="WY.setStyle('backgroundColor','transparent')" style="padding:.25rem .55rem;border:1px solid rgba(148,163,184,.2);border-radius:.35rem;background:transparent;cursor:pointer;font-size:.72rem;font-family:inherit;color:#64748b">Прозрачный</button>
+                                    <button onclick="WY.promptGradient()" style="padding:.25rem .55rem;border:1px solid rgba(59,130,246,.2);border-radius:.35rem;background:rgba(59,130,246,.08);cursor:pointer;font-size:.72rem;font-family:inherit;color:#3b82f6">🌈 Градиент</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <iframe id="wysiwyg-frame" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
                     </div>
                 </div>
@@ -568,26 +638,44 @@
     const WY = {
         frame: null,
         doc: null,
+        _selectedEl: null,
+        _inspOpen: false,
 
         open(html) {
             this.frame = document.getElementById('wysiwyg-frame');
-            const full = html || FS.files['index.html']?.content || '';
-            this.frame.srcdoc = full;
+            this.frame.srcdoc = html;
             this.frame.onload = () => {
                 this.doc = this.frame.contentDocument;
                 this.doc.designMode = 'on';
-                // inject edit styles
+                // Inject editing UI styles
                 const style = this.doc.createElement('style');
-                style.textContent = '*:hover{outline:1px dashed rgba(59,130,246,.4)!important}*:focus{outline:2px solid #3b82f6!important}';
+                style.id = '__wy_style';
+                style.textContent = `
+                    *:hover { outline: 1px dashed rgba(59,130,246,.35) !important; cursor: pointer; }
+                    *:focus { outline: 2px solid #3b82f6 !important; }
+                    .wy-selected { outline: 2px solid #3b82f6 !important; outline-offset: 2px; }
+                `;
                 this.doc.head.appendChild(style);
+
+                // Track clicked element for inspector
+                this.doc.addEventListener('click', e => {
+                    this._selectedEl = e.target;
+                    this._syncInspector(e.target);
+                });
+                // Sync page bg color picker
+                const bodyBg = getComputedStyle(this.doc.body).backgroundColor;
+                try { document.getElementById('wt-pagebg').value = this._rgbToHex(bodyBg); } catch(e){}
             };
         },
 
         cmd(command, value) {
             if (!this.doc) return;
             this.doc.execCommand(command, false, value || null);
-            this.frame.contentWindow.focus();
+            this.frame?.contentWindow?.focus();
         },
+
+        undo() { this.cmd('undo'); },
+        redo() { this.cmd('redo'); },
 
         heading(tag) {
             if (!this.doc) return;
@@ -597,12 +685,19 @@
         setFontSize(size) {
             if (!this.doc) return;
             const sel = this.doc.getSelection();
-            if (!sel.rangeCount) return;
+            if (!sel?.rangeCount) return;
             const span = this.doc.createElement('span');
             span.style.fontSize = size;
-            const range = sel.getRangeAt(0).extractContents();
-            span.appendChild(range);
-            sel.getRangeAt(0).insertNode(span);
+            try {
+                const range = sel.getRangeAt(0).extractContents();
+                span.appendChild(range);
+                sel.getRangeAt(0).insertNode(span);
+            } catch(e) {}
+        },
+
+        setPageBg(color) {
+            if (!this.doc) return;
+            this.doc.body.style.backgroundColor = color;
         },
 
         insertLink() {
@@ -610,13 +705,79 @@
             if (url) this.cmd('createLink', url);
         },
 
+        toggleInspector() {
+            this._inspOpen = !this._inspOpen;
+            document.getElementById('wy-inspector').style.display = this._inspOpen ? 'block' : 'none';
+            document.getElementById('wy-inspect-btn').classList.toggle('on', this._inspOpen);
+        },
+
+        _syncInspector(el) {
+            if (!this._inspOpen || !el) return;
+            const cs = getComputedStyle(el);
+            const safe = (id, val) => { try { document.getElementById(id).value = val || ''; } catch(e){} };
+            safe('wy-padding', el.style.padding);
+            safe('wy-margin', el.style.margin);
+            safe('wy-width', el.style.width);
+            safe('wy-radius', el.style.borderRadius);
+            safe('wy-border', el.style.border);
+            safe('wy-shadow', el.style.boxShadow);
+            try { document.getElementById('wy-opacity').value = Math.round((parseFloat(el.style.opacity)||1)*100); document.getElementById('wy-opacity-val').textContent = Math.round((parseFloat(el.style.opacity)||1)*100)+'%'; } catch(e){}
+            try {
+                const bg = el.style.backgroundColor || cs.backgroundColor;
+                document.getElementById('wy-el-bg').value = this._rgbToHex(bg);
+            } catch(e){}
+        },
+
+        setStyle(prop, value) {
+            const el = this._selectedEl;
+            if (!el || !this.doc) return;
+            el.style[prop] = value;
+        },
+
+        deleteElement() {
+            const el = this._selectedEl;
+            if (!el || !this.doc || el === this.doc.body) { toast('⚠️ Нельзя удалить body'); return; }
+            if (!confirm('Удалить этот элемент?')) return;
+            el.remove();
+            this._selectedEl = null;
+        },
+
+        promptGradient() {
+            const el = this._selectedEl;
+            if (!el) { toast('⚠️ Кликните на элемент в редакторе'); return; }
+            const c1 = prompt('Цвет 1 (hex или rgba):', '#3b82f6');
+            if (!c1) return;
+            const c2 = prompt('Цвет 2 (hex или rgba):', '#7c3aed');
+            if (!c2) return;
+            const dir = prompt('Направление (135deg / to right / to bottom):', '135deg');
+            el.style.background = `linear-gradient(${dir||'135deg'}, ${c1}, ${c2})`;
+        },
+
+        _rgbToHex(rgb) {
+            if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
+            const m = rgb.match(/\d+/g);
+            if (!m || m.length < 3) return '#ffffff';
+            return '#' + [m[0],m[1],m[2]].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+        },
+
         applyToCode() {
             if (!this.doc) return;
-            // Extract body content and merge back
+            // Remove our injected editing style before extracting
+            const injStyle = this.doc.getElementById('__wy_style');
+            if (injStyle) injStyle.remove();
+            // Remove wy-selected class
+            this.doc.querySelectorAll('.wy-selected').forEach(el=>el.classList.remove('wy-selected'));
+
             const body = this.doc.body?.innerHTML || '';
+            // Rebuild full HTML with updated body and body styles
+            const bodyStyle = this.doc.body?.getAttribute('style') || '';
             let html = FS.files['index.html'].content;
-            // Replace body content
-            html = html.replace(/<body([^>]*)>([\s\S]*?)<\/body>/i, `<body$1>\n${body}\n</body>`);
+            html = html.replace(/<body([^>]*)>([\s\S]*?)<\/body>/i, (m, attrs) => {
+                // Update or add style attribute
+                let newAttrs = attrs.replace(/\s*style="[^"]*"/i, '');
+                if (bodyStyle) newAttrs += ` style="${bodyStyle}"`;
+                return `<body${newAttrs}>\n${body}\n</body>`;
+            });
             FS.files['index.html'].content = html;
             if (ED._editor && ED._curFile === 'index.html') ED._editor.setValue(html);
             ED.refresh();
@@ -864,24 +1025,28 @@
             msg.textContent=`📦 Разархивируется: ${file.name}`;
 
             try {
-                const zip = await JSZip.loadAsync(file, {
-                    onprogress: (meta) => {
-                        const pct = Math.round((meta.currentFile/meta.files.total)*60);
-                        bar.style.width=pct+'%';
-                    }
-                });
-
+                const zip = await JSZip.loadAsync(file);
                 const entries = Object.entries(zip.files).filter(([,f])=>!f.dir);
                 let done = 0;
 
+                // Detect root prefix to strip (e.g. "mysite/")
+                let prefix = '';
+                const paths = entries.map(([p])=>p);
+                const firstSlash = paths[0]?.indexOf('/');
+                if (firstSlash > 0) {
+                    const candidate = paths[0].slice(0, firstSlash + 1);
+                    if (paths.every(p => p.startsWith(candidate) || p.includes('__MACOSX'))) {
+                        prefix = candidate;
+                    }
+                }
+
                 for (const [path, zipEntry] of entries) {
-                    // Skip hidden files / Mac garbage
-                    if (path.includes('__MACOSX') || path.startsWith('.')) { done++; continue; }
-                    // Use only filename (strip directory path)
-                    const name = path.split('/').pop();
+                    if (path.includes('__MACOSX') || path.startsWith('.') || path.endsWith('/')) { done++; continue; }
+                    // Strip common prefix and keep full relative path
+                    let name = prefix ? path.slice(prefix.length) : path;
                     if (!name) { done++; continue; }
 
-                    msg.textContent=`📦 ${name}`;
+                    msg.textContent = `📦 ${name}`;
                     bar.style.width = Math.round(60 + (done/entries.length)*40) + '%';
 
                     const isImg = FS.isImage(name);
@@ -897,36 +1062,90 @@
                 }
 
                 bar.style.width='100%';
-                msg.textContent='✅ Готово!';
+                msg.textContent=`✅ Готово! ${done} файлов`;
                 this._renderExplorer(); this._renderTabs();
-                // Open index.html if it's there
-                if (FS.files['index.html']) this.switchFile('index.html');
+
+                // Find best entry point
+                const entryPriority = ['index.html','index.htm','main.html'];
+                const entry = entryPriority.find(e=>FS.files[e]) || Object.keys(FS.files).find(k=>k.endsWith('.html'));
+                if (entry) this.switchFile(entry);
                 this.refresh();
                 toast(`📦 ZIP разархивирован: ${done} файлов`);
             } catch(err) {
                 msg.textContent='❌ Ошибка: '+err.message;
+                console.error(err);
             }
-            setTimeout(()=>prog.style.display='none', 2000);
+            setTimeout(()=>prog.style.display='none', 2500);
         },
 
         /* ── Preview ── */
-        _schedPreview() { clearTimeout(this._prevTmr); this._prevTmr=setTimeout(()=>this.refresh(),600); },
+        _prevVisible: true,
+
+        togglePreview() {
+            this._prevVisible = !this._prevVisible;
+            const panel = document.getElementById('ed-preview');
+            const resz  = document.getElementById('ed-resize');
+            const btn   = document.getElementById('tb-prev-toggle');
+            const codew = document.getElementById('ed-code-wrap');
+
+            panel.style.display = this._prevVisible ? 'flex' : 'none';
+            resz.style.display  = this._prevVisible ? 'block' : 'none';
+            if (!this._prevVisible) {
+                codew.style.flex  = '1';
+                codew.style.width = '';
+                if (btn) { btn.classList.remove('blue'); btn.classList.add('on'); btn.innerHTML='<i class="fas fa-eye-slash"></i> Превью выкл'; }
+            } else {
+                codew.style.flex  = '';
+                codew.style.width = '';
+                if (btn) { btn.classList.remove('on'); btn.classList.add('blue'); btn.innerHTML='<i class="fas fa-eye"></i> Превью'; }
+                this.refresh();
+            }
+            if (this._editor) this._editor.layout();
+        },
+
+        _schedPreview() {
+            if (!this._prevVisible) return;
+            clearTimeout(this._prevTmr); this._prevTmr=setTimeout(()=>this.refresh(),600);
+        },
 
         refresh() {
+            if (!this._prevVisible) return;
             const f=document.getElementById('ed-frame');
-            if(f) f.srcdoc=this._buildHTML();
+            if (f) f.srcdoc = this._buildHTML();
         },
 
         _buildHTML() {
-            let h = FS.files['index.html'].content;
-            const c = FS.files['style.css'].content;
-            const j = FS.files['script.js'].content;
-            // Inject image data URLs so preview works
-            Object.entries(FS.files).filter(([,f])=>f.type==='image').forEach(([name,f])=>{
-                h = h.replace(new RegExp(`(src|href)=['"](${name}|\\./|)${name}['"]`,'g'), `$1="${f.dataUrl}"`);
+            // Start from the uploaded/edited index.html
+            let h = FS.files['index.html']?.content || '';
+            if (!h) return '<p style="font-family:sans-serif;padding:2rem;color:#64748b">Нет содержимого для предпросмотра</p>';
+
+            // Replace relative file references with actual content / data URLs
+            Object.entries(FS.files).forEach(([name, f]) => {
+                if (f.type === 'image') {
+                    // Replace image src references
+                    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    h = h.replace(new RegExp(`(src=["'])([./]*)(${escaped})(["'])`, 'g'), `$1${f.dataUrl}$4`);
+                    h = h.replace(new RegExp(`(src=["'])(${escaped})(["'])`, 'g'), `$1${f.dataUrl}$3`);
+                } else if (f.type === 'code') {
+                    const ext = name.split('.').pop().toLowerCase();
+                    // Inline CSS files referenced by link tags
+                    if (ext === 'css') {
+                        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const linkRe = new RegExp(`<link[^>]+href=["'][./]*${escaped}["'][^>]*>`, 'gi');
+                        if (linkRe.test(h)) {
+                            h = h.replace(linkRe, `<style>\n${f.content}\n</style>`);
+                        }
+                    }
+                    // Inline JS files referenced by script tags
+                    if (ext === 'js') {
+                        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const scriptRe = new RegExp(`<script[^>]+src=["'][./]*${escaped}["'][^>]*><\\/script>`, 'gi');
+                        if (scriptRe.test(h)) {
+                            h = h.replace(scriptRe, `<script>\n${f.content}\n<\/script>`);
+                        }
+                    }
+                }
             });
-            if (c) h = h.replace('</head>',`<style>\n${c}\n</style>\n</head>`);
-            if (j) h = h.replace('</body>',`<script>\n${j}\n<\/script>\n</body>`);
             return h;
         },
 
@@ -961,7 +1180,7 @@
             if (this._wysOpen) {
                 if (this._editor) FS.files[this._curFile].content = this._editor.getValue();
                 WY.open(this._buildHTML());
-                toast('🎨 Визуальный редактор включён — кликай и редактируй напрямую');
+                toast('🎨 WYSIWYG включён — кликай на элементы и редактируй');
             }
         },
 
