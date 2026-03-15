@@ -14,6 +14,65 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ─── StormEditor Styles ─────────────────────────── */
+        .se-tab {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: #1e1e3a; border: 1px solid #2d2d4e; color: #888;
+            padding: 0.3rem 0.9rem; border-radius: 6px; cursor: pointer;
+            font-size: 0.8rem; white-space: nowrap; transition: all 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .se-tab:hover { color: #c0c0ff; border-color: #4d4d7e; }
+        .active-tab { background: #2d2d5e !important; border-color: #6366f1 !important; color: #e0e0ff !important; }
+        .se-btn {
+            background: #1e1e3a; border: 1px solid #2d2d4e; color: #aaa;
+            padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer;
+            font-size: 0.8rem; transition: all 0.2s; font-family: inherit;
+            display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;
+        }
+        .se-btn:hover { border-color: #6366f1; color: #e0e0ff; }
+        .se-btn-accent { border-color: #4f46e5; color: #a5b4fc; }
+        .se-btn-accent:hover { background: #4f46e5; color: white; }
+        .se-btn-green { border-color: #16a34a; color: #86efac; }
+        .se-btn-green:hover { background: #16a34a; color: white; }
+        .se-btn-blue { border-color: #2563eb; color: #93c5fd; }
+        .se-btn-blue:hover { background: #2563eb; color: white; }
+        .se-btn-purple { border-color: #7c3aed; color: #c084fc; }
+        .se-btn-purple:hover { background: #7c3aed; color: white; }
+        .se-select {
+            background: #1e1e3a; border: 1px solid #2d2d4e; color: #aaa;
+            padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.8rem;
+            cursor: pointer; outline: none; font-family: inherit;
+        }
+        .se-device-btn {
+            background: transparent; border: 1px solid #3d3d5e; color: #888;
+            width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+            font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .se-device-btn:hover, .active-device { background: #4f46e5; border-color: #4f46e5; color: white; }
+        .se-quick-btn {
+            background: #1a1a3a; border: 1px solid #3d3d5e; color: #888;
+            padding: 0.25rem 0.6rem; border-radius: 6px; cursor: pointer;
+            font-size: 0.72rem; transition: all 0.2s; font-family: inherit;
+        }
+        .se-quick-btn:hover { border-color: #7c3aed; color: #c084fc; }
+        .se-ai-msg {
+            padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.78rem;
+            line-height: 1.5; word-break: break-word; max-width: 95%;
+        }
+        .se-ai-user {
+            background: #2d2d5e; color: #c0c0ff; margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+        .se-ai-assistant {
+            background: #1a1a2e; border: 1px solid #2d2d4e; color: #e0e0ff;
+            border-bottom-left-radius: 2px;
+        }
+        #site-editor-view.view-section { padding: 0 !important; }
+        #se-full-preview { justify-content: flex-start; }
+    </style>
 </head>
 
 <body
@@ -141,6 +200,11 @@
                     class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
                     data-target="docs-view">
                     <i class="fas fa-book w-5"></i> База знаний
+                </button>
+                <button
+                    class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+                    data-target="site-editor-view">
+                    <i class="fas fa-code w-5"></i> Редактор сайта
                 </button>
             </nav>
 
@@ -922,11 +986,154 @@
                     </div>
                 </div>
             </div>
+            <!-- ==================== РЕДАКТОР САЙТА ==================== -->
+            <div id="site-editor-view" class="view-section hidden" style="margin: -2rem; height: calc(100vh - 3.5rem); display: flex; flex-direction: column;">
+
+                <!-- Toolbar -->
+                <div id="se-toolbar" style="background: #1a1a2e; border-bottom: 1px solid #2d2d4e; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem;">
+                        <div style="width: 10px; height: 10px; background: #ff5f57; border-radius: 50%;"></div>
+                        <div style="width: 10px; height: 10px; background: #febc2e; border-radius: 50%;"></div>
+                        <div style="width: 10px; height: 10px; background: #28c840; border-radius: 50%;"></div>
+                    </div>
+                    <span style="color: #e0e0ff; font-weight: 700; font-size: 0.9rem; margin-right: 0.5rem;">⚡ StormEditor</span>
+
+                    <!-- File tabs -->
+                    <div id="se-file-tabs" style="display: flex; gap: 0.25rem; flex: 1; overflow-x: auto; scrollbar-width: none;">
+                        <button class="se-tab active-tab" data-file="index.html" onclick="SEEditor.switchFile('index.html')">
+                            <i class="fab fa-html5" style="color:#e34c26;"></i> index.html
+                        </button>
+                        <button class="se-tab" data-file="style.css" onclick="SEEditor.switchFile('style.css')">
+                            <i class="fab fa-css3-alt" style="color:#264de4;"></i> style.css
+                        </button>
+                        <button class="se-tab" data-file="script.js" onclick="SEEditor.switchFile('script.js')">
+                            <i class="fab fa-js-square" style="color:#f7df1e;"></i> script.js
+                        </button>
+                        <button onclick="SEEditor.addFile()" style="background: transparent; border: 1px dashed #444; color: #888; padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;">+ Файл</button>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div style="display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0;">
+                        <button onclick="SEEditor.formatCode()" class="se-btn" title="Форматировать код">
+                            <i class="fas fa-indent"></i>
+                        </button>
+                        <button onclick="SEEditor.toggleWrap()" class="se-btn" title="Перенос строк" id="se-wrap-btn">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button onclick="SEEditor.toggleFullPreview()" class="se-btn se-btn-accent" title="Полноэкранный просмотр">
+                            <i class="fas fa-expand"></i> Превью
+                        </button>
+                        <button onclick="SEEditor.downloadProject()" class="se-btn se-btn-green" title="Скачать проект">
+                            <i class="fas fa-download"></i> Скачать
+                        </button>
+                        <button onclick="SEEditor.openInNewTab()" class="se-btn se-btn-blue" title="Открыть в новой вкладке">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                        <select id="se-template-select" onchange="SEEditor.loadTemplate(this.value)" class="se-select" title="Загрузить шаблон">
+                            <option value="">📁 Шаблоны</option>
+                            <option value="landing">🚀 Лендинг</option>
+                            <option value="portfolio">🎨 Портфолио</option>
+                            <option value="blog">📝 Блог</option>
+                            <option value="dashboard">📊 Дашборд</option>
+                            <option value="empty">⬜ Пустой</option>
+                        </select>
+                        <button onclick="SEEditor.toggleAI()" class="se-btn se-btn-purple" title="AI-помощник">
+                            <i class="fas fa-robot"></i> AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status bar -->
+                <div id="se-statusbar" style="background: #12122a; border-bottom: 1px solid #2d2d4e; padding: 0.2rem 1rem; display: flex; gap: 1.5rem; font-size: 0.72rem; color: #666; flex-shrink: 0;">
+                    <span id="se-cursor-pos">Стр: 1, Кол: 1</span>
+                    <span id="se-file-lang">HTML</span>
+                    <span id="se-char-count">0 символов</span>
+                    <span id="se-auto-save-status" style="margin-left: auto; color: #4ade80;"><i class="fas fa-circle" style="font-size: 0.6rem;"></i> Автосохранение</span>
+                </div>
+
+                <!-- Main content: editor + preview -->
+                <div style="flex: 1; display: flex; overflow: hidden; position: relative;">
+
+                    <!-- Editor panel -->
+                    <div id="se-editor-panel" style="width: 50%; display: flex; flex-direction: column; border-right: 2px solid #2d2d4e; position: relative;">
+                        <div id="se-monaco-container" style="flex: 1; overflow: hidden;"></div>
+
+                        <!-- Resize handle -->
+                        <div id="se-resize-handle" style="position: absolute; right: -4px; top: 0; bottom: 0; width: 8px; cursor: col-resize; z-index: 10; background: transparent;"
+                            onmousedown="SEEditor.startResize(event)"></div>
+                    </div>
+
+                    <!-- Preview panel -->
+                    <div id="se-preview-panel" style="flex: 1; display: flex; flex-direction: column; background: #fff;">
+                        <div id="se-preview-toolbar" style="background: #1e1e3a; padding: 0.4rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                            <span style="color: #888; font-size: 0.75rem;">ПРЕДПРОСМОТР</span>
+                            <div style="flex: 1; background: #2d2d4e; border-radius: 20px; padding: 0.2rem 0.75rem; margin: 0 0.5rem;">
+                                <span style="color: #aaa; font-size: 0.75rem;" id="se-preview-url">localhost:preview</span>
+                            </div>
+                            <div style="display: flex; gap: 0.25rem;">
+                                <button onclick="SEEditor.setPreviewMode('desktop')" class="se-device-btn active-device" data-mode="desktop" title="Десктоп"><i class="fas fa-desktop"></i></button>
+                                <button onclick="SEEditor.setPreviewMode('tablet')" class="se-device-btn" data-mode="tablet" title="Планшет"><i class="fas fa-tablet-alt"></i></button>
+                                <button onclick="SEEditor.setPreviewMode('mobile')" class="se-device-btn" data-mode="mobile" title="Телефон"><i class="fas fa-mobile-alt"></i></button>
+                            </div>
+                            <button onclick="SEEditor.refreshPreview()" style="background: transparent; border: none; color: #888; cursor: pointer; font-size: 0.8rem;" title="Обновить"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div id="se-preview-wrapper" style="flex: 1; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; background: #2d2d2d; padding: 0.5rem; transition: all 0.3s;">
+                            <iframe id="se-preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals" style="width: 100%; height: 100%; border: none; background: white; border-radius: 4px; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.4);"></iframe>
+                        </div>
+                    </div>
+
+                    <!-- AI Panel -->
+                    <div id="se-ai-panel" style="width: 0; overflow: hidden; background: #0f0f1e; border-left: 2px solid #2d2d4e; display: flex; flex-direction: column; transition: width 0.3s ease; flex-shrink: 0;">
+                        <div style="padding: 1rem; border-bottom: 1px solid #2d2d4e; flex-shrink: 0;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: #c084fc;">
+                                <i class="fas fa-robot"></i>
+                                <span style="font-weight: 700; font-size: 0.9rem;">AI-ассистент</span>
+                            </div>
+                            <p style="color: #666; font-size: 0.75rem; margin-top: 0.25rem;">Попросите изменить код или создать компонент</p>
+                        </div>
+                        <div id="se-ai-messages" style="flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                        <div style="padding: 0.75rem; border-top: 1px solid #2d2d4e; flex-shrink: 0;">
+                            <textarea id="se-ai-input" placeholder="Например: сделай шапку синей..." style="width: 100%; background: #1a1a2e; border: 1px solid #3d3d5e; color: #e0e0ff; border-radius: 8px; padding: 0.5rem; font-size: 0.8rem; resize: none; height: 70px; outline: none; font-family: inherit;"></textarea>
+                            <button onclick="SEEditor.sendAIMessage()" style="width: 100%; margin-top: 0.5rem; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; border: none; border-radius: 8px; padding: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                                <i class="fas fa-paper-plane"></i> Отправить
+                            </button>
+                            <div style="display: flex; gap: 0.25rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                                <button onclick="SEEditor.quickPrompt('Добавь красивую анимацию')" class="se-quick-btn">✨ Анимация</button>
+                                <button onclick="SEEditor.quickPrompt('Сделай адаптивным')" class="se-quick-btn">📱 Адаптив</button>
+                                <button onclick="SEEditor.quickPrompt('Улучши дизайн')" class="se-quick-btn">🎨 Дизайн</button>
+                                <button onclick="SEEditor.quickPrompt('Добавь тёмную тему')" class="se-quick-btn">🌙 Тёмная тема</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full preview overlay -->
+                <div id="se-full-preview" style="display: none; position: fixed; inset: 0; z-index: 9999; background: #1a1a2e; flex-direction: column;">
+                    <div style="background: #12122a; padding: 0.5rem 1rem; display: flex; justify-between; align-items: center; gap: 1rem;">
+                        <span style="color: #c084fc; font-weight: 700;">⚡ StormEditor — Полный просмотр</span>
+                        <div style="flex: 1; background: #2d2d4e; border-radius: 20px; padding: 0.25rem 1rem; max-width: 400px;">
+                            <span style="color: #aaa; font-size: 0.8rem;">preview.stormcreate.local</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="SEEditor.setFullPreviewMode('desktop')" class="se-device-btn" data-mode="desktop"><i class="fas fa-desktop"></i></button>
+                            <button onclick="SEEditor.setFullPreviewMode('tablet')" class="se-device-btn" data-mode="tablet"><i class="fas fa-tablet-alt"></i></button>
+                            <button onclick="SEEditor.setFullPreviewMode('mobile')" class="se-device-btn" data-mode="mobile"><i class="fas fa-mobile-alt"></i></button>
+                            <button onclick="SEEditor.toggleFullPreview()" style="background: #ff5f57; border: none; color: white; padding: 0.3rem 0.75rem; border-radius: 6px; cursor: pointer; font-weight: 600;"><i class="fas fa-times"></i> Закрыть</button>
+                        </div>
+                    </div>
+                    <div style="flex: 1; display: flex; justify-content: center; align-items: flex-start; background: #2d2d2d; padding: 1rem; overflow: auto;">
+                        <iframe id="se-full-preview-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals" style="border: none; background: white; border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); transition: all 0.3s; width: 100%; height: calc(100vh - 80px);"></iframe>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script type="module" src="js/ui.js"></script>
     <script type="module" src="js/admin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script src="js/site-editor.js" defer></script>
 </body>
 
 </html>

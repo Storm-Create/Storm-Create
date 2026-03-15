@@ -1043,7 +1043,7 @@ function setupHeroScene() {
 
         const isMobile = window.innerWidth < 640;
         const isTablet = window.innerWidth < 1024;
-        const count = isMobile ? 8 : isTablet ? 14 : 20;
+        const count = isMobile ? 5 : isTablet ? 10 : 18;
 
         for (let i = 0; i < count; i += 1) {
             const particle = document.createElement('span');
@@ -1074,13 +1074,17 @@ function setupHeroScene() {
         }
     };
 
+    let pointerRafId = null;
     const handlePointerMove = (event) => {
-        const rect = hero.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-        hero.style.setProperty('--pointer-x', `${x}%`);
-        hero.style.setProperty('--pointer-y', `${y}%`);
+        if (pointerRafId) return;
+        pointerRafId = requestAnimationFrame(() => {
+            pointerRafId = null;
+            const rect = hero.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            hero.style.setProperty('--pointer-x', `${x}%`);
+            hero.style.setProperty('--pointer-y', `${y}%`);
+        });
     };
 
     const resetPointer = () => {
