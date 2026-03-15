@@ -456,7 +456,10 @@
             <input type="password" id="gate-pass" class="auth-input" placeholder="Пароль">
             <button id="gate-btn" class="auth-btn" onclick="gateSubmit()"><i class="fas fa-sign-in-alt mr-1.5"></i> Войти</button>
             <p class="auth-switch" id="gate-sw">Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span></p>
-            <div class="auth-divider">или</div>
+            <div class="auth-divider">или войдите через</div>
+            <!-- Telegram widget -->
+            <div id="tg-login-container" style="display:flex;justify-content:center;min-height:40px;align-items:center;margin-bottom:.5rem"></div>
+            <div class="auth-divider"></div>
             <a href="index.html" class="auth-back">← Вернуться на главную</a>
         </div>
     </div>
@@ -825,45 +828,154 @@
     <!-- ══ FIREBASE AUTH ══ -->
     <script type="module">
         import { auth } from './js/firebase.js';
-        import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import {
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
         let mode = 'login';
-        onAuthStateChanged(auth, user => {
+        let editorReady = false;
+
+        function showEditor(user) {
             document.getElementById('auth-loading').style.display = 'none';
-            if (user) {
-                document.getElementById('auth-gate').style.display = 'none';
-                document.getElementById('editor-wrap').style.display = 'flex';
-                const av = document.getElementById('act-user');
-                if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover">`;
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('editor-wrap').style.display = 'flex';
+            // Avatar
+            const av = document.getElementById('act-user');
+            if (av) {
+                if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
                 else av.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
-                av.title = user.displayName || user.email;
-                if (typeof ED !== 'undefined') ED.init();
+                av.title = user.displayName || user.email || '';
+            }
+            // Init editor only once
+            if (!editorReady) {
+                editorReady = true;
+                if (typeof ED !== 'undefined') {
+                    // Small delay so the editor-wrap is visible/laid out before Monaco initializes
+                    setTimeout(() => ED.init(), 80);
+                }
+            }
+        }
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                showEditor(user);
             } else {
+                document.getElementById('auth-loading').style.display = 'none';
                 document.getElementById('auth-gate').style.display = 'flex';
                 document.getElementById('editor-wrap').style.display = 'none';
+                renderTgWidget();
             }
         });
+
+        /* ── Telegram auth ── */
+        function renderTgWidget() {
+            const c = document.getElementById('tg-login-container');
+            if (!c || c.dataset.rendered) return;
+            c.dataset.rendered = '1';
+            const s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://telegram.org/js/telegram-widget.js?22';
+            s.setAttribute('data-telegram-login', 'StormCreateBot');
+            s.setAttribute('data-size', 'medium');
+            s.setAttribute('data-onauth', 'onTelegramAuthEditor(user)');
+            s.setAttribute('data-request-access', 'write');
+            s.setAttribute('data-radius', '8');
+            c.appendChild(s);
+        }
+
+        window.onTelegramAuthEditor = async (tgUser) => {
+            document.getElementById('auth-err').style.display = 'none';
+            document.getElementById('gate-btn').disabled = true;
+            document.getElementById('gate-btn').innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Вход через Telegram...';
+            try {
+                const email    = `${tgUser.id}@telegram.stormcreate.com`;
+                const password = `tg_auth_${tgUser.id}_secure_mock_pwd_2026`;
+                const displayName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || 'Пользователь Telegram';
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch(e) {
+                    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-login-credentials') {
+                        const c2 = await createUserWithEmailAndPassword(auth, email, password);
+                        await updateProfile(c2.user, { displayName, photoURL: tgUser.photo_url || '' });
+                    } else throw e;
+                }
+            } catch(err) {
+                showErr('Ошибка Telegram: ' + (err.message || err.code));
+                document.getElementById('gate-btn').disabled = false;
+                document.getElementById('gate-btn').innerHTML = '<i class="fas fa-sign-in-alt mr-1.5"></i> Войти';
+            }
+        };
+
+        /* ── Email/Password ── */
         window.gateToggle = () => {
             mode = mode === 'login' ? 'register' : 'login';
             document.getElementById('auth-err').style.display = 'none';
-            const nameEl = document.getElementById('gate-name'), btn = document.getElementById('gate-btn'), sw = document.getElementById('gate-sw');
-            if (mode === 'register') { nameEl.style.display = 'block'; btn.innerHTML = '<i class="fas fa-user-plus mr-1.5"></i> Зарегистрироваться'; sw.innerHTML = 'Уже есть аккаунт? <span onclick="gateToggle()">Войти</span>'; }
-            else { nameEl.style.display = 'none'; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1.5"></i> Войти'; sw.innerHTML = 'Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span>'; }
-        };
-        window.gateSubmit = async () => {
-            const email = document.getElementById('gate-email').value.trim(), pass = document.getElementById('gate-pass').value, name = document.getElementById('gate-name').value.trim();
-            const btn = document.getElementById('gate-btn'), err = document.getElementById('auth-err');
-            err.style.display = 'none';
-            if (!email || !pass) { showErr('Заполните все поля'); return; }
-            const orig = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Загрузка...';
-            try {
-                if (mode === 'login') await signInWithEmailAndPassword(auth, email, pass);
-                else { if (!name) { showErr('Введите имя'); btn.disabled=false; btn.innerHTML=orig; return; } const c=await createUserWithEmailAndPassword(auth,email,pass); await updateProfile(c.user,{displayName:name}); }
-            } catch(e) {
-                const m={'auth/user-not-found':'Пользователь не найден','auth/wrong-password':'Неверный пароль','auth/invalid-credential':'Неверный email или пароль','auth/email-already-in-use':'Email уже используется','auth/weak-password':'Пароль слишком короткий (мин. 6 символов)','auth/invalid-email':'Неверный email','auth/too-many-requests':'Слишком много попыток'};
-                showErr(m[e.code]||e.message); btn.disabled=false; btn.innerHTML=orig;
+            const nameEl = document.getElementById('gate-name');
+            const btn    = document.getElementById('gate-btn');
+            const sw     = document.getElementById('gate-sw');
+            if (mode === 'register') {
+                nameEl.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-user-plus mr-1.5"></i> Зарегистрироваться';
+                sw.innerHTML  = 'Уже есть аккаунт? <span onclick="gateToggle()">Войти</span>';
+            } else {
+                nameEl.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1.5"></i> Войти';
+                sw.innerHTML  = 'Нет аккаунта? <span onclick="gateToggle()">Зарегистрироваться</span>';
             }
         };
-        function showErr(msg) { const el=document.getElementById('auth-err'); el.textContent='⚠️ '+msg; el.style.display='block'; }
+
+        window.gateSubmit = async () => {
+            const email = document.getElementById('gate-email').value.trim();
+            const pass  = document.getElementById('gate-pass').value;
+            const name  = document.getElementById('gate-name').value.trim();
+            const btn   = document.getElementById('gate-btn');
+            const err   = document.getElementById('auth-err');
+            err.style.display = 'none';
+            if (!email || !pass) { showErr('Заполните все поля'); return; }
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Загрузка...';
+            try {
+                if (mode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    if (!name) { showErr('Введите ваше имя'); btn.disabled=false; btn.innerHTML=orig; return; }
+                    const cr = await createUserWithEmailAndPassword(auth, email, pass);
+                    await updateProfile(cr.user, { displayName: name });
+                }
+            } catch(e) {
+                const msgs = {
+                    'auth/user-not-found':      'Пользователь не найден',
+                    'auth/wrong-password':       'Неверный пароль',
+                    'auth/invalid-credential':   'Неверный email или пароль',
+                    'auth/email-already-in-use': 'Email уже используется',
+                    'auth/weak-password':        'Пароль минимум 6 символов',
+                    'auth/invalid-email':        'Неверный формат email',
+                    'auth/too-many-requests':    'Слишком много попыток, подождите',
+                    'auth/network-request-failed': 'Нет подключения к интернету',
+                };
+                showErr(msgs[e.code] || e.message);
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        };
+
+        // Enter key support
+        document.getElementById('gate-pass').addEventListener('keydown', e => {
+            if (e.key === 'Enter') gateSubmit();
+        });
+        document.getElementById('gate-email').addEventListener('keydown', e => {
+            if (e.key === 'Enter') gateSubmit();
+        });
+
+        function showErr(msg) {
+            const el = document.getElementById('auth-err');
+            el.textContent = '⚠️ ' + msg;
+            el.style.display = 'block';
+        }
     </script>
 
     <!-- ══ EDITOR CORE ══ -->
