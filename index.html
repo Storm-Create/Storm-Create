@@ -279,8 +279,287 @@
         </div>
     </section>
 
-    
-    <section id="stats" class="stats-section py-24 bg-blue-600 dark:bg-blue-700">
+    <!-- ═══════════════════════════════════════════════
+         НОВЫЙ РАЗДЕЛ: Создание сайтов
+    ═══════════════════════════════════════════════ -->
+    <section id="website-builder" class="section-shell py-24 bg-gray-50 dark:bg-darker">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Заголовок -->
+            <div class="text-center mb-16 fade-in">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-5">
+                    <i class="fas fa-code text-xs"></i> Новая функция
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Создавай сайты прямо в боте</h2>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+                    StormCreate теперь включает полноценный конструктор сайтов. Создай витрину, лендинг или портфолио — без единой строки кода, прямо из Telegram.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Левая колонка — фичи -->
+                <div class="space-y-6 fade-in">
+                    <div class="flex gap-4 p-5 bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Готовые шаблоны</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Лендинг, портфолио, блог, дашборд — выбери шаблон и настрой под себя за минуты.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:shadow-lg transition" style="transition-delay:80ms">
+                        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Визуальный редактор</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Кликай на элементы и меняй текст, цвет, фон, отступы прямо на странице — как в Figma.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:shadow-lg transition" style="transition-delay:160ms">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Редактор кода</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">HTML, CSS, JavaScript с подсветкой синтаксиса, живым превью и загрузкой ZIP-архивов.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-5 bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:shadow-lg transition" style="transition-delay:240ms">
+                        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Адаптивный дизайн</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Превью в режимах десктоп, планшет и телефон. Сайт выглядит идеально на любом устройстве.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="editor.html"
+                           class="inline-flex items-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-base transition shadow-lg hover:shadow-blue-500/30">
+                            <i class="fas fa-code"></i> Открыть редактор
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Правая колонка — визуал редактора -->
+                <div class="fade-in" style="transition-delay:100ms">
+                    <div class="relative">
+                        <!-- Декоративные элементы -->
+                        <div class="absolute -top-4 -right-4 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+                        <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
+
+                        <!-- Мок редактора -->
+                        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                            <!-- Шапка окна -->
+                            <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                                <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                <div class="flex-1 mx-3 bg-gray-200 dark:bg-gray-700 rounded-full h-5 flex items-center px-3">
+                                    <span class="text-xs text-gray-400">localhost › preview</span>
+                                </div>
+                            </div>
+                            <!-- Вкладки -->
+                            <div class="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-xs">
+                                <div class="px-4 py-2 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1.5">
+                                    <i class="fab fa-html5 text-orange-500"></i> index.html
+                                </div>
+                                <div class="px-4 py-2 text-gray-400 flex items-center gap-1.5">
+                                    <i class="fab fa-css3-alt text-blue-500"></i> style.css
+                                </div>
+                                <div class="px-4 py-2 text-gray-400 flex items-center gap-1.5">
+                                    <i class="fab fa-js-square text-yellow-500"></i> script.js
+                                </div>
+                            </div>
+                            <!-- Код -->
+                            <div class="grid grid-cols-2 gap-0">
+                                <div class="p-4 font-mono text-xs text-gray-500 dark:text-gray-400 border-r border-gray-100 dark:border-gray-700 leading-relaxed bg-gray-50/50 dark:bg-gray-900/50">
+                                    <div><span class="text-gray-300 mr-2">1</span><span class="text-blue-500">&lt;section</span> <span class="text-green-500">class=</span><span class="text-orange-400">"hero"</span><span class="text-blue-500">&gt;</span></div>
+                                    <div><span class="text-gray-300 mr-2">2</span>&nbsp;&nbsp;<span class="text-blue-500">&lt;h1&gt;</span><span class="text-gray-600 dark:text-gray-300">Привет!</span><span class="text-blue-500">&lt;/h1&gt;</span></div>
+                                    <div><span class="text-gray-300 mr-2">3</span>&nbsp;&nbsp;<span class="text-blue-500">&lt;p&gt;</span><span class="text-gray-600 dark:text-gray-300">Мой сайт</span><span class="text-blue-500">&lt;/p&gt;</span></div>
+                                    <div><span class="text-gray-300 mr-2">4</span>&nbsp;&nbsp;<span class="text-blue-500">&lt;button&gt;</span><span class="text-gray-600 dark:text-gray-300">Начать</span><span class="text-blue-500">&lt;/button&gt;</span></div>
+                                    <div><span class="text-gray-300 mr-2">5</span><span class="text-blue-500">&lt;/section&gt;</span></div>
+                                </div>
+                                <!-- Превью -->
+                                <div class="p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 flex flex-col items-center justify-center gap-2 min-h-[120px]">
+                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-200">Привет!</div>
+                                    <div class="text-xs text-gray-500">Мой сайт</div>
+                                    <div class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">Начать</div>
+                                </div>
+                            </div>
+                            <!-- Статус бар -->
+                            <div class="px-4 py-1.5 bg-blue-600 flex items-center gap-3 text-xs text-blue-100">
+                                <span>HTML</span><span>·</span><span>Стр 1, Кол 1</span>
+                                <span class="ml-auto flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>Сохранено</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         НОВЫЙ РАЗДЕЛ: Заменяет 5 ботов
+    ═══════════════════════════════════════════════ -->
+    <section id="all-in-one" class="section-shell py-24 bg-white dark:bg-dark overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Заголовок -->
+            <div class="text-center mb-16 fade-in">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40 text-purple-600 dark:text-purple-400 text-sm font-semibold mb-5">
+                    <i class="fas fa-robot text-xs"></i> Один бот — всё решает
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Заменяет пять ботов сразу</h2>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+                    Забудь о зоопарке ботов в своей группе. StormCreate объединяет магазин, модерацию, приветствия, статистику и поддержку в одном боте.
+                </p>
+            </div>
+
+            <!-- Сравнение: 5 ботов vs StormCreate -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 fade-in">
+
+                <!-- Без StormCreate -->
+                <div class="p-8 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-lg">Без StormCreate</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">5 разных ботов, 5 настроек, хаос</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs"><i class="fas fa-shopping-bag text-blue-500"></i></div>
+                            <span class="text-sm font-medium">@ShopBot — магазин</span>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">отдельный</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xs"><i class="fas fa-shield-alt text-red-500"></i></div>
+                            <span class="text-sm font-medium">@ModBot — модератор</span>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">отдельный</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-xs"><i class="fas fa-hand-wave text-green-500"></i></div>
+                            <span class="text-sm font-medium">@WelcomeBot — приветствия</span>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">отдельный</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-xs"><i class="fas fa-chart-bar text-yellow-500"></i></div>
+                            <span class="text-sm font-medium">@StatsBot — статистика</span>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">отдельный</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xs"><i class="fas fa-headset text-purple-500"></i></div>
+                            <span class="text-sm font-medium">@SupportBot — поддержка</span>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">отдельный</span>
+                        </div>
+                    </div>
+                    <div class="mt-5 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        5 ботов · 5 токенов · 5 кошельков · Бардак
+                    </div>
+                </div>
+
+                <!-- Со StormCreate -->
+                <div class="p-8 rounded-2xl border-2 border-blue-200 dark:border-blue-800/50 bg-gradient-to-br from-blue-50/80 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 relative overflow-hidden">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">⚡ Рекомендуем</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-lg">StormCreate</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Один бот, всё включено</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-xs"><i class="fas fa-shopping-cart text-blue-600"></i></div>
+                            <span class="text-sm font-semibold">Магазин с оплатой</span>
+                            <span class="ml-auto"><i class="fas fa-check-circle text-green-500 text-sm"></i></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-xs"><i class="fas fa-shield-alt text-red-500"></i></div>
+                            <span class="text-sm font-semibold">Модератор группы</span>
+                            <span class="ml-auto"><i class="fas fa-check-circle text-green-500 text-sm"></i></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-xs"><i class="fas fa-hand-sparkles text-green-500"></i></div>
+                            <span class="text-sm font-semibold">Приветствия новых</span>
+                            <span class="ml-auto"><i class="fas fa-check-circle text-green-500 text-sm"></i></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-xs"><i class="fas fa-chart-line text-yellow-500"></i></div>
+                            <span class="text-sm font-semibold">Аналитика и статистика</span>
+                            <span class="ml-auto"><i class="fas fa-check-circle text-green-500 text-sm"></i></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                            <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-xs"><i class="fas fa-headset text-purple-500"></i></div>
+                            <span class="text-sm font-semibold">Поддержка клиентов</span>
+                            <span class="ml-auto"><i class="fas fa-check-circle text-green-500 text-sm"></i></span>
+                        </div>
+                    </div>
+                    <div class="mt-5 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-sm text-green-700 dark:text-green-400 flex items-center gap-2 font-medium">
+                        <i class="fas fa-check-circle"></i>
+                        1 бот · 1 токен · Всё в одном месте
+                    </div>
+                </div>
+            </div>
+
+            <!-- Блок про модерацию -->
+            <div class="fade-in">
+                <div class="p-8 md:p-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl text-white relative overflow-hidden">
+                    <!-- Декор -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+
+                    <div class="relative grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-semibold mb-4">
+                                <i class="fas fa-shield-halved"></i> Умная модерация
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-bold mb-4 leading-tight">Ваш бот — лучший модератор группы</h3>
+                            <p class="text-blue-100 mb-6 leading-relaxed">Добавьте бота в свою группу и он автоматически будет следить за порядком: блокировать спам, удалять запрещённые ссылки, выдавать предупреждения и приветствовать новых участников.</p>
+                            <a href="https://t.me/StormCreateBot" target="_blank"
+                               class="inline-flex items-center gap-2 bg-white text-blue-600 font-bold px-6 py-3 rounded-full hover:bg-blue-50 transition shadow-lg">
+                                <i class="fab fa-telegram-plane"></i> Добавить в группу
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                                <div class="text-3xl mb-2">🛡️</div>
+                                <div class="font-bold mb-1">Антиспам</div>
+                                <div class="text-blue-200 text-xs">Автоматически блокирует спамеров и флудеров</div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                                <div class="text-3xl mb-2">🔗</div>
+                                <div class="font-bold mb-1">Фильтр ссылок</div>
+                                <div class="text-blue-200 text-xs">Удаляет запрещённые ссылки и рекламу</div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                                <div class="text-3xl mb-2">👋</div>
+                                <div class="font-bold mb-1">Приветствия</div>
+                                <div class="text-blue-200 text-xs">Встречает новых участников персональным сообщением</div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                                <div class="text-3xl mb-2">⚠️</div>
+                                <div class="font-bold mb-1">Предупреждения</div>
+                                <div class="text-blue-200 text-xs">Система варнов с автоматическим баном</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="stats-grid" class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-white">
                 <div class="fade-in">
