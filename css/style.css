@@ -65,7 +65,7 @@ html.dark .site-body {
 }
 
 .site-background__glow {
-    filter: blur(72px);
+    filter: blur(48px); /* было 72px */
     opacity: 0.55;
     animation: driftGlow 18s ease-in-out infinite;
     will-change: transform;
@@ -106,7 +106,7 @@ html.dark .site-background__noise {
     background: rgba(255, 255, 255, 0.62) !important;
     border-color: rgba(255, 255, 255, 0.55) !important;
     box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-    backdrop-filter: blur(22px);
+    backdrop-filter: blur(14px); /* было 22px */
 }
 
 html.dark .site-nav {
@@ -211,7 +211,6 @@ html.dark .hero-backdrop {
     width: 18rem;
     height: 18rem;
     animation: orbitSpin 18s linear infinite;
-    will-change: transform;
 }
 
 .hero-orbit--two {
@@ -221,7 +220,6 @@ html.dark .hero-backdrop {
     height: 9rem;
     opacity: 0.72;
     animation: orbitSpin 12s linear infinite reverse;
-    will-change: transform;
 }
 
 .hero-particles {
@@ -237,11 +235,12 @@ html.dark .hero-backdrop {
     justify-content: center;
     border-radius: 50%;
     background: linear-gradient(135deg, #229ED9, #1a8bbf);
-    box-shadow: 0 0 18px rgba(34, 158, 217, 0.4), 0 4px 12px rgba(34, 158, 217, 0.25);
+    /* Убрали box-shadow с blur — дорого для каждой частицы */
+    box-shadow: 0 2px 8px rgba(34, 158, 217, 0.3);
     animation: heroParticleFloat var(--particle-duration, 16s) ease-in-out infinite;
     animation-delay: var(--particle-delay, 0s);
     color: white;
-    will-change: transform;
+    /* will-change убран — слишком много GPU-слоёв при 12+ частицах */
 }
 
 .hero-particle::after {
@@ -259,7 +258,7 @@ html.dark .hero-backdrop {
     fill: white;
     position: relative;
     z-index: 1;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    /* drop-shadow убран — дорогая операция на каждой частице */
 }
 
 html.dark .hero-particle {
@@ -444,7 +443,6 @@ html.dark .hero-highlight span {
 
 .hero-visual-card--main {
     animation: heroCardLift 8s ease-in-out infinite;
-    will-change: transform;
 }
 
 .hero-visual-top,
@@ -671,14 +669,12 @@ html.dark .hero-float-card span {
     top: -1rem;
     right: -1rem;
     animation: floatCard 8s ease-in-out infinite;
-    will-change: transform;
 }
 
 .hero-float-card--bottom {
     bottom: 1rem;
     left: -1.5rem;
     animation: floatCard 9s ease-in-out infinite reverse;
-    will-change: transform;
 }
 
 .section-shell,
@@ -702,7 +698,7 @@ html.dark .hero-float-card span {
     background: linear-gradient(180deg, var(--surface-light-strong), var(--surface-light));
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px); /* было 24px */
 }
 
 html.dark #features > div,
@@ -727,7 +723,8 @@ html.dark #partners > div {
     border: 1px solid rgba(255, 255, 255, 0.62);
     box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(18px);
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease, border-color 0.45s ease, background-color 0.45s ease;
+    /* Убрали background-color из transition — вызывает перерисовку */
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 html.dark #features .grid > div,
@@ -978,7 +975,7 @@ html.dark .page-hero__chip {
     background: linear-gradient(180deg, var(--surface-light-strong), var(--surface-light));
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px); /* было 24px */
 }
 
 html.dark .page-panel {
@@ -1000,7 +997,7 @@ html.dark .glass-card {
 }
 
 .glass-card--lift {
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease, border-color 0.45s ease, background-color 0.45s ease;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 .glass-card--lift:hover {
@@ -1281,6 +1278,49 @@ html.dark .page-footer-tagline {
     .hero-glow {
         display: none;
     }
+    /* Убираем hover-анимацию карточек на тач-устройствах */
+    #features .grid > div:hover,
+    #latest-posts > a:hover,
+    #reviews-list > div:hover,
+    #roadmap-list > div > div:last-child:hover {
+        transform: none;
+    }
+}
+
+/* === Performance optimizations for tablets (640–1024px) === */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* Снижаем blur на планшетах */
+    .site-nav { backdrop-filter: blur(10px) !important; }
+    .site-mobile-menu { backdrop-filter: blur(12px) !important; }
+    .hero-kicker,
+    .hero-highlight,
+    .hero-float-card,
+    .page-hero__kicker,
+    .page-hero__chip { backdrop-filter: blur(8px); }
+    #features > div,
+    #reviews > div,
+    #news > div,
+    #faq > div,
+    #roadmap > div,
+    #partners > div,
+    .page-panel { backdrop-filter: blur(12px); }
+    /* Убираем второй орбит на планшетах */
+    .hero-orbit--two { display: none; }
+    /* Уменьшаем blur фоновых blob */
+    .site-background__glow { filter: blur(36px); }
+    .hero-glow { filter: blur(26px); }
+}
+
+/* === will-change: только на активных анимациях, не глобально === */
+/* will-change убран с orbit и float-card — навешивается динамически при hover */
+.hero-orbit--one,
+.hero-orbit--two {
+    will-change: auto; /* было: transform — лишняя GPU-память в покое */
+}
+.hero-float-card--top,
+.hero-float-card--bottom,
+.hero-visual-card--main {
+    will-change: auto; /* GPU-слой создаётся только при анимации */
 }
 
 /* === Enhanced glow effects === */
@@ -1512,9 +1552,9 @@ html.dark .page-footer-tagline {
 
 .fade-in {
     opacity: 0;
-    transform: translate3d(0, 28px, 0) scale(0.985);
-    filter: blur(10px);
-    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s ease;
+    transform: translate3d(0, 20px, 0);
+    /* Убрали filter: blur() — дорогостоящая операция при каждой анимации */
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Main site mobile improvements */
@@ -1555,8 +1595,7 @@ html.dark .page-footer-tagline {
 
 .fade-in.visible {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-    filter: blur(0);
+    transform: translate3d(0, 0, 0);
 }
 
 #toast-container {

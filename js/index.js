@@ -932,15 +932,30 @@ function setupSupportChat() {
 
 document.addEventListener('DOMContentLoaded', () => {
     setupHeroScene();
-    loadLatestPosts();
     setupAuth();
-    loadReviews();
-    setupReviewForm();
-    setupProfileForm();
-    setupSupportChat();
     loadSiteSettings();
-    loadFaq();
-    loadRoadmap();
+    setupSupportChat();
+
+    // Откладываем некритические загрузки до следующего idle-момента
+    const scheduleIdle = (fn) => {
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(fn, { timeout: 2000 });
+        } else {
+            setTimeout(fn, 300);
+        }
+    };
+
+    scheduleIdle(() => {
+        loadLatestPosts();
+        loadReviews();
+    });
+
+    scheduleIdle(() => {
+        setupReviewForm();
+        setupProfileForm();
+        loadFaq();
+        loadRoadmap();
+    });
 });
 
 async function loadSiteSettings() {
@@ -1007,20 +1022,21 @@ function animateCounter(id, target) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    let current = 0;
-    const duration = 2000; // 2 seconds
-    const stepTime = 30;
-    const increment = target / (duration / stepTime);
+    // Используем requestAnimationFrame вместо setInterval — точнее и эффективнее
+    const duration = 1800;
+    const start = performance.now();
 
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-            el.textContent = target.toLocaleString() + '+';
-            clearInterval(timer);
-        } else {
-            el.textContent = Math.floor(current).toLocaleString() + '+';
-        }
-    }, stepTime);
+    const tick = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+        el.textContent = current.toLocaleString() + '+';
+        if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
 }
 
 function setupHeroScene() {
@@ -1043,7 +1059,8 @@ function setupHeroScene() {
 
         const isMobile = window.innerWidth < 640;
         const isTablet = window.innerWidth < 1024;
-        const count = isMobile ? 5 : isTablet ? 10 : 18;
+        // Уменьшаем частицы: 0 на мобильных, 6 на планшетах, 12 на десктопах
+        const count = isMobile ? 0 : isTablet ? 6 : 12;
 
         for (let i = 0; i < count; i += 1) {
             const particle = document.createElement('span');
