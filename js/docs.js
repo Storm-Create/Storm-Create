@@ -208,7 +208,10 @@ function resolveSectionCategory(section) {
     if (n <= 21) return 'Shop-бот';
     if (n <= 27) return 'Поддержка и безопасность';
     if (n <= 32) return 'Расширенные функции';
-    return 'VPN-бот';
+    if (n <= 40) return 'VPN-бот';
+    if (n <= 64) return 'Shop-бот';
+    if (n === 65) return 'FileStore-бот';
+    return 'Shop-бот';
 }
 
 function toMarkdown(lines) {
@@ -315,8 +318,9 @@ function renderNav(items) {
         'Поддержка и безопасность': 3,
         'Расширенные функции': 4,
         'VPN-бот': 5,
-        'Юридические документы': 6,
-        'Общее': 7
+        'FileStore-бот': 6,
+        'Юридические документы': 7,
+        'Общее': 8
     };
 
     const orderedCategories = Object.entries(categories).sort((a, b) => {
