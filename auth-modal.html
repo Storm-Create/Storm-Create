@@ -1,0 +1,423 @@
+<!--
+  ╔════════════════════════════════════════════════════════════════════════╗
+  ║  ЗАМЕНИТЕ весь блок id="auth-modal" в index.html на этот фрагмент.   ║
+  ║  Также замените скрипт-модуль src="js/index.js" в конце body:        ║
+  ║    ➜  добавьте вызовы новых методов из auth.js (см. patch ниже).     ║
+  ╚════════════════════════════════════════════════════════════════════════╝
+-->
+
+<!-- ════════════════════════════ AUTH MODAL ════════════════════════════ -->
+<div id="auth-modal"
+    class="fixed inset-0 z-[100] bg-black/60 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300"
+    role="dialog" aria-modal="true" aria-labelledby="auth-modal-heading">
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden"
+         style="max-height: 95vh; overflow-y: auto;">
+
+        <!-- Gradient accent bar -->
+        <div class="h-1 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+
+        <div class="p-6">
+            <!-- Close -->
+            <button onclick="window.closeAuthModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition z-10"
+                aria-label="Закрыть">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <!-- Heading -->
+            <h2 id="auth-modal-heading"
+                class="text-2xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
+                StormCreate
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">Вход или регистрация в один клик</p>
+
+            <!-- ── TABS ── -->
+            <div id="auth-tab-bar" class="flex border-b border-gray-200 dark:border-gray-700 mb-5">
+                <button id="tab-login"
+                    class="flex-1 py-2.5 text-center text-sm font-semibold text-primary border-b-2 border-primary transition"
+                    onclick="window.switchAuthTab('login')">Вход</button>
+                <button id="tab-register"
+                    class="flex-1 py-2.5 text-center text-sm font-semibold text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 transition"
+                    onclick="window.switchAuthTab('register')">Регистрация</button>
+                <button id="tab-magic"
+                    class="flex-1 py-2.5 text-center text-sm font-semibold text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 transition"
+                    onclick="window.switchAuthTab('magic')">Код на почту</button>
+            </div>
+
+            <!-- ════════════ PANEL: Login / Register ════════════ -->
+            <div id="panel-email">
+                <form id="auth-form" class="space-y-3">
+
+                    <!-- Name (register only) -->
+                    <div id="name-field" class="hidden">
+                        <label class="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">Ваше имя</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-3 text-gray-400 text-sm"></i>
+                            <input type="text" id="auth-name"
+                                class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none text-sm transition"
+                                placeholder="Иван Иванов">
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">Email</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-3 top-3 text-gray-400 text-sm"></i>
+                            <input type="email" id="auth-email" required
+                                class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none text-sm transition"
+                                placeholder="you@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300">Пароль</label>
+                            <button type="button" id="forgot-password-btn"
+                                class="text-xs text-primary hover:underline"
+                                onclick="window.openResetPassword()">Забыли пароль?</button>
+                        </div>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-3 text-gray-400 text-sm"></i>
+                            <input type="password" id="auth-password" required minlength="6"
+                                class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none text-sm transition"
+                                placeholder="••••••••">
+                            <button type="button" onclick="window.togglePasswordVisibility()"
+                                class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition">
+                                <i id="eye-icon" class="fas fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="auth-submit-btn"
+                        class="w-full py-2.5 bg-primary hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition mt-1 flex justify-center items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </button>
+
+                    <!-- Email verification notice (register) -->
+                    <p id="verify-notice" class="hidden text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
+                        <i class="fas fa-envelope-open-text mr-1"></i>
+                        Письмо с подтверждением отправлено на вашу почту. Пожалуйста, перейдите по ссылке для активации аккаунта.
+                    </p>
+                </form>
+            </div>
+
+            <!-- ════════════ PANEL: Magic link ════════════ -->
+            <div id="panel-magic" class="hidden">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Введите email — мы отправим одноразовую ссылку для входа без пароля.
+                </p>
+                <form id="magic-form" class="space-y-3">
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-3 text-gray-400 text-sm"></i>
+                        <input type="email" id="magic-email" required
+                            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none text-sm transition"
+                            placeholder="you@example.com">
+                    </div>
+                    <button type="submit" id="magic-submit-btn"
+                        class="w-full py-2.5 bg-primary hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition flex justify-center items-center gap-2">
+                        <i class="fas fa-paper-plane"></i> Отправить ссылку
+                    </button>
+                </form>
+                <div id="magic-success" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-sm text-green-700 dark:text-green-400">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Ссылка отправлена! Проверьте почту и нажмите на ссылку для входа.
+                    <br><span class="text-xs opacity-75 mt-1 block">Ссылка действует 1 час.</span>
+                </div>
+            </div>
+
+            <!-- ════════════ PANEL: Reset password ════════════ -->
+            <div id="panel-reset" class="hidden">
+                <div class="flex items-center gap-2 mb-4">
+                    <button onclick="window.switchAuthTab('login')"
+                        class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <p class="font-semibold">Сброс пароля</p>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Введите email — мы отправим ссылку для сброса пароля.
+                </p>
+                <form id="reset-form" class="space-y-3">
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-3 text-gray-400 text-sm"></i>
+                        <input type="email" id="reset-email" required
+                            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary outline-none text-sm transition"
+                            placeholder="you@example.com">
+                    </div>
+                    <button type="submit" id="reset-submit-btn"
+                        class="w-full py-2.5 bg-primary hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition flex justify-center items-center gap-2">
+                        <i class="fas fa-key"></i> Сбросить пароль
+                    </button>
+                </form>
+                <div id="reset-success" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl text-sm text-green-700 dark:text-green-400">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Письмо отправлено! Проверьте почту и следуйте инструкциям.
+                </div>
+            </div>
+
+            <!-- ─── Divider ─── -->
+            <div id="auth-divider" class="relative my-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+                <div class="relative flex justify-center text-xs">
+                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">или войдите через</span>
+                </div>
+            </div>
+
+            <!-- ─── Social buttons ─── -->
+            <div id="auth-social" class="space-y-2">
+
+                <!-- Google -->
+                <button id="google-btn" onclick="window.loginWithGoogleAuth()"
+                    class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm">
+                    <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Войти через Google
+                </button>
+
+                <!-- Apple / Game Center -->
+                <button id="apple-btn" onclick="window.loginWithAppleAuth()"
+                    class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100 transition text-sm font-medium text-white dark:text-black shadow-sm">
+                    <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    Войти через Apple / Game Center
+                </button>
+
+                <!-- Telegram -->
+                <div class="w-full" id="telegram-login-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════ PATCH для js/index.js ═══════════════════════════════
+Добавьте эти функции в файл js/index.js (или index.js в корне),
+ПОСЛЕ импортов в самом начале файла.
+Замените строку:
+    import { checkAuth, login, register, logout, updateUserProfile, loginWithTelegram } from './auth.js';
+на:
+    import {
+        checkAuth, login, register, logout, updateUserProfile, loginWithTelegram,
+        loginWithGoogle, loginWithApple, resetPassword, sendMagicLink, magicLinkCompletion
+    } from './auth.js';
+
+Затем добавьте эти функции (вставьте после строки "let currentAuthMode = 'login';"):
+═══════════════════════════════════════════════════════════════════════════════
+
+// ── Auth tab switching (updated — поддерживает 3 таба) ─────────────────────
+window.switchAuthTab = (mode) => {
+    currentAuthMode = mode;
+
+    // Tabs
+    const tabs = { login: 'tab-login', register: 'tab-register', magic: 'tab-magic' };
+    const activeClass = ['text-primary', 'border-primary'];
+    const inactiveClass = ['text-gray-500', 'dark:text-gray-400', 'border-transparent'];
+
+    Object.entries(tabs).forEach(([key, id]) => {
+        const tab = document.getElementById(id);
+        if (!tab) return;
+        if (key === mode) {
+            tab.classList.add(...activeClass);
+            tab.classList.remove(...inactiveClass);
+        } else {
+            tab.classList.remove(...activeClass);
+            tab.classList.add(...inactiveClass);
+        }
+    });
+
+    // Panels
+    const allPanels = ['panel-email', 'panel-magic', 'panel-reset'];
+    const divider = document.getElementById('auth-divider');
+    const social = document.getElementById('auth-social');
+    const nameField = document.getElementById('name-field');
+    const forgotBtn = document.getElementById('forgot-password-btn');
+    const submitBtn = document.getElementById('auth-submit-btn');
+    const verifyNotice = document.getElementById('verify-notice');
+
+    allPanels.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+
+    if (mode === 'login') {
+        document.getElementById('panel-email').classList.remove('hidden');
+        divider?.classList.remove('hidden');
+        social?.classList.remove('hidden');
+        nameField?.classList.add('hidden');
+        forgotBtn?.classList.remove('hidden');
+        if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти'; }
+        document.getElementById('auth-name').required = false;
+        verifyNotice?.classList.add('hidden');
+    } else if (mode === 'register') {
+        document.getElementById('panel-email').classList.remove('hidden');
+        divider?.classList.remove('hidden');
+        social?.classList.remove('hidden');
+        nameField?.classList.remove('hidden');
+        forgotBtn?.classList.add('hidden');
+        if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Зарегистрироваться'; }
+        document.getElementById('auth-name').required = true;
+        verifyNotice?.classList.add('hidden');
+    } else if (mode === 'magic') {
+        document.getElementById('panel-magic').classList.remove('hidden');
+        divider?.classList.add('hidden');
+        social?.classList.add('hidden');
+        document.getElementById('magic-success')?.classList.add('hidden');
+    }
+};
+
+// ── Google ────────────────────────────────────────────────────────────────
+window.loginWithGoogleAuth = async () => {
+    const btn = document.getElementById('google-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...'; }
+    try {
+        await loginWithGoogle();
+        showToast('Вы вошли через Google!', 'success');
+        window.closeAuthModal();
+    } catch (err) {
+        console.error(err);
+        showToast(err.message || 'Ошибка входа через Google', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg> Войти через Google`;
+        }
+    }
+};
+
+// ── Apple ────────────────────────────────────────────────────────────────
+window.loginWithAppleAuth = async () => {
+    const btn = document.getElementById('apple-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...'; }
+    try {
+        await loginWithApple();
+        showToast('Вы вошли через Apple!', 'success');
+        window.closeAuthModal();
+    } catch (err) {
+        console.error(err);
+        // Apple popup closed by user — not an error
+        if (err.code !== 'auth/popup-closed-by-user') {
+            showToast(err.message || 'Ошибка входа через Apple', 'error');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg> Войти через Apple / Game Center`;
+        }
+    }
+};
+
+// ── Password reset ────────────────────────────────────────────────────────
+window.openResetPassword = () => {
+    const allPanels = ['panel-email', 'panel-magic'];
+    allPanels.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    document.getElementById('panel-reset')?.classList.remove('hidden');
+    document.getElementById('auth-divider')?.classList.add('hidden');
+    document.getElementById('auth-social')?.classList.add('hidden');
+    // Deactivate all tabs
+    ['tab-login','tab-register','tab-magic'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('text-primary','border-primary'); el.classList.add('text-gray-500','border-transparent'); }
+    });
+};
+
+document.getElementById('reset-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('reset-email').value.trim();
+    const btn = document.getElementById('reset-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+    try {
+        await resetPassword(email);
+        document.getElementById('reset-success')?.classList.remove('hidden');
+        btn.classList.add('hidden');
+    } catch (err) {
+        showToast(err.message || 'Ошибка сброса пароля', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key"></i> Сбросить пароль';
+    }
+});
+
+// ── Magic link ───────────────────────────────────────────────────────────
+document.getElementById('magic-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('magic-email').value.trim();
+    const btn = document.getElementById('magic-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+    try {
+        await sendMagicLink(email);
+        document.getElementById('magic-success')?.classList.remove('hidden');
+        btn.classList.add('hidden');
+    } catch (err) {
+        showToast(err.message || 'Ошибка отправки ссылки', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить ссылку';
+    }
+});
+
+// ── Password visibility toggle ────────────────────────────────────────────
+window.togglePasswordVisibility = () => {
+    const input = document.getElementById('auth-password');
+    const icon = document.getElementById('eye-icon');
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash text-sm';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye text-sm';
+    }
+};
+
+// ── Auto-complete magic link on page load ─────────────────────────────────
+magicLinkCompletion.then(user => {
+    if (user) {
+        showToast('Вы вошли через magic link!', 'success');
+    }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Также обновите auth-form submit (в setupAuth / внутри authForm listener):
+// ── ЗАМЕНИТЕ блок authForm.addEventListener('submit', ...) на этот: ──────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+// В функции setupAuth() найдите:
+//   const authForm = document.getElementById('auth-form');
+//   authForm.addEventListener('submit', async (e) => { ...
+//
+// И замените тело try на:
+//
+//   try {
+//       if (currentAuthMode === 'login') {
+//           await login(email, password);
+//           showToast('Успешный вход', 'success');
+//       } else {
+//           await register(email, password, name || 'Пользователь');
+//           // Show verification notice instead of closing modal
+//           document.getElementById('verify-notice')?.classList.remove('hidden');
+//           showToast('Регистрация прошла успешно! Проверьте почту.', 'success');
+//           return; // don't close — user needs to verify
+//       }
+//       window.closeAuthModal();
+//   }
+═══════════════════════════════════════════════════════════════════════════════
+КОНЕЦ ПАТЧА
+═══════════════════════════════════════════════════════════════════════════════
+-->
